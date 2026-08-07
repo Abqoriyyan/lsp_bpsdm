@@ -12,11 +12,14 @@ class Pemohon_model extends CI_Model
     # List Permohonan SKK
     public function list_permohonan_skk($nik)
     {
-        $sql = "SELECT a.id_izin, d.kualifikasi, c.klasifikasi, c.subklasifikasi, c.jabatan_kerja, c.asosiasi, b.kode_status FROM data_personal_permohonan a 
+        $sql = "SELECT a.id_izin, d.kualifikasi, c.klasifikasi, c.subklasifikasi, c.jabatan_kerja, c.asosiasi, b.kode_status 
+        FROM data_personal_permohonan a 
         JOIN ( SELECT * FROM history_permohonan WHERE LOG IN (SELECT MAX(LOG) FROM history_permohonan WHERE kode_status GROUP BY id_izin)) b ON b.id_izin = a.id_izin 
         JOIN data_klasifikasi_kualifikasi_permohonan c ON c.id_izin = a.id_izin 
         JOIN master_kualifikasi d ON c.kualifikasi = d.id 
-        WHERE a.nik = ? AND b.kode_status NOT IN ('50','90') GROUP BY id_izin";
+        WHERE a.nik = ? AND b.kode_status NOT IN ('50','90') 
+        GROUP BY a.id_izin, d.kualifikasi, c.klasifikasi, c.subklasifikasi, c.jabatan_kerja, c.asosiasi, b.kode_status";
+
         $query = $this->db->query($sql, array($nik));
         return $query->result_array();
     }

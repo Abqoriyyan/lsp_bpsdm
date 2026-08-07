@@ -360,7 +360,7 @@ class Admin extends MY_Controller
 				//Insert User ke Tabel user_login
 				$user_login['nik'] = $nik_pemohon;
 				$user_login['username'] = "SKK-" . $usr;
-				$user_login['password'] = md5($pwd);
+				$user_login['password'] = password_hash($pwd, PASSWORD_BCRYPT);
 				$user_login['email'] = $array['personal'][0]['email'];
 				$user_login['user_level'] = 'User';
 				$user_login['status'] = '1';
@@ -811,16 +811,26 @@ class Admin extends MY_Controller
 		$id_izin = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
 
 		#Surat Referensi Proyek
-		if (isset($_POST['submit'])) {
-			$count = $_POST['count'];
-			for ($i = 1; $i < $count; $i++) {
-				$catatan_surat_referensi_proyek = $_POST['catatan_surat_referensi_proyek'][$i]; // check empty and check if interger
-				$kode_item = $_POST['kode_item'][$i];
-				$id_proyek = $_POST['id_proyek'][$i];
+		if ($this->input->post('submit') !== NULL) {
 
-				if (empty($_POST['surat_referensi_proyek'][$i])) {
+			$count = $this->input->post('count', TRUE);
+
+			$post_catatan = $this->input->post('catatan_surat_referensi_proyek', TRUE);
+			$post_kode_item = $this->input->post('kode_item', TRUE);
+			$post_id_proyek = $this->input->post('id_proyek', TRUE);
+			$post_surat_ref = $this->input->post('surat_referensi_proyek', TRUE);
+
+			for ($i = 1; $i < $count; $i++) {
+
+				$catatan_surat_referensi_proyek = isset($post_catatan[$i]) ? $post_catatan[$i] : '';
+				$kode_item = isset($post_kode_item[$i]) ? $post_kode_item[$i] : '';
+				$id_proyek = isset($post_id_proyek[$i]) ? $post_id_proyek[$i] : '';
+
+				$status_surat_referensi_proyek = '0';
+
+				if (empty($post_surat_ref[$i])) {
 					$status_surat_referensi_proyek = '0';
-				} elseif (!empty($_POST['surat_referensi_proyek'][$i]) && $_POST['surat_referensi_proyek'][$i] == '1') {
+				} elseif (!empty($post_surat_ref[$i]) && $post_surat_ref[$i] == '1') {
 					$status_surat_referensi_proyek = '1';
 				}
 
@@ -833,10 +843,10 @@ class Admin extends MY_Controller
 					'data_id_proyek' => $id_proyek,
 					'user_peninjau' => $this->session->userdata('username'),
 				);
+
 				$this->db->replace('tinjau_permohonan', $surat_referensi_proyek);
 			}
 		}
-
 
 		#Ceklis Proyek
 		if ($this->input->post('ceklis_proyek', TRUE) == 1) {
@@ -2033,7 +2043,7 @@ class Admin extends MY_Controller
 
 		$user_login['nik'] = $this->input->post('nik', TRUE);
 		$user_login['username'] = $this->input->post('id_asesor', TRUE);
-		$user_login['password'] = md5("asesor");
+		$user_login['password'] = password_hash("asesor", PASSWORD_BCRYPT);
 		$user_login['email'] = $this->input->post('email', TRUE);
 		$user_login['user_level'] = 'Asesor';
 		$user_login['status'] = '1';

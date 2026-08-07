@@ -347,5 +347,15 @@ class Asesor_model extends CI_Model
         return $query->row();
     }
 
+    public function cek_tugas_asesor($id_izin, $username_login)
+    {
+        $this->db->select('id_izin');
+        $this->db->from('data_penunjukan_asesor');
+        $this->db->where('id_izin', $id_izin);
+        $this->db->where('id_asesor', $username_login);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
 }
-?>

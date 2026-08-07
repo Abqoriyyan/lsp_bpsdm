@@ -137,7 +137,7 @@
 		</div>
 
 		<div class="recaptcha-wrapper">
-			<div class="g-recaptcha" data-sitekey="6LfXw2QqAAAAAK5RMpXnSbNfpWN0AB23-N6IwNk7"></div>
+			<div class="g-recaptcha" data-sitekey="<?php echo $recaptcha_site_key; ?>"></div>
 		</div>
 
 		<button type="submit" class="btn btn-primary btn-block modern-btn">

@@ -43,7 +43,6 @@ class User extends MY_Controller
             redirect('login/keluar', 'refresh');
         }
         ##/Cek Session Login##
-
         $get_data_permohonan = $this->pemohon_model->list_permohonan_skk($this->session->userdata('nik'));
 
         $this->data = array(
@@ -97,9 +96,8 @@ class User extends MY_Controller
         }
         ##/Cek Session Login##
         $id_izin = base64_decode($id_izin);
-        $nik_login = $this->session->userdata('nik'); // 👈 Ambil NIK User dari Session
+        $nik_login = $this->session->userdata('nik');
 
-        // 🛡️ SECURITY CHECK (IDOR)
         $cek_personal = $this->pemohon_model->get_data_personal_permohonan($id_izin);
         if (!$cek_personal || $cek_personal->nik !== $nik_login) {
             show_error('Anda tidak memiliki akses untuk mengubah data ini.', 403, 'Akses Ditolak');
@@ -109,7 +107,6 @@ class User extends MY_Controller
         #Get Data Apl
         $get_data_apl01 = $this->pemohon_model->get_data_apl01($id_izin);
 
-        // Filter Sanitasi Input agar DB bersih (Langkah perbaikan sebelumnya)
         $data = array(
             'id_izin' => $id_izin,
             'pekerjaan_sekarang_perusahaan' => str_replace(['"', '<', '>'], '', strip_tags($this->input->post('perusahaan', FALSE))),
@@ -181,6 +178,13 @@ class User extends MY_Controller
         }
         ##/Cek Session Login##
         $id_izin = base64_decode($id_izin);
+        $nik_login = $this->session->userdata('nik');
+
+        $cek_personal = $this->pemohon_model->get_data_personal_permohonan($id_izin);
+        if (!$cek_personal || $cek_personal->nik !== $nik_login) {
+            show_error('Anda tidak memiliki akses untuk mengubah data ini.', 403, 'Akses Ditolak');
+            return;
+        }
 
         $get_data_apl01 = $this->pemohon_model->get_data_apl01($id_izin);
         $get_data_personal_permohonan = $this->pemohon_model->get_data_personal_permohonan($id_izin);
@@ -235,6 +239,13 @@ class User extends MY_Controller
         }
         ##/Cek Session Login##
         $id_izin = base64_decode($id_izin);
+        $nik_login = $this->session->userdata('nik');
+
+        $cek_personal = $this->pemohon_model->get_data_personal_permohonan($id_izin);
+        if (!$cek_personal || $cek_personal->nik !== $nik_login) {
+            show_error('Anda tidak memiliki akses untuk mengubah data ini.', 403, 'Akses Ditolak');
+            return;
+        }
 
         # Get Data Master Model
         $get_master_unit_kompetensi = $this->master_model->get_master_unit_kompetensi();
@@ -272,6 +283,13 @@ class User extends MY_Controller
         }
         ##/Cek Session Login##
         $id_izin = base64_decode($id_izin);
+        $nik_login = $this->session->userdata('nik');
+
+        $cek_personal = $this->pemohon_model->get_data_personal_permohonan($id_izin);
+        if (!$cek_personal || $cek_personal->nik !== $nik_login) {
+            show_error('Anda tidak memiliki akses untuk mengubah data ini.', 403, 'Akses Ditolak');
+            return;
+        }
         $log = date("Y-m-d H:i:s");
 
         # Get Data Master Model
@@ -367,7 +385,6 @@ class User extends MY_Controller
         $nik_login = $this->session->userdata('nik');
         $log = date("Y-m-d H:i:s");
 
-        // 🛡️ SECURITY CHECK (IDOR)
         $cek_personal = $this->pemohon_model->get_data_personal_permohonan($id_izin);
         if (!$cek_personal || $cek_personal->nik !== $nik_login) {
             show_error('Anda tidak memiliki akses untuk mengubah data ini.', 403, 'Akses Ditolak');
@@ -420,10 +437,17 @@ class User extends MY_Controller
         }
         ##/Cek Session Login##
         $id_izin = base64_decode($id_izin);
+        $id_izin = base64_decode($id_izin);
+        $nik_login = $this->session->userdata('nik');
+
+        $cek_personal = $this->pemohon_model->get_data_personal_permohonan($id_izin);
+        if (!$cek_personal || $cek_personal->nik !== $nik_login) {
+            show_error('Anda tidak memiliki akses untuk mengubah data ini.', 403, 'Akses Ditolak');
+            return;
+        }
 
         #Get Data Bukti Relavan
         $get_bukti_relavan_apl02 = $this->pemohon_model->get_bukti_relavan_apl02($id_izin);
-
 
         #Delete Data Bukti Relavan
         $this->db->delete('bukti_relavan_apl02_permohonan', array('id' => $id_bukti));

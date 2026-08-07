@@ -62,13 +62,20 @@ class Asesor extends MY_Controller
     public function cetak_surat_tugas($id_izin)
     {
         // ##/Cek Session Login##
-        // if (!$this->ion_auth->ceklogin()){
-        //     redirect('login','refresh');
-        // }else if($this->session->userdata('level') !== 'Asesor'){
-        //     redirect('login/keluar','refresh');
-        // }
+        if (!$this->ion_auth->ceklogin()) {
+            redirect('login', 'refresh');
+        } else if ($this->session->userdata('level') !== 'Asesor') {
+            redirect('login/keluar', 'refresh');
+        }
         // ##/Cek Session Login##
         $id_izin = base64_decode($id_izin);
+        $username_login = $this->session->userdata('username');
+        $cek_tugas = $this->asesor_model->cek_tugas_asesor($id_izin, $username_login);
+
+        if (!$cek_tugas) {
+            show_error('Akses Ditolak. Anda tidak ditugaskan untuk manguji peserta ini.', 403, 'Forbidden');
+            return;
+        }
 
         $token = $this->api_model->get_token();
         $get_data_ketua_pelaksana = $this->asesor_model->get_data_ketua_pelaksana();
@@ -104,7 +111,13 @@ class Asesor extends MY_Controller
         }
         ##/Cek Session Login##
         $id_izin = base64_decode($id_izin);
-        $id_asesor = $this->session->userdata('username');
+        $username_login = $this->session->userdata('username');
+        $cek_tugas = $this->asesor_model->cek_tugas_asesor($id_izin, $username_login);
+
+        if (!$cek_tugas) {
+            show_error('Akses Ditolak. Anda tidak ditugaskan untuk manguji peserta ini.', 403, 'Forbidden');
+            return;
+        }
 
         $this->data = array(
             'username' => $this->session->userdata('username'),
@@ -135,7 +148,20 @@ class Asesor extends MY_Controller
 
     public function cetak_form_apl01($id_izin)
     {
+        if (!$this->ion_auth->ceklogin()) {
+            redirect('login', 'refresh');
+        } else if ($this->session->userdata('level') !== 'Asesor') {
+            redirect('login/keluar', 'refresh');
+        }
+
         $id_izin = base64_decode($id_izin);
+        $username_login = $this->session->userdata('username');
+        $cek_tugas = $this->asesor_model->cek_tugas_asesor($id_izin, $username_login);
+
+        if (!$cek_tugas) {
+            show_error('Akses Ditolak. Anda tidak ditugaskan untuk manguji peserta ini.', 403, 'Forbidden');
+            return;
+        }
         $token = $this->api_model->get_token();
 
         $get_data_apl01 = $this->asesor_model->get_data_apl01($id_izin);
@@ -180,7 +206,19 @@ class Asesor extends MY_Controller
 
     public function form_apl02($id_izin)
     {
+        if (!$this->ion_auth->ceklogin()) {
+            redirect('login', 'refresh');
+        } else if ($this->session->userdata('level') !== 'Asesor') {
+            redirect('login/keluar', 'refresh');
+        }
         $id_izin = base64_decode($id_izin);
+        $username_login = $this->session->userdata('username');
+        $cek_tugas = $this->asesor_model->cek_tugas_asesor($id_izin, $username_login);
+
+        if (!$cek_tugas) {
+            show_error('Akses Ditolak. Anda tidak ditugaskan untuk manguji peserta ini.', 403, 'Forbidden');
+            return;
+        }
         $get_data_apl01 = $this->asesor_model->get_data_apl01($id_izin);
         $get_ttd_asesor = $this->asesor_model->get_ttd_asesor($id_izin, $this->session->userdata('username'));
 
@@ -239,6 +277,13 @@ class Asesor extends MY_Controller
         }
         ##/Cek Session Login##
         $id_izin = base64_decode($id_izin);
+        $username_login = $this->session->userdata('username');
+        $cek_tugas = $this->asesor_model->cek_tugas_asesor($id_izin, $username_login);
+
+        if (!$cek_tugas) {
+            show_error('Akses Ditolak. Anda tidak ditugaskan untuk manguji peserta ini.', 403, 'Forbidden');
+            return;
+        }
         $token = $this->api_model->get_token();
 
         # Get Data Master Model
@@ -295,7 +340,13 @@ class Asesor extends MY_Controller
         }
         ##/Cek Session Login##
         $id_izin = base64_decode($id_izin);
-        $id_asesor = $this->session->userdata('username');
+        $username_login = $this->session->userdata('username');
+        $cek_tugas = $this->asesor_model->cek_tugas_asesor($id_izin, $username_login);
+
+        if (!$cek_tugas) {
+            show_error('Akses Ditolak. Anda tidak ditugaskan untuk manguji peserta ini.', 403, 'Forbidden');
+            return;
+        }
 
         # Get Data Permohonan
         $get_data_klasifikasi_kualifikasi = $this->asesor_model->get_data_klasifikasi_kualifikasi($id_izin);
@@ -332,6 +383,13 @@ class Asesor extends MY_Controller
         }
         ##/Cek Session Login##
         $id_izin = base64_decode($id_izin);
+        $username_login = $this->session->userdata('username');
+        $cek_tugas = $this->asesor_model->cek_tugas_asesor($id_izin, $username_login);
+
+        if (!$cek_tugas) {
+            show_error('Akses Ditolak. Anda tidak ditugaskan untuk manguji peserta ini.', 403, 'Forbidden');
+            return;
+        }
         $log = date("Y-m-d H:i:s");
 
         # Get Data Permohonan
@@ -384,6 +442,13 @@ class Asesor extends MY_Controller
         }
         ##/Cek Session Login##
         $id_izin = base64_decode($id_izin);
+        $username_login = $this->session->userdata('username');
+        $cek_tugas = $this->asesor_model->cek_tugas_asesor($id_izin, $username_login);
+
+        if (!$cek_tugas) {
+            show_error('Akses Ditolak. Anda tidak ditugaskan untuk manguji peserta ini.', 403, 'Forbidden');
+            return;
+        }
         $log = date("Y-m-d H:i:s");
 
         // Get File Lama
@@ -412,6 +477,13 @@ class Asesor extends MY_Controller
         }
         ##/Cek Session Login##
         $id_izin = base64_decode($id_izin);
+        $username_login = $this->session->userdata('username');
+        $cek_tugas = $this->asesor_model->cek_tugas_asesor($id_izin, $username_login);
+
+        if (!$cek_tugas) {
+            show_error('Akses Ditolak. Anda tidak ditugaskan untuk manguji peserta ini.', 403, 'Forbidden');
+            return;
+        }
         $log = date("Y-m-d H:i:s");
 
         //config upload file Asesmen
@@ -458,6 +530,13 @@ class Asesor extends MY_Controller
         }
         ##/Cek Session Login##
         $id_izin = base64_decode($id_izin);
+        $username_login = $this->session->userdata('username');
+        $cek_tugas = $this->asesor_model->cek_tugas_asesor($id_izin, $username_login);
+
+        if (!$cek_tugas) {
+            show_error('Akses Ditolak. Anda tidak ditugaskan untuk manguji peserta ini.', 403, 'Forbidden');
+            return;
+        }
         $log = date("Y-m-d H:i:s");
 
         $where = array(
@@ -472,7 +551,6 @@ class Asesor extends MY_Controller
         redirect("asesor/asesmen/" . base64_encode($id_izin), "refresh");
     }
 
-
     public function rekomendasi_hasil_asesmen($id_izin)
     {
         ##/Cek Session Login##
@@ -483,6 +561,13 @@ class Asesor extends MY_Controller
         }
         ##/Cek Session Login##
         $id_izin = base64_decode($id_izin);
+        $username_login = $this->session->userdata('username');
+        $cek_tugas = $this->asesor_model->cek_tugas_asesor($id_izin, $username_login);
+
+        if (!$cek_tugas) {
+            show_error('Akses Ditolak. Anda tidak ditugaskan untuk manguji peserta ini.', 403, 'Forbidden');
+            return;
+        }
         $log = date("Y-m-d H:i:s");
 
         $rekomendasi_hasil_asesmen = array(
@@ -582,7 +667,21 @@ class Asesor extends MY_Controller
 
     public function cetak_berita_acara_rekomendasi_asesor($id_izin)
     {
+        ##/Cek Session Login##
+        if (!$this->ion_auth->ceklogin()) {
+            redirect('login', 'refresh');
+        } else if ($this->session->userdata('level') !== 'Asesor') {
+            redirect('login/keluar', 'refresh');
+        }
+        ##/Cek Session Login##
         $id_izin = base64_decode($id_izin);
+        $username_login = $this->session->userdata('username');
+        $cek_tugas = $this->asesor_model->cek_tugas_asesor($id_izin, $username_login);
+
+        if (!$cek_tugas) {
+            show_error('Akses Ditolak. Anda tidak ditugaskan untuk manguji peserta ini.', 403, 'Forbidden');
+            return;
+        }
         $token = $this->api_model->get_token();
 
         $file_pdf = 'Berita Acara Rekomendasi Aseesor - ' . $id_izin;
@@ -617,6 +716,13 @@ class Asesor extends MY_Controller
         }
         ##/Cek Session Login##
         $id_izin = base64_decode($id_izin);
+        $username_login = $this->session->userdata('username');
+        $cek_tugas = $this->asesor_model->cek_tugas_asesor($id_izin, $username_login);
+
+        if (!$cek_tugas) {
+            show_error('Akses Ditolak. Anda tidak ditugaskan untuk manguji peserta ini.', 403, 'Forbidden');
+            return;
+        }
 
         # Get Data Master Model
         $get_master_unit_kompetensi = $this->master_model->get_master_unit_kompetensi();
@@ -653,6 +759,13 @@ class Asesor extends MY_Controller
         }
         ##/Cek Session Login##
         $id_izin = base64_decode($id_izin);
+        $username_login = $this->session->userdata('username');
+        $cek_tugas = $this->asesor_model->cek_tugas_asesor($id_izin, $username_login);
+
+        if (!$cek_tugas) {
+            show_error('Akses Ditolak. Anda tidak ditugaskan untuk manguji peserta ini.', 403, 'Forbidden');
+            return;
+        }
         $log = date("Y-m-d H:i:s");
 
 
@@ -776,6 +889,13 @@ class Asesor extends MY_Controller
         }
         ##/Cek Session Login##
         $id_izin = base64_decode($id_izin);
+        $username_login = $this->session->userdata('username');
+        $cek_tugas = $this->asesor_model->cek_tugas_asesor($id_izin, $username_login);
+
+        if (!$cek_tugas) {
+            show_error('Akses Ditolak. Anda tidak ditugaskan untuk manguji peserta ini.', 403, 'Forbidden');
+            return;
+        }
 
         # Get Data Master Model
         $get_master_unit_kompetensi = $this->master_model->get_master_unit_kompetensi();
@@ -807,6 +927,13 @@ class Asesor extends MY_Controller
         }
         ##/Cek Session Login##
         $id_izin = base64_decode($id_izin);
+        $username_login = $this->session->userdata('username');
+        $cek_tugas = $this->asesor_model->cek_tugas_asesor($id_izin, $username_login);
+
+        if (!$cek_tugas) {
+            show_error('Akses Ditolak. Anda tidak ditugaskan untuk manguji peserta ini.', 403, 'Forbidden');
+            return;
+        }
         $log = date("Y-m-d H:i:s");
 
         # Get Data Master Model
@@ -856,6 +983,13 @@ class Asesor extends MY_Controller
         }
         ##/Cek Session Login##
         $id_izin = base64_decode($id_izin);
+        $username_login = $this->session->userdata('username');
+        $cek_tugas = $this->asesor_model->cek_tugas_asesor($id_izin, $username_login);
+
+        if (!$cek_tugas) {
+            show_error('Akses Ditolak. Anda tidak ditugaskan untuk manguji peserta ini.', 403, 'Forbidden');
+            return;
+        }
 
         # Get Data Master Model
         $get_master_unit_kompetensi = $this->master_model->get_master_unit_kompetensi();

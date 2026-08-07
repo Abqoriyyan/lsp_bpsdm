@@ -1,7 +1,9 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php if (!defined('BASEPATH'))
+	exit('No direct script access allowed');
 header('Access-Control-Allow-Origin: *');
 header("Access-Control-Allow-Methods:GET,OPTIONS");
-class Snap extends MY_Controller {
+class Snap extends MY_Controller
+{
 
 	/**
 	 * Index Page for this controller.
@@ -21,34 +23,39 @@ class Snap extends MY_Controller {
 
 
 	public function __construct()
-    {
-        parent::__construct();
-        $params = array('server_key' => 'SB-Mid-server-53Lh3rQyQXouQ2D1UK8DUfQ4', 'production' => false);
+	{
+		parent::__construct();
+		$serverKey = getenv('MIDTRANS_SERVER_KEY');
+		$isProduction = filter_var(getenv('MIDTRANS_IS_PRODUCTION'), FILTER_VALIDATE_BOOLEAN);
+		$params = array(
+			'server_key' => $serverKey,
+			'production' => $isProduction
+		);
 		$this->load->library('midtrans');
 		$this->midtrans->config($params);
-		$this->load->helper('url');	
-    }
+		$this->load->helper('url');
+	}
 
-    public function index()
-    {
-    	$this->load->view('checkout_snap');
-    }
+	public function index()
+	{
+		$this->load->view('checkout_snap');
+	}
 
-    public function token()
-    {
-		
+	public function token()
+	{
+
 		// Required
 		$transaction_details = array(
-		  'order_id' => rand(),
-		  'gross_amount' => 18000, // no decimal allowed for creditcard
+			'order_id' => rand(),
+			'gross_amount' => 18000, // no decimal allowed for creditcard
 		);
 
 		// Optional
 		$item1_details = array(
-		  'id' => '',
-		  'price' => 18000,
-		  'quantity' => 1,
-		  'name' => "Apple"
+			'id' => '',
+			'price' => 18000,
+			'quantity' => 1,
+			'name' => "Apple"
 		);
 
 		// // Optional
@@ -61,7 +68,7 @@ class Snap extends MY_Controller {
 
 		// Optional
 		// $item_details = array ($item1_details, $item2_details);
-		$item_details = array ($item1_details);
+		$item_details = array($item1_details);
 
 		// // Optional
 		// $billing_address = array(
@@ -87,46 +94,46 @@ class Snap extends MY_Controller {
 
 		// Optional
 		$customer_details = array(
-		  'first_name'    => "Andri",
-		  'last_name'     => "Litani",
-		  'email'         => "andri@litani.com",
-		  'phone'         => "081122334455",
-		//   'billing_address'  => $billing_address,
-		//   'shipping_address' => $shipping_address
+			'first_name' => "Andri",
+			'last_name' => "Litani",
+			'email' => "andri@litani.com",
+			'phone' => "081122334455",
+			//   'billing_address'  => $billing_address,
+			//   'shipping_address' => $shipping_address
 		);
 
 		// Data yang akan dikirim untuk request redirect_url.
-        $credit_card['secure'] = true;
-        //ser save_card true to enable oneclick or 2click
-        //$credit_card['save_card'] = true;
+		$credit_card['secure'] = true;
+		//ser save_card true to enable oneclick or 2click
+		//$credit_card['save_card'] = true;
 
-        $time = time();
-        $custom_expiry = array(
-            'start_time' => date("Y-m-d H:i:s O",$time),
-            'unit' => 'minute', 
-            'duration'  => 2
-        );
-        
-        $transaction_data = array(
-            'transaction_details'=> $transaction_details,
-            'item_details'       => $item_details,
-            'customer_details'   => $customer_details,
-            'credit_card'        => $credit_card,
-            'expiry'             => $custom_expiry
-        );
+		$time = time();
+		$custom_expiry = array(
+			'start_time' => date("Y-m-d H:i:s O", $time),
+			'unit' => 'minute',
+			'duration' => 2
+		);
+
+		$transaction_data = array(
+			'transaction_details' => $transaction_details,
+			'item_details' => $item_details,
+			'customer_details' => $customer_details,
+			'credit_card' => $credit_card,
+			'expiry' => $custom_expiry
+		);
 
 		error_log(json_encode($transaction_data));
 		$snapToken = $this->midtrans->getSnapToken($transaction_data);
 		error_log($snapToken);
 		echo $snapToken;
-    }
+	}
 
-    public function finish()
-    {
-    	$result = json_decode($this->input->post('result_data'));
-    	echo 'RESULT <br><pre>';
-    	var_dump($result);
-    	echo '</pre>' ;
+	public function finish()
+	{
+		$result = json_decode($this->input->post('result_data'));
+		echo 'RESULT <br><pre>';
+		var_dump($result);
+		echo '</pre>';
 
-    }
+	}
 }

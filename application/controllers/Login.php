@@ -37,7 +37,7 @@ class Login extends MY_Controller
 			$username = $this->input->post('username', TRUE);
 			$password_input = $this->input->post('password', TRUE);
 
-			$secret_key = "6LfXw2QqAAAAADsUN4qaVFuvWUQST99Pqs5JxriD";
+			$secret_key = getenv('RECAPTCHA_SECRET_KEY');
 			$recaptcha_response = $this->input->post('g-recaptcha-response');
 
 			$verifikasi = file_get_contents('https://www.google.com/recaptcha/api/siteverify?secret=' . $secret_key . '&response=' . $recaptcha_response);
@@ -111,7 +111,8 @@ class Login extends MY_Controller
 		$this->data['title'] = $this->session->flashdata('title');
 		$this->data['text'] = $this->session->flashdata('text');
 		$this->data['class'] = $this->session->flashdata('class');
-		$this->load->view('login', $this->data);
+		$data['recaptcha_site_key'] = getenv('RECAPTCHA_SITE_KEY');
+		$this->load->view('login', $data);
 	}
 
 	function keluar()
