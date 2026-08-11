@@ -35,12 +35,16 @@ class Admin_model extends CI_Model
     ## GET List Tinjau Permohonan ##
     public function get_list_tinjau_permohonan()
     {
-        $sql = "SELECT a.id_izin,a.nama, d.kualifikasi, c.created, c.klasifikasi, c.subklasifikasi, c.jabatan_kerja, c.asosiasi, c.jenis_permohonan, b.kode_status
-            FROM data_personal_permohonan a 
-            JOIN ( SELECT * FROM history_permohonan WHERE LOG IN (SELECT MAX(LOG) FROM history_permohonan GROUP BY id_izin)) b  ON b.id_izin = a.id_izin 
-            JOIN data_klasifikasi_kualifikasi_permohonan c ON c.id_izin = a.id_izin 
-            JOIN master_kualifikasi d ON c.kualifikasi = d.id 
-            WHERE b.kode_status = '20' GROUP BY id_izin";
+        $sql = "SELECT a.id_izin, a.nama, d.kualifikasi, c.created, c.klasifikasi, c.subklasifikasi, c.jabatan_kerja, c.asosiasi, c.jenis_permohonan, b.kode_status
+                FROM data_personal_permohonan a 
+                JOIN ( 
+                    SELECT * FROM history_permohonan 
+                    WHERE LOG IN (SELECT MAX(LOG) FROM history_permohonan GROUP BY id_izin)
+                ) b ON b.id_izin = a.id_izin 
+                JOIN data_klasifikasi_kualifikasi_permohonan c ON c.id_izin = a.id_izin 
+                JOIN master_kualifikasi d ON c.kualifikasi = d.id 
+                WHERE b.kode_status = '20' 
+                GROUP BY a.id_izin, a.nama, d.kualifikasi, c.created, c.klasifikasi, c.subklasifikasi, c.jabatan_kerja, c.asosiasi, c.jenis_permohonan, b.kode_status";
 
         $query = $this->db->query($sql);
         return $query->result_array();
@@ -223,16 +227,22 @@ class Admin_model extends CI_Model
     #################### Pembayaran #####################
     public function get_list_tagihan_pembayaran()
     {
-        $sql = "SELECT a.id_izin,a.nama, d.kualifikasi, c.created, c.klasifikasi, c.subklasifikasi,c.jenjang,
-         c.jabatan_kerja,f.deskripsi as jenis_permohonan, c.asosiasi, b.kode_status, g.status_code,g.bukti_pembayaran,g.payment_type
-        FROM data_personal_permohonan a 
-        JOIN ( SELECT * FROM history_permohonan WHERE LOG IN (SELECT MAX(LOG) FROM history_permohonan GROUP BY id_izin)) b  ON b.id_izin = a.id_izin 
-        JOIN data_klasifikasi_kualifikasi_permohonan c ON c.id_izin = a.id_izin 
-        JOIN master_kualifikasi d ON c.kualifikasi = d.id 
-        -- LEFT JOIN data_penunjukan_asesor e ON e.id_izin = a.id_izin
-        JOIN master_jenis_permohonan f ON f.id = c.jenis_permohonan
-        LEFT JOIN data_pembayaran_permohonan g ON g.id_izin = a.id_izin
-        WHERE b.kode_status IN ('12','30','31','50') GROUP BY id_izin";
+        $sql = "SELECT a.id_izin, a.nama, d.kualifikasi, c.created, c.klasifikasi, c.subklasifikasi, c.jenjang,
+                       c.jabatan_kerja, f.deskripsi as jenis_permohonan, c.asosiasi, b.kode_status, 
+                       g.status_code, g.bukti_pembayaran, g.payment_type
+                FROM data_personal_permohonan a 
+                JOIN ( 
+                    SELECT * FROM history_permohonan 
+                    WHERE LOG IN (SELECT MAX(LOG) FROM history_permohonan GROUP BY id_izin)
+                ) b ON b.id_izin = a.id_izin 
+                JOIN data_klasifikasi_kualifikasi_permohonan c ON c.id_izin = a.id_izin 
+                JOIN master_kualifikasi d ON c.kualifikasi = d.id 
+                JOIN master_jenis_permohonan f ON f.id = c.jenis_permohonan
+                LEFT JOIN data_pembayaran_permohonan g ON g.id_izin = a.id_izin
+                WHERE b.kode_status IN ('12','30','31','50') 
+                GROUP BY a.id_izin, a.nama, d.kualifikasi, c.created, c.klasifikasi, c.subklasifikasi, c.jenjang,
+                         c.jabatan_kerja, f.deskripsi, c.asosiasi, b.kode_status, 
+                         g.status_code, g.bukti_pembayaran, g.payment_type";
 
         $query = $this->db->query($sql);
         return $query->result_array();
@@ -258,7 +268,9 @@ class Admin_model extends CI_Model
                 LEFT JOIN master_tuk h ON h.id = g.id_tuk
                 LEFT JOIN master_jabatan_kerja i ON i.id_jabatan_kerja = c.jabatan_kerja
                 WHERE b.kode_status = '31' 
-                GROUP BY a.id_izin";
+                GROUP BY a.id_izin, a.nama, d.kualifikasi, c.created, c.klasifikasi, c.subklasifikasi, 
+                         i.jabatan_kerja, c.asosiasi, b.kode_status, 
+                         e.id_asesor, f.nama, e.kode_jadwal_asesmen, h.nama_tuk";
 
         $query = $this->db->query($sql);
         return $query->result_array();
@@ -402,7 +414,6 @@ class Admin_model extends CI_Model
 
     public function get_data_penetapan_komite_lpjk($id_izin)
     {
-        // Tambahkan b.no_reg pada SELECT
         $sql = "SELECT a.id_izin, b.nama AS nama_komite_teknis, b.no_reg, b.jabatan_komite_teknis, 
                    a.hasil_penetapan, a.catatan, DATE(c.log) AS tgl_surat_tugas, 
                    c.no_surat_tugas, DATE(a.log) AS tgl_penetapan, e.jabatan_kerja AS skema
@@ -438,21 +449,37 @@ class Admin_model extends CI_Model
     ################### Selesai Penetapan Komite Teknis ############################
     public function get_data_selesai_penetapan()
     {
-        $sql = "SELECT a.*,e.id AS id_jadwal_asesmen,b.id_izin,MAX(b.kode_status) AS kode_status, b.username, b.log FROM data_pencatatan_sertifikasi a 
-            JOIN ( SELECT * FROM history_permohonan WHERE LOG IN (SELECT MAX(LOG) FROM history_permohonan GROUP BY id_izin)) b ON b.id_izin = a.id_izin
-            JOIN data_hasil_penetapan_komite_teknis c ON c.id_izin = a.id_izin
-            JOIN data_penunjukan_asesor d ON d.id_izin = a.id_izin
-            JOIN data_jadwal_asesmen e ON kode_jadwal = d.kode_jadwal_asesmen
-            WHERE c.hasil_penetapan = 'Kompeten' GROUP BY a.id_izin HAVING kode_status = '31'";
+        $sql = "SELECT main.*, e.id AS id_jadwal_asesmen, b.username, b.log, b.kode_status
+                FROM data_pencatatan_sertifikasi main
+                JOIN (
+                    SELECT id_izin, MAX(kode_status) AS kode_status, ANY_VALUE(username) as username, ANY_VALUE(log) as log
+                    FROM history_permohonan
+                    WHERE LOG IN (SELECT MAX(LOG) FROM history_permohonan GROUP BY id_izin)
+                    GROUP BY id_izin
+                    HAVING kode_status = '31'
+                ) b ON b.id_izin = main.id_izin
+                JOIN data_hasil_penetapan_komite_teknis c ON c.id_izin = main.id_izin
+                JOIN data_penunjukan_asesor d ON d.id_izin = main.id_izin
+                JOIN data_jadwal_asesmen e ON e.kode_jadwal = d.kode_jadwal_asesmen
+                WHERE c.hasil_penetapan = 'Kompeten'";
 
         $query = $this->db->query($sql);
         return $query->result_array();
     }
     public function get_data_terbit_sertifikat()
     {
-        $sql = "SELECT a.*,b.* FROM data_pencatatan_sertifikasi a 
-        JOIN ( SELECT * FROM history_permohonan WHERE LOG IN (SELECT MAX(LOG) FROM history_permohonan GROUP BY id_izin)) b ON b.id_izin = a.id_izin 
-        WHERE b.kode_status = '50' GROUP BY a.id_izin";
+        $sql = "SELECT a.*, 
+                       b.id_izin, 
+                       b.kode_status, 
+                       ANY_VALUE(b.username) as username, 
+                       ANY_VALUE(b.log) as log
+                FROM data_pencatatan_sertifikasi a 
+                JOIN ( 
+                    SELECT * FROM history_permohonan 
+                    WHERE LOG IN (SELECT MAX(LOG) FROM history_permohonan GROUP BY id_izin)
+                ) b ON b.id_izin = a.id_izin 
+                WHERE b.kode_status = '50' 
+                GROUP BY a.id_izin";
 
         $query = $this->db->query($sql);
         return $query->result_array();
@@ -481,7 +508,7 @@ class Admin_model extends CI_Model
     ################### /Selesai Penetapan Komite Teknis ###########################
 
     // =======================================================================
-    // --- AREA KOMITE TEKNIS ---
+    // --- KOMITE TEKNIS ---
     // =======================================================================
 
     public function get_permohonan_komite()
@@ -489,7 +516,7 @@ class Admin_model extends CI_Model
         $sql = "SELECT a.*, b.kode_status, c.nama AS nama
                 FROM list_permohonan a 
                 LEFT JOIN (SELECT * FROM history_permohonan WHERE LOG IN (SELECT MAX(LOG) FROM history_permohonan GROUP BY id_izin)) b ON b.id_izin = a.id_izin
-                LEFT JOIN data_personal_permohonan c ON a.id_izin = c.id_izin"; // <-- JOIN KE TABEL PERSONAL
+                LEFT JOIN data_personal_permohonan c ON a.id_izin = c.id_izin";
 
         $query = $this->db->query($sql);
         return $query->result_array();
@@ -533,10 +560,9 @@ class Admin_model extends CI_Model
     }
 
     // =======================================================================
-    // --- AREA VERIFIKASI TUK ---
+    // --- VERIFIKASI TUK ---
     // =======================================================================
 
-    // 1. Ambil List Jadwal Asesmen
     public function get_list_jadwal_asesmen()
     {
         $this->db->select('a.*, b.nama_tuk, b.alamat');
@@ -545,7 +571,6 @@ class Admin_model extends CI_Model
         return $this->db->get()->result_array();
     }
 
-    // 2. Ambil Detail Jadwal Asesmen
     public function get_detail_jadwal_asesmen($kode_jadwal)
     {
         $this->db->select('a.*, b.nama_tuk, b.alamat');
@@ -555,7 +580,6 @@ class Admin_model extends CI_Model
         return $this->db->get()->row();
     }
 
-    // 3. Simpan atau Update Surat Verifikasi
     public function simpan_verifikasi_tuk($data)
     {
         $this->db->where('kode_jadwal', $data['kode_jadwal']);
@@ -569,7 +593,6 @@ class Admin_model extends CI_Model
         }
     }
 
-    // 4. Tarik Data Verifikasi TUK
     public function get_verifikasi_tuk($kode_jadwal)
     {
         $this->db->where('kode_jadwal', $kode_jadwal);
@@ -578,7 +601,7 @@ class Admin_model extends CI_Model
 
     public function get_list_pernyataan_terbit()
     {
-        $sql = "SELECT a.*, b.nama AS nama_asesi 
+        $sql = "SELECT a.*, ANY_VALUE(b.nama) AS nama_asesi 
                 FROM data_pencatatan_sertifikasi a
                 LEFT JOIN data_personal_permohonan b ON a.id_izin = b.id_izin
                 GROUP BY a.id_izin";

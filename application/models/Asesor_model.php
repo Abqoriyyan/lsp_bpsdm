@@ -13,8 +13,6 @@ class Asesor_model extends CI_Model
         $this->db->join('data_klasifikasi_kualifikasi_permohonan c', 'c.id_izin = a.id_izin');
         $this->db->join('master_kualifikasi d', 'c.kualifikasi = d.id');
         $this->db->join('data_personal_permohonan e', 'e.id_izin = a.id_izin');
-
-        // Parameter di-bind secara otomatis dengan aman oleh CI3
         $this->db->where('a.id_asesor', $id_asesor);
         $this->db->where('b.user_pemberi_rekomendasi IS NULL', null, false);
 
@@ -41,8 +39,6 @@ class Asesor_model extends CI_Model
         $this->db->join('data_jadwal_asesmen g', 'g.kode_jadwal = a.kode_jadwal_asesmen');
         $this->db->join('master_tuk h', 'h.id = g.id_tuk');
         $this->db->join('master_jabatan_kerja i', 'i.id_jabatan_kerja = d.jabatan_kerja');
-
-        // Celah SQL Injection ditutup di sini
         $this->db->where('a.id_izin', $id_izin);
 
         $query = $this->db->get();
@@ -341,7 +337,7 @@ class Asesor_model extends CI_Model
         $this->db->from('data_penunjukan_asesor a');
         $this->db->join('master_asesor b', 'b.id_asesor = a.id_asesor', 'left');
         $this->db->where('a.id_izin', $id_izin);
-        $this->db->where('a.asesor', $role); // '1' untuk Asesor 1, '2' untuk Asesor 2
+        $this->db->where('a.asesor', $role);
 
         $query = $this->db->get();
         return $query->row();

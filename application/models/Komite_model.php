@@ -58,11 +58,9 @@ class Komite_model extends CI_Model
         $this->db->from('data_pendidikan_permohonan a');
         $this->db->join('master_jenjang_pendidikan b', 'a.jenjang = b.id_jenjang');
         $this->db->join('tinjau_permohonan c', 'c.id_izin = a.id_izin');
-
-        // Parameter diproses aman oleh CI3
         $this->db->where('a.id_izin', $id_izin);
         $this->db->where('c.item_tinjau_permohonan', '2');
-        $this->db->where('c.jenjang_yang_sesuai = a.id', null, false); // Mencegah CI menambahkan backticks ke a.id
+        $this->db->where('c.jenjang_yang_sesuai = a.id', null, false);
 
         $query = $this->db->get();
         return $query->row();
@@ -194,7 +192,6 @@ class Komite_model extends CI_Model
     ## Get Data Pencatatan / Hasil Penetapan yang sudah status 50
     public function get_data_pencatatan($id_izin)
     {
-        // 1. Panggil kolom yang rawan tertimpa secara spesifik
         $this->db->select('
             a.*, 
             a.ketua_pelaksana as nama_ketua_pelaksana, 
@@ -207,7 +204,6 @@ class Komite_model extends CI_Model
         ');
         $this->db->from('data_pencatatan_sertifikasi a');
 
-        // 2. Gunakan 'left' join agar data utama tidak hilang jika tabel relasi kosong
         $this->db->join('master_komite b', 'b.user_komite = a.user_penetap', 'left');
         $this->db->join('data_penunjukan_asesor c', 'c.id_izin = a.id_izin', 'left');
         $this->db->join('data_jadwal_asesmen d', 'd.kode_jadwal = c.kode_jadwal_asesmen', 'left');
@@ -256,4 +252,3 @@ class Komite_model extends CI_Model
         return $query->result_array();
     }
 }
-?>
