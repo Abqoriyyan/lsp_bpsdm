@@ -19,7 +19,6 @@ function tanggal_indo($tanggal)
     return $split[2] . ' ' . $bulan[(int) $split[1]] . ' ' . $split[0];
 }
 
-// 1. Base64 KOP Surat
 $path_kop = FCPATH . 'assets/lsp/kop-lsp.png';
 $base64_kop = '';
 if (file_exists($path_kop)) {
@@ -28,7 +27,6 @@ if (file_exists($path_kop)) {
     $base64_kop = 'data:image/' . $type . ';base64,' . base64_encode($data);
 }
 
-// 2. Base64 TTD Ketua Pelaksana
 $base64_ketua = '';
 if (!empty($get_data_ketua_pelaksana->file_ttd)) {
     $path_ketua = FCPATH . 'assets/lsp/ttd_ketua_pelaksana/' . $get_data_ketua_pelaksana->file_ttd;
@@ -39,7 +37,6 @@ if (!empty($get_data_ketua_pelaksana->file_ttd)) {
     }
 }
 
-// 3. Base64 Cap/Stempel
 $stamp_path = FCPATH . 'assets/lsp/cap.png';
 $base64_stamp = '';
 if (file_exists($stamp_path)) {

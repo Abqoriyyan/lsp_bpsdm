@@ -3465,19 +3465,18 @@ class Admin extends MY_Controller
 		}
 
 		$kode_jadwal = $this->input->post('kode_jadwal', TRUE);
-
 		$upload_path = FCPATH . 'uploads/absensi_pra_asesmen/';
 
 		if (!is_dir($upload_path)) {
 			mkdir($upload_path, 0777, true);
 		}
-		$ext = pathinfo($_FILES['file_absen']['name'], PATHINFO_EXTENSION);
 
+		$ext = pathinfo($_FILES['file_absen']['name'], PATHINFO_EXTENSION);
 		$config['file_name'] = 'Absen_Pra_' . str_replace('/', '_', $kode_jadwal) . '_' . time() . '.' . $ext;
 
-		$config['upload_path'] = FCPATH . 'uploads/absensi_pra_asesmen/';
+		$config['upload_path'] = $upload_path; // Pakai variabel yang sudah didefinisikan
 		$config['allowed_types'] = 'pdf|jpg|jpeg|png';
-		$config['max_size'] = 5120;
+		$config['max_size'] = 5120; // 5 MB
 
 		$this->load->library('upload', $config);
 
@@ -3491,9 +3490,13 @@ class Admin extends MY_Controller
 			);
 
 			$this->admin_model->simpan_absensi_pra_asesmen($data);
-			$this->session->set_flashdata('pesan', '<div class="alert alert-success">File berhasil diunggah!</div>');
+
+			// Cukup kirim teks, HTML sudah di-handle oleh View
+			$this->session->set_flashdata('success', 'File absensi pra-asesmen berhasil diunggah!');
 		} else {
-			$this->session->set_flashdata('pesan', '<div class="alert alert-danger">' . $this->upload->display_errors() . '</div>');
+			// Hapus tag HTML bawaan <p> dari display_errors CodeIgniter agar rapi saat masuk ke alert
+			$error_msg = strip_tags($this->upload->display_errors());
+			$this->session->set_flashdata('error', 'Gagal mengunggah file: ' . $error_msg);
 		}
 
 		redirect('Admin/form_pra_asesmen/' . base64_encode($kode_jadwal));

@@ -6,7 +6,6 @@ function tanggal_indo($tanggal)
     return $split[2] . ' ' . $bulan[(int) $split[1]] . ' ' . $split[0];
 }
 
-// 1. Persiapkan Base64 Image untuk KOP Surat
 $path_kop = FCPATH . 'assets/lsp/kop-lsp.png';
 $base64_kop = '';
 if (file_exists($path_kop)) {
@@ -15,7 +14,6 @@ if (file_exists($path_kop)) {
     $base64_kop = 'data:image/' . $type . ';base64,' . base64_encode($data);
 }
 
-// 2. Persiapkan Base64 TTD Pemohon
 $base64_pemohon = '';
 if (!empty($get_data_apl01->ttd_pemohon)) {
     $path_ttd_pemohon = FCPATH . 'uploads/file_permohonan/ttd_pemohon_apl01_apl02/' . $get_data_apl01->ttd_pemohon;
@@ -26,7 +24,6 @@ if (!empty($get_data_apl01->ttd_pemohon)) {
     }
 }
 
-// 3. Persiapkan Base64 TTD Asesor 1
 $base64_asesor = '';
 if (!empty($get_ttd_lead_asesor->ttd_asesor)) {
     $path_ttd_asesor = FCPATH . 'uploads/file_permohonan/ttd_asesor_apl02/' . $get_ttd_lead_asesor->ttd_asesor;
@@ -37,10 +34,7 @@ if (!empty($get_ttd_lead_asesor->ttd_asesor)) {
     }
 }
 
-// 4. Persiapkan Base64 TTD Asesor 2
 $base64_asesor2 = '';
-// Variabel di bawah ini ($get_ttd_asesor_2) silakan disesuaikan dengan 
-// variabel yang dilempar dari controller untuk data Asesor 2
 if (!empty($get_ttd_asesor_2->ttd_asesor)) {
     $path_ttd_asesor2 = FCPATH . 'uploads/file_permohonan/ttd_asesor_apl02/' . $get_ttd_asesor_2->ttd_asesor;
     if (file_exists($path_ttd_asesor2)) {
@@ -57,7 +51,6 @@ if (!empty($get_ttd_asesor_2->ttd_asesor)) {
     <meta charset="UTF-8">
     <title>Formulir APL 02 - <?= $get_data_personal_permohonan->nama; ?></title>
     <style>
-        /* Pengaturan Margin Kertas */
         @page {
             margin: 60px;
         }
@@ -75,7 +68,6 @@ if (!empty($get_ttd_asesor_2->ttd_asesor)) {
             color: #000;
         }
 
-        /* Kontainer KOP Surat */
         .kop-container {
             width: 100%;
             text-align: center;
@@ -88,7 +80,6 @@ if (!empty($get_ttd_asesor_2->ttd_asesor)) {
             object-fit: contain;
         }
 
-        /* Tipografi */
         h3 {
             font-size: 12pt;
             font-weight: bold;
@@ -101,21 +92,18 @@ if (!empty($get_ttd_asesor_2->ttd_asesor)) {
             margin-bottom: 8px;
         }
 
-        /* Desain Tabel Umum */
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
         }
 
-        /* Tabel Skema */
         .table-skema td {
             border: 1px solid #333;
             padding: 8px 10px;
             vertical-align: middle;
         }
 
-        /* Tabel Panduan */
         .table-panduan td,
         .table-panduan th {
             border: 1px solid #333;
@@ -129,13 +117,10 @@ if (!empty($get_ttd_asesor_2->ttd_asesor)) {
             font-size: 11pt;
         }
 
-        /* Tabel Data APL 02 */
         .table-apl02 {
-            /* Dihapus page-break-inside: avoid; dari tabel agar tidak lompat halaman per tabel */
             width: 100%;
         }
 
-        /* Solusi agar tidak misah di tengah KUK: pakaikan page-break-inside pada TR */
         .table-apl02 tr {
             page-break-inside: avoid;
         }

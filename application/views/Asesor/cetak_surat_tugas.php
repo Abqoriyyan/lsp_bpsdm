@@ -19,7 +19,6 @@ function tanggal_indo($tanggal)
     return $split[2] . ' ' . $bulan[(int) $split[1]] . ' ' . $split[0];
 }
 
-// 1. Persiapkan Base64 Image untuk KOP Surat
 $path_kop = FCPATH . 'assets/lsp/kop-lsp.png';
 $base64_kop = '';
 if (file_exists($path_kop)) {
@@ -28,7 +27,6 @@ if (file_exists($path_kop)) {
     $base64_kop = 'data:image/' . $type . ';base64,' . base64_encode($data);
 }
 
-// 2. Persiapkan Base64 TTD Ketua Pelaksana
 $base64_ketua = '';
 if (!empty($get_data_ketua_pelaksana->file_ttd)) {
     $path_ketua = FCPATH . 'assets/lsp/ttd_ketua_pelaksana/' . $get_data_ketua_pelaksana->file_ttd;
@@ -39,7 +37,6 @@ if (!empty($get_data_ketua_pelaksana->file_ttd)) {
     }
 }
 
-// 3. Persiapkan Base64 Image untuk Cap/Stempel
 $stamp_path = FCPATH . 'assets/lsp/cap.png';
 $base64_stamp = '';
 if (file_exists($stamp_path)) {
@@ -158,7 +155,6 @@ $surat_info = isset($get_data_surat_tugas[0]) ? $get_data_surat_tugas[0] : $get_
 
         .signature-container-center {
             width: 100%;
-            /* DIUBAH KE 100%: Agar teks otomatis berada di tengah halaman kertas */
             text-align: center;
         }
 
@@ -166,42 +162,33 @@ $surat_info = isset($get_data_surat_tugas[0]) ? $get_data_surat_tugas[0] : $get_
             text-align: center;
         }
 
-        /* Ruang TTD & Stempel relative terhadap 100% lebar halaman */
         .signature-space {
             position: relative;
             height: 75px;
-            /* Tinggi dikurangi sedikit agar TTD/Cap menimpa teks nama di bawahnya */
             margin: 5px 0;
             width: 100%;
         }
 
         .signature-img {
             width: 180px;
-            /* JANGAN GUNAKAN MAX-WIDTH: Wajib ukuran pasti agar perhitungan margin-left akurat */
             height: auto;
             position: absolute;
             z-index: 1;
             top: -25px;
             left: 50%;
-            /* Tarik ke poros tengah halaman */
             margin-left: -90px;
-            /* SOLUSI: Setengah dari width (180px / 2) sebagai pengganti translateX */
         }
 
         .stamp-img {
             width: 145px;
-            /* JANGAN GUNAKAN MAX-WIDTH: Wajib ukuran pasti */
             height: auto;
             position: absolute;
             z-index: 3;
-            /* Z-Index tertinggi agar menimpa TTD dan teks nama */
             top: -25px;
             left: 50%;
             margin-left: -140px;
-            /* Digeser lebih ke kiri dari poros tengah agar memberikan efek overlap yang natural */
             opacity: 0.90;
             transform: rotate(-8deg);
-            /* Efek miring stempel asli */
         }
 
         .name-under-signature {

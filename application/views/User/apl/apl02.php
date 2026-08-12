@@ -145,7 +145,8 @@
                 </div>
                 
                 <form action="<?= base_url('user/save_data_apl02/').base64_encode($id_izin); ?>" method="POST" enctype="multipart/form-data">
-                
+                    <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>"
+                            value="<?= $this->security->get_csrf_hash(); ?>" />                
                 <?php
                     foreach($get_master_unit_kompetensi as $master_unit_kompetensi){
                         if($master_unit_kompetensi['kode_jabker'] == $get_data_klasifikasi_kualifikasi->jabatan_kerja){

@@ -1,5 +1,5 @@
 <?php
-// Optimasi fungsi getRomawi
+
 function getRomawi($bln)
 {
     $romawi = [
@@ -39,7 +39,6 @@ function tanggal_indo($tanggal)
     return $split[2] . ' ' . $bulan[(int) $split[1]] . ' ' . $split[0];
 }
 
-// Helper untuk generate base64 image
 function getBase64Image($path)
 {
     $relative_path = str_replace(base_url(), '', $path);

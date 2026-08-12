@@ -126,18 +126,15 @@
                                     <tbody>
                                         <!-- Looping untuk 3 Formasi Absensi Berdasarkan Data Penunjukan -->
                                         <?php 
-                                        // Cek apakah formasi sudah diisi di tab 1
                                         $nama_ketua = isset($get_penunjukan->ketua_komite) ? $get_penunjukan->ketua_komite : '';
                                         $nama_anggota1 = isset($get_penunjukan->anggota_1) ? $get_penunjukan->anggota_1 : '';
                                         $nama_anggota2 = isset($get_penunjukan->anggota_2) ? $get_penunjukan->anggota_2 : '';
 
-                                        // Cek data absensi jika sudah pernah disimpan
                                         $hadir_ketua = ''; $absen_ketua = '';
                                         $hadir_anggota1 = ''; $absen_anggota1 = '';
                                         $hadir_anggota2 = ''; $absen_anggota2 = '';
 
                                         if(!empty($get_absensi)) {
-                                            // Asumsi index 0 = Ketua, 1 = Anggota 1, 2 = Anggota 2
                                             if(isset($get_absensi[0])) {
                                                 if($get_absensi[0]['status_kehadiran'] == 'Hadir') $hadir_ketua = 'selected';
                                                 else $absen_ketua = 'selected';
@@ -206,20 +203,20 @@
                                     </tbody>
                                 </table>
                                 
-<div class="mt-3">
-    <?php if(!empty($nama_ketua)): ?>
-        <button type="submit" class="btn btn-success"><i class="fas fa-check-circle mr-1"></i> Simpan Absensi</button>
-        
-        <?php if(!empty($get_absensi)): ?>
-            <a href="<?= base_url('Admin/cetak_absensi_komite/'.base64_encode($id_izin)); ?>" target="_blank" class="btn btn-info ml-2">
-                <i class="fas fa-print mr-1"></i> Cetak Daftar Hadir (PDF)
-            </a>
-        <?php endif; ?>
-        
-    <?php else: ?>
-        <button type="button" class="btn btn-secondary" disabled><i class="fas fa-check-circle mr-1"></i> Lengkapi Tab Surat Penunjukan Dahulu</button>
-    <?php endif; ?>
-</div>
+                                <div class="mt-3">
+                                    <?php if(!empty($nama_ketua)): ?>
+                                        <button type="submit" class="btn btn-success"><i class="fas fa-check-circle mr-1"></i> Simpan Absensi</button>
+                                        
+                                        <?php if(!empty($get_absensi)): ?>
+                                            <a href="<?= base_url('Admin/cetak_absensi_komite/'.base64_encode($id_izin)); ?>" target="_blank" class="btn btn-info ml-2">
+                                                <i class="fas fa-print mr-1"></i> Cetak Daftar Hadir (PDF)
+                                            </a>
+                                        <?php endif; ?>
+                                        
+                                    <?php else: ?>
+                                        <button type="button" class="btn btn-secondary" disabled><i class="fas fa-check-circle mr-1"></i> Lengkapi Tab Surat Penunjukan Dahulu</button>
+                                    <?php endif; ?>
+                                </div>
                             </form>
                         </div>
 

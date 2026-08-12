@@ -10,7 +10,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
-        /* CSS ringan hanya untuk mempercantik form, tidak akan merusak layout utama */
         .form-control-modern {
             border: 1px solid #cbd5e1;
             border-radius: 8px;
@@ -55,6 +54,8 @@
                         </div>
 
                         <form action="<?= base_url('Admin/insert_tolak_permohonan') ?>" method="POST">
+                            <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>"
+                                value="<?= $this->security->get_csrf_hash(); ?>" />
 
                             <div class="mb-3">
                                 <label for="id_izin" class="form-label fw-semibold text-secondary">Id Izin</label>

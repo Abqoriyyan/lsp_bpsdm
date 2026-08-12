@@ -19,7 +19,6 @@ function tanggal_indo($tanggal)
     return $split[2] . ' ' . $bulan[(int) $split[1]] . ' ' . $split[0];
 }
 
-// 1. Ambil Base64 KOP Surat
 $path_kop = FCPATH . 'assets/lsp/kop-lsp.png';
 $base64_kop = '';
 if (file_exists($path_kop)) {
@@ -28,7 +27,6 @@ if (file_exists($path_kop)) {
     $base64_kop = 'data:image/' . $type . ';base64,' . base64_encode($data);
 }
 
-// 2. Ambil Base64 Tanda Tangan Asesi dari form APL 01 secara Dinamis
 $file_ttd_asesi = isset($get_data_apl01->ttd_pemohon) ? $get_data_apl01->ttd_pemohon : '';
 
 $base64_ttd_asesi = '';
@@ -138,7 +136,6 @@ if (!empty($file_ttd_asesi)) {
             padding-bottom: 5px;
         }
 
-        /* Bagian Blok Tanda Tangan Kanan Bawah */
         .signature-section {
             margin-top: 40px;
             width: 100%;
@@ -212,9 +209,7 @@ if (!empty($file_ttd_asesi)) {
             <td class="td-colon">:</td>
             <td class="td-value">
                 <?php
-                // Cek apakah data ada di objek atau array
                 if (isset($get_data_klasifikasi)) {
-                    // Biasanya berupa objek jika dipanggil via row()
                     echo isset($get_data_klasifikasi->deskripsi_jabatan_kerja) ? $get_data_klasifikasi->deskripsi_jabatan_kerja : 'Skema tidak ditemukan';
                 } else {
                     echo '-';

@@ -5,17 +5,17 @@ $allowed_origins = [
 	'https://bpsdm.pu.go.id',
 ];
 
-$http_origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
+// $http_origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
 
-if (in_array($http_origin, $allowed_origins, true)) {
-	header("Access-Control-Allow-Origin: " . $http_origin);
-} else {
-	// header("HTTP/1.1 403 Forbidden");
-	exit('Akses ditolak oleh CORS policy.');
-}
-header("Access-Control-Allow-Methods:GET,OPTIONS");
-header('HTTP/1.1 403 Forbidden');
-exit('Webhook is disabled.');
+// if (in_array($http_origin, $allowed_origins, true)) {
+// 	header("Access-Control-Allow-Origin: " . $http_origin);
+// } else {
+// 	// header("HTTP/1.1 403 Forbidden");
+// 	exit('Akses ditolak oleh CORS policy.');
+// }
+// header("Access-Control-Allow-Methods:GET,OPTIONS");
+// header('HTTP/1.1 403 Forbidden');
+// exit('Webhook is disabled.');
 class Pembayaran extends MY_Controller
 {
 	/**

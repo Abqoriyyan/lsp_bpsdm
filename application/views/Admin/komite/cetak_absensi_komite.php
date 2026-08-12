@@ -19,7 +19,6 @@ function tanggal_indo($tanggal)
     return $split[2] . ' ' . $bulan[(int) $split[1]] . ' ' . $split[0];
 }
 
-// Persiapkan Base64 KOP Surat
 $path_kop = FCPATH . 'assets/lsp/kop-lsp.png';
 $base64_kop = '';
 if (file_exists($path_kop)) {
@@ -114,13 +113,11 @@ if (file_exists($path_kop)) {
             text-align: center;
         }
 
-        /* Modifikasi Tanda Tangan */
         .ttd-col {
             height: 80px;
             position: relative;
         }
 
-        /* Ketinggian ditambah agar muat TTD */
         .ttd-col span {
             position: absolute;
             display: flex;
@@ -204,13 +201,11 @@ if (file_exists($path_kop)) {
                 $no = 1;
                 foreach ($get_absensi as $row):
 
-                    // --- LOGIKA PENCARIAN & ENCODE TANDA TANGAN KOMITE ---
                     $base64_ttd_personil = '';
                     if (isset($get_master_komite)) {
                         foreach ($get_master_komite as $komite) {
                             if ($row['nama_personil'] == $komite['nama']) {
 
-                                // SESUAIKAN: Nama kolom 'file_ttd' dan folder 'ttd_komite'
                                 if (!empty($komite['file_ttd'])) {
                                     $path_ttd = FCPATH . 'assets/lsp/ttd_komite/' . $komite['file_ttd'];
 

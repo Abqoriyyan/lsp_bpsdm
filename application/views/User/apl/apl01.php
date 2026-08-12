@@ -266,16 +266,14 @@
                     type: "POST",
                     url: "<?php echo base_url(); ?>User/insert_signature_apl01/<?= base64_encode($get_data_apl01->id_izin) ?>",
                     data: {
-                        'image': signaturePad.toDataURL('image/png'), // Memastikan format keluaran adalah PNG
+                        'image': signaturePad.toDataURL('image/png'),
                         'rowno': $('#rowno').val()
                     },
                     dataType: "JSON",
                     success: function (response) {
-                        // Redirect kembali ke halaman formulir agar tampilan ter-refresh dengan TTD baru
                         top.location.href = "<?= base_url('User/formulir_apl01/') . base64_encode($get_data_apl01->id_izin) ?>";
                     },
                     error: function () {
-                        // Fallback jika tidak mengembalikan JSON terstruktur tetapi langsung redirect
                         top.location.href = "<?= base_url('User/formulir_apl01/') . base64_encode($get_data_apl01->id_izin) ?>";
                     }
                 });

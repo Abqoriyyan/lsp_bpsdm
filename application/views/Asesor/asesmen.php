@@ -268,6 +268,8 @@
                                 <form
                                     action="<?= base_url("Asesor/rekomendasi_hasil_asesmen/") . base64_encode($id_izin); ?>"
                                     method="POST" enctype="multipart/form-data">
+                                    <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>"
+                                        value="<?= $this->security->get_csrf_hash(); ?>" />
                                     <div class="col-sm-4">
                                         Rekomendasi Asesor :
                                         <select class="form-control text-center text-dark" name="rekomendasi_asesor">
@@ -296,6 +298,8 @@
                                 <form
                                     action="<?= base_url("Asesor/upload_bukti_dokumentasi_asesmen/") . base64_encode($id_izin); ?>"
                                     method="POST" enctype="multipart/form-data">
+                                    <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>"
+                                        value="<?= $this->security->get_csrf_hash(); ?>" />
                                     Silahkan Upload File Bukti Foto Dokumentasi Asesmen <br />(minimal
                                     memperlihatkan foto asesi dan asesor dalam 1 frame) untuk keperluan Laporan ke LPJK <br>
 

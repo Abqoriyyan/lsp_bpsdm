@@ -47,6 +47,8 @@
             <div class="container">
                 <form action="<?= base_url('admin/buat_jadwal_asesmen/') ?>" method="POST" enctype="multipart/form-data"
                     onsubmit="return confirm('Konfirmasi Menambahkan Jadwal Asesmen')">
+                    <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>"
+                        value="<?= $this->security->get_csrf_hash(); ?>" />
                     <div class="row">
                         <div class="col-sm-6">
                             <div class="form-group">
