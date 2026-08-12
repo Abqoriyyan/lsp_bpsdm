@@ -149,6 +149,8 @@
             <div class="text-center">
                 <form action="<?= base_url('admin/insert_hasil_tinjau_permohonan/') . base64_encode($id_izin); ?>"
                     onsubmit="return confirm('Apakah sudah yakin untuk Hasil Tinjau Permohonannya ?');" method="POST">
+                    <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>"
+                        value="<?= $this->security->get_csrf_hash(); ?>" />
                     <label>Pemutusan Hasil Tinjau Permohonan</label><br />
                     <select name="hasil_tinjau_permohonan" class="select text-center">
                         <option value="10">Memenuhi</option>

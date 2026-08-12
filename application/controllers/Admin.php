@@ -109,8 +109,10 @@ class Admin extends MY_Controller
 				$this->db->replace('list_permohonan', $get_list_data_permohonan);
 			}
 
-			echo "<script>alert('Data List Permohonan Berhasil Di Update');</script>";
-			redirect('admin/list_permohonan', 'refresh');
+			echo "<script>
+                alert('Data List Permohonan Berhasil Di Update');
+                window.location.href='" . base_url('admin/list_permohonan') . "';
+            </script>";
 		}
 	}
 
@@ -577,34 +579,45 @@ class Admin extends MY_Controller
 			redirect('login/keluar', 'refresh');
 		}
 		##/Cek Session Login##
+
 		$id_izin_raw = base64_decode($id_izin);
 		$id_izin_clean = $this->security->xss_clean($id_izin_raw);
 		$id_izin = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
 
-		#Info Data Permohonan
+		# Info Data Permohonan
 		$info_data_permohonan = $this->admin_model->info_data_permohonan($id_izin);
 
-		#Get Master 
+		# Get Master 
 		$get_master_persyaratan_kompeten = $this->master_model->get_master_persyaratan_kompeten();
 
-		#Get Data Detail Permohonan
+		# Get Data Detail Permohonan
 		$get_data_personal_permohonan = $this->admin_model->get_data_personal_permohonan($id_izin);
 		$get_data_pendidikan_permohonan = $this->admin_model->get_data_pendidikan_permohonan($id_izin);
 		$data_pendidikan_yang_sudah_dipilih = $this->admin_model->data_pendidikan_yang_sudah_dipilih($id_izin);
 		$get_data_proyek_permohonan = $this->admin_model->get_data_proyek_permohonan($id_izin);
 		$get_data_pelatihan_permohonan = $this->admin_model->get_data_pelatihan_permohonan($id_izin);
-		// $get_data_studi_kasus_permohonan = $this->admin_model->get_data_studi_kasus_permohonan($id_izin);
-		// $get_data_sertifikat_surat_keterangan_permohonan = $this->admin_model->get_data_sertifikat_surat_keterangan_permohonan($id_izin);
 		$get_data_klasifikasi_kualifikasi_permohonan = $this->admin_model->get_data_klasifikasi_kualifikasi_permohonan($id_izin);
 
-		#Opsi Persyaratan Kompetensi APL 01
+		# Opsi Persyaratan Kompetensi APL 01
 		$option_persyaratan_kompetensi_apl01 = $this->admin_model->option_persyaratan_kompetensi_apl01($id_izin);
-		$get_data_apl01 = $this->admin_model->get_data_apl01($id_izin);
 
-		#Get Data Tinjau Permohonan
+		$get_data_apl01 = $this->admin_model->get_data_apl01($id_izin);
+		if (empty($get_data_apl01)) {
+			$get_data_apl01 = (object) [
+				'id_izin' => $id_izin,
+				'tujuan_asesment' => '',
+				'id_persyaratan_kompeten' => '',
+				'status_persyaratan_kompeten' => '',
+				'status_ktp' => '',
+				'status_pas_foto' => '',
+				'ttd_peninjau' => NULL
+			];
+		}
+
+		# Get Data Tinjau Permohonan
 		$get_data_tinjau_permohonan = $this->admin_model->get_data_tinjau_permohonan($id_izin);
 
-		$this->data = array(
+		$data = array(
 			'username' => $this->session->userdata('username'),
 			'level' => $this->session->userdata('level'),
 			'id_izin' => $id_izin,
@@ -614,15 +627,15 @@ class Admin extends MY_Controller
 			'data_pendidikan_yang_sudah_dipilih' => $data_pendidikan_yang_sudah_dipilih,
 			'get_data_proyek_permohonan' => $get_data_proyek_permohonan,
 			'get_data_pelatihan_permohonan' => $get_data_pelatihan_permohonan,
-			// 'get_data_studi_kasus_permohonan' => $get_data_studi_kasus_permohonan,
-			// 'get_data_sertifikat_surat_keterangan_permohonan' => $get_data_sertifikat_surat_keterangan_permohonan,
 			'get_data_klasifikasi_kualifikasi_permohonan' => $get_data_klasifikasi_kualifikasi_permohonan,
 			'get_data_tinjau_permohonan' => $get_data_tinjau_permohonan,
 			'get_master_persyaratan_kompeten' => $get_master_persyaratan_kompeten,
 			'option_persyaratan_kompetensi_apl01' => $option_persyaratan_kompetensi_apl01,
 			'get_data_apl01' => $get_data_apl01,
 		);
-		$this->template->load('menu', 'Admin/tinjau_permohonan/tinjau_permohonan', $this->data);
+
+		// Masukkan variabel $data lokal ke metode load template
+		$this->template->load('menu', 'Admin/tinjau_permohonan/tinjau_permohonan', $data);
 	}
 
 	#Proses Tinjau Permohonan Administrasi
@@ -958,46 +971,56 @@ class Admin extends MY_Controller
 	// Keperluan Signature / TTD Peninjau di APL 01
 	public function insert_signature_peninjau_apl01($id_izin)
 	{
-		if (!$this->ion_auth->ceklogin()) {
-			redirect('login', 'refresh');
-		} else if ($this->session->userdata('level') !== 'Admin') {
-			redirect('login/keluar', 'refresh');
+		## Cek Session Login untuk AJAX
+		if (!$this->ion_auth->ceklogin() || $this->session->userdata('level') !== 'Admin') {
+			header('HTTP/1.1 403 Forbidden');
+			echo "Sesi telah habis, silakan login ulang.";
+			exit;
 		}
-		##/Cek Session Login##
+
 		$id_izin_raw = base64_decode($id_izin);
 		$id_izin_clean = $this->security->xss_clean($id_izin_raw);
 		$id_izin = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
 		$log = date("Y-m-d H:i:s");
-
-		$img = $this->input->post('image');
+		$img = $this->input->post('image', FALSE);
 		$img = str_replace('data:image/png;base64,', '', $img);
 		$img = str_replace(' ', '+', $img);
 		$data = base64_decode($img);
-		$file = './uploads/file_permohonan/ttd_admin_apl01/ttd_peninjau_apl01-' . base64_encode($id_izin) . '.png';
-		$success = file_put_contents($file, $data);
-		$image = str_replace('./', '', $file);
+		$file_name = 'ttd_peninjau_apl01-' . base64_encode($id_izin) . '.png';
+		$folder_path = FCPATH . 'uploads/file_permohonan/ttd_admin_apl01/';
+		$file_path = $folder_path . $file_name;
+
+		if (!is_dir($folder_path)) {
+			mkdir($folder_path, 0775, true);
+		}
+
+		// Tulis gambar ke server
+		if (!file_put_contents($file_path, $data)) {
+			header('HTTP/1.1 500 Internal Server Error');
+			echo "Gagal menyimpan file gambar ke direktori server.";
+			exit;
+		}
 
 		$get_data_apl01 = $this->admin_model->get_data_apl01($id_izin);
 
-		if (empty($get_data_apl01->tanggal_ttd_peninjau)) {
+		if (empty($get_data_apl01) || empty($get_data_apl01->tanggal_ttd_peninjau)) {
 			$tanggal_ttd_peninjau = $log;
 		} else {
 			$tanggal_ttd_peninjau = $get_data_apl01->tanggal_ttd_peninjau;
 		}
 
-		// Update untuk mencatatkan ke Database
-		$data = array(
-			'ttd_peninjau' => 'ttd_peninjau_apl01-' . base64_encode($id_izin) . '.png',
+		$data_update = array(
+			'ttd_peninjau' => $file_name,
 			'tanggal_ttd_peninjau' => $tanggal_ttd_peninjau,
-			'nama_peninjau' => $this->session->userdata('username')
+			'user_peninjau' => $this->session->userdata('username')
 		);
 
 		$where = array(
 			'id_izin' => $id_izin
 		);
 
-		$this->admin_model->update_data($where, $data, 'data_apl01_permohonan');
-		redirect("admin/tinjau_permohonan/" . base64_encode($id_izin), "refresh");
+		$this->admin_model->update_data($where, $data_update, 'data_apl01_permohonan');
+		echo "Tanda Tangan Berhasil Disimpan";
 	}
 
 	// #Proses Tinjau Permohonan Sertifikat Surat Keterangan

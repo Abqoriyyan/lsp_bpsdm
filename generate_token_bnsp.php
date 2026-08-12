@@ -17,7 +17,7 @@ $data_lokal = mysqli_fetch_assoc($cek_token_lokal);
 $bnspUser = getenv('BNSP_API_USER');
 $bnspKey = getenv('BNSP_API_KEY');
 if (!$bnspUser || !$bnspKey) {
-    log_message('error', 'BNSP API credentials are not set in .env');
+    error_log('BNSP API credentials are not set in .env');
 }
 
 if ($data_lokal['expire_date'] < date("Y-m-d H:i:s")) {
