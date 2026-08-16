@@ -239,15 +239,14 @@
             canvas.width = canvas.offsetWidth * ratio;
             canvas.height = canvas.offsetHeight * ratio;
             canvas.getContext("2d").scale(ratio, ratio);
-            signaturePad.clear(); // Bersihkan setelah resize agar grid pas
+            signaturePad.clear();
         }
 
         signaturePad = new SignaturePad(canvas, {
-            backgroundColor: 'rgba(255, 255, 255, 0)', // Transparan agar tersimpan murni bentuk PNG coretan
+            backgroundColor: 'rgba(255, 255, 255, 0)',
             penColor: 'rgb(0, 0, 0)'
         });
 
-        // Jalankan resize saat pertama kali dibuka
         window.onresize = resizeCanvas;
         resizeCanvas();
 
@@ -262,23 +261,28 @@
             }
 
             if (confirm('Apakah Anda yakin ingin menyimpan perubahan Tanda Tangan / TTD ini?')) {
+                var csrfName = '<?= $this->security->get_csrf_token_name(); ?>';
+                var csrfHash = '<?= $this->security->get_csrf_hash(); ?>';
+
                 $.ajax({
                     type: "POST",
                     url: "<?php echo base_url(); ?>User/insert_signature_apl01/<?= base64_encode($get_data_apl01->id_izin) ?>",
                     data: {
                         'image': signaturePad.toDataURL('image/png'),
-                        'rowno': $('#rowno').val()
+                        'rowno': $('#rowno').val(),
+                        [csrfName]: csrfHash //
                     },
                     dataType: "JSON",
                     success: function (response) {
                         top.location.href = "<?= base_url('User/formulir_apl01/') . base64_encode($get_data_apl01->id_izin) ?>";
                     },
-                    error: function () {
-                        top.location.href = "<?= base_url('User/formulir_apl01/') . base64_encode($get_data_apl01->id_izin) ?>";
+                    error: function (xhr, status, error) {
+                        alert("Gagal menyimpan tanda tangan. Silakan cek console browser Anda.");
+                        console.log("Error AJAX:", xhr.responseText);
                     }
                 });
             }
-        }); 
+        });
     </script>
 </body>
 
