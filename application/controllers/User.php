@@ -125,12 +125,13 @@ class User extends MY_Controller
 
         $this->pemohon_model->update_data($where, $data, 'data_apl01_permohonan');
         redirect("User/formulir_apl01/" . base64_encode($id_izin), "refresh");
+        redirect("User/formulir_apl01/" . base64_encode($id_izin));
     }
 
-    public function insert_signature_apl01($id_izin_encoded)
+    public function insert_signature_apl01($id_izin)
     {
 
-        $id_izin = base64_decode($id_izin_encoded);
+        $id_izin = base64_decode($id_izin);
         $img_post = $this->input->post('image', FALSE);
 
         if (empty($img_post)) {
@@ -167,6 +168,8 @@ class User extends MY_Controller
         } else {
             echo json_encode(['status' => false, 'message' => 'Gagal menyimpan file ke direktori server.']);
         }
+        redirect("User/formulir_apl01/" . base64_encode($id_izin), "refresh");
+        redirect("User/formulir_apl01/" . base64_encode($id_izin));
     }
 
     public function print_apl01($id_izin)
@@ -339,6 +342,7 @@ class User extends MY_Controller
         }
 
         redirect("User/formulir_apl02/" . base64_encode($id_izin), "refresh");
+        redirect("User/formulir_apl02/" . base64_encode($id_izin));
     }
 
     public function bukti_relavan_apl02($id_izin)

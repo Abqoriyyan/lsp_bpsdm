@@ -896,7 +896,7 @@
                                                     </a>
                                                 </td>
                                                 <td>
-                                                    <select class="custom-select custom-select-sm" name="status_ktp"
+                                                    <select class="custom-select custom-select-md" name="status_ktp"
                                                         required>
                                                         <option value="">-- Pilih Pernyataan --</option>
                                                         <option <?php if ($get_data_apl01->status_ktp == 'Ada (Memenuhi Syarat)') {
@@ -923,7 +923,7 @@
                                                     </a>
                                                 </td>
                                                 <td>
-                                                    <select class="custom-select custom-select-sm"
+                                                    <select class="custom-select custom-select-md"
                                                         name="status_pas_foto" required>
                                                         <option value="">-- Pilih Pernyataan --</option>
                                                         <option <?php if ($get_data_apl01->status_pas_foto == 'Ada (Memenuhi Syarat)') {

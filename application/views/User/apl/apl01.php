@@ -270,7 +270,7 @@
                     data: {
                         'image': signaturePad.toDataURL('image/png'),
                         'rowno': $('#rowno').val(),
-                        [csrfName]: csrfHash //
+                        [csrfName]: csrfHash
                     },
                     dataType: "JSON",
                     success: function (response) {
