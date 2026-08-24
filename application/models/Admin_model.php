@@ -452,7 +452,7 @@ class Admin_model extends CI_Model
         $sql = "SELECT main.*, e.id AS id_jadwal_asesmen, b.username, b.log, b.kode_status
                 FROM data_pencatatan_sertifikasi main
                 JOIN (
-                    SELECT id_izin, MAX(kode_status) AS kode_status, ANY_VALUE(username) as username, ANY_VALUE(log) as log
+                    SELECT id_izin, MAX(kode_status) AS kode_status, MAX(username) as username, MAX(log) as log
                     FROM history_permohonan
                     WHERE LOG IN (SELECT MAX(LOG) FROM history_permohonan GROUP BY id_izin)
                     GROUP BY id_izin
@@ -471,8 +471,8 @@ class Admin_model extends CI_Model
         $sql = "SELECT a.*, 
                        b.id_izin, 
                        b.kode_status, 
-                       ANY_VALUE(b.username) as username, 
-                       ANY_VALUE(b.log) as log
+                       MAX(b.username) as username, 
+                       MAX(b.log) as log
                 FROM data_pencatatan_sertifikasi a 
                 JOIN ( 
                     SELECT * FROM history_permohonan 
@@ -601,7 +601,7 @@ class Admin_model extends CI_Model
 
     public function get_list_pernyataan_terbit()
     {
-        $sql = "SELECT a.*, ANY_VALUE(b.nama) AS nama_asesi 
+        $sql = "SELECT a.*, MAX(b.nama) AS nama_asesi 
                 FROM data_pencatatan_sertifikasi a
                 LEFT JOIN data_personal_permohonan b ON a.id_izin = b.id_izin
                 GROUP BY a.id_izin";
