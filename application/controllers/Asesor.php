@@ -97,6 +97,8 @@ class Asesor extends MY_Controller
 
         // $this->load->view($page, $data);
         $html = $this->load->view($page, $data, true);
+        ob_clean();
+        error_reporting(0);
         $this->pdfgenerator->generate($html, $file_pdf, $paper, $orientation);
     }
 
@@ -201,6 +203,8 @@ class Asesor extends MY_Controller
 
         // $this->load->view($page, $data);
         $html = $this->load->view($page, $data, true);
+        ob_clean();
+        error_reporting(0);
         $this->pdfgenerator->generate($html, $file_pdf, $paper, $orientation);
     }
 
@@ -234,37 +238,50 @@ class Asesor extends MY_Controller
 
     public function insert_signature_asesor_apl02($id_izin)
     {
-        if (!$this->ion_auth->ceklogin()) {
-            redirect('login', 'refresh');
-        } else if ($this->session->userdata('level') !== 'Asesor') {
-            redirect('login/keluar', 'refresh');
+        if (!$this->ion_auth->ceklogin() || $this->session->userdata('level') !== 'Asesor') {
+            header('HTTP/1.1 403 Forbidden');
+            echo "Sesi telah habis atau akses ditolak, silakan login ulang.";
+            exit;
         }
-        ##/Cek Session Login##
-        $id_izin = base64_decode($id_izin);
+
+        $id_izin_raw = base64_decode($id_izin);
+        $id_izin_clean = $this->security->xss_clean($id_izin_raw);
+        $id_izin_asli = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
+
         $log = date("Y-m-d H:i:s");
 
-        $img = $this->input->post('image');
+        $img = $this->input->post('image', FALSE);
         $img = str_replace('data:image/png;base64,', '', $img);
         $img = str_replace(' ', '+', $img);
         $data = base64_decode($img);
-        $file = './uploads/file_permohonan/ttd_asesor_apl02/ttd_asesor_apl02-' . $this->session->userdata('username') . "-" . base64_encode($id_izin) . '.png';
-        $success = file_put_contents($file, $data);
-        $image = str_replace('./', '', $file);
 
-        // Update untuk mencatatkan ke Database
-        $data = array(
-            'ttd_asesor' => 'ttd_asesor_apl02-' . $this->session->userdata('username') . "-" . base64_encode($id_izin) . '.png',
+        $file_name = 'ttd_asesor_apl02-' . $this->session->userdata('username') . "-" . base64_encode($id_izin_asli) . '.png';
+        $folder_path = FCPATH . 'uploads/file_permohonan/ttd_asesor_apl02/';
+        $file_path = $folder_path . $file_name;
+
+        if (!is_dir($folder_path)) {
+            mkdir($folder_path, 0775, true);
+        }
+
+        if (!file_put_contents($file_path, $data)) {
+            header('HTTP/1.1 500 Internal Server Error');
+            echo "Gagal menyimpan file gambar ke direktori server.";
+            exit;
+        }
+
+        $data_update = array(
+            'ttd_asesor' => $file_name,
             'tanggal_ttd' => $log,
         );
 
         $where = array(
-            'id_izin' => $id_izin,
+            'id_izin' => $id_izin_asli,
             'id_asesor' => $this->session->userdata('username'),
         );
 
-        $this->asesor_model->update_data($where, $data, 'data_penunjukan_asesor');
+        $this->asesor_model->update_data($where, $data_update, 'data_penunjukan_asesor');
 
-        redirect("asesor/form_apl02/" . base64_encode($id_izin), "refresh");
+        echo "Tanda Tangan Berhasil Disimpan";
     }
 
     public function cetak_form_apl02($id_izin)
@@ -325,6 +342,8 @@ class Asesor extends MY_Controller
 
         // $this->load->view($page, $data);
         $html = $this->load->view($page, $data, true);
+        ob_clean();
+        error_reporting(0);
         $this->pdfgenerator->generate($html, $file_pdf, $paper, $orientation);
     }
     /////////////////////////////////// /Pra Asesmen ////////////////////////////////////////////
@@ -465,7 +484,6 @@ class Asesor extends MY_Controller
         redirect("asesor/asesmen/" . base64_encode($id_izin), "refresh");
     }
     // /Delete File Asesmen Hybrid //
-
 
     public function upload_bukti_dokumentasi_asesmen($id_izin)
     {

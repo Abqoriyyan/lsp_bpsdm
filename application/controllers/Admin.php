@@ -929,7 +929,6 @@ class Admin extends MY_Controller
 		}
 		##/Cek Session Login##
 
-		// Validasi ID Izin (SUDAH SANGAT BENAR)
 		$id_izin_raw = base64_decode($id_izin);
 		$id_izin_clean = $this->security->xss_clean($id_izin_raw);
 		$id_izin = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
@@ -964,7 +963,6 @@ class Admin extends MY_Controller
 		$this->db->replace('data_apl01_permohonan', $apl01_tinjau_permohonan);
 		$this->session->set_flashdata('success', 'Save Ceklis Apl01');
 
-		// OPTIMASI: Menggunakan helper redirect bawaan CI3
 		redirect('admin/tinjau_permohonan/' . base64_encode($id_izin));
 	}
 
@@ -3228,6 +3226,8 @@ class Admin extends MY_Controller
 		$page = 'Admin/komite/cetak_sk_komite';
 
 		$html = $this->load->view($page, $data, true);
+		ob_clean();
+		error_reporting(0);
 		$this->pdfgenerator->generate($html, $file_pdf, $paper, $orientation);
 	}
 
@@ -3268,6 +3268,8 @@ class Admin extends MY_Controller
 		$page = 'Admin/komite/cetak_absensi_komite';
 
 		$html = $this->load->view($page, $data, true);
+		ob_clean();
+		error_reporting(0);
 		$this->pdfgenerator->generate($html, $file_pdf, $paper, $orientation);
 	}
 
@@ -3425,6 +3427,8 @@ class Admin extends MY_Controller
 		$page = 'Admin/pernyataan/cetak_pernyataan';
 
 		$html = $this->load->view($page, $data, true);
+		ob_clean();
+		error_reporting(0);
 		$this->pdfgenerator->generate($html, $file_pdf, $paper, $orientation);
 	}
 

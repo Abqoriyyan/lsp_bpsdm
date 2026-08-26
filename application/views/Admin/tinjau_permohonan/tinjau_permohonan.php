@@ -363,7 +363,8 @@
                         </div>
 
                         <div class="mt-4 text-right">
-                            <input type="submit" value="Simpan Administrasi" class="btn btn-primary px-4 shadow-sm" />
+                            <input type="submit" name="submit" value="Simpan Administrasi"
+                                class="btn btn-primary px-4 shadow-sm" />
                         </div>
                     </form>
                 </div>
@@ -694,11 +695,11 @@
                                     <div class="m-signature-pad-footer mt-3 text-right">
                                         <button type="button" data-action="clear"
                                             class="btn btn-outline-danger btn-sm shadow-sm mr-2">
-                                            <i class="fa fa-trash-o"></i> Clear
+                                            <i class="fa fa-trash-o"></i> Hapus
                                         </button>
                                         <button type="button" id="save2" data-action="save"
                                             class="btn btn-success btn-sm shadow-sm">
-                                            <i class="fa fa-check"></i> Save TTD
+                                            <i class="fa fa-check"></i> Simpan TTD
                                         </button>
                                     </div>
                                 </div>

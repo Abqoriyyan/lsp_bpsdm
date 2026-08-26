@@ -663,6 +663,8 @@ class Komite extends MY_Controller
 
 		// $this->load->view($page, $data);
 		$html = $this->load->view($page, $data, true);
+		ob_clean();
+		error_reporting(0);
 		$this->pdfgenerator->generate($html, $file_pdf, $paper, $orientation);
 	}
 
@@ -713,6 +715,8 @@ class Komite extends MY_Controller
 
 		// $this->load->view($page, $data);
 		$html = $this->load->view($page, $data, true);
+		ob_clean();
+		error_reporting(0);
 		$this->pdfgenerator->generate($html, $file_pdf, $paper, $orientation);
 	}
 
@@ -760,6 +764,8 @@ class Komite extends MY_Controller
 
 		// $this->load->view($page, $data);
 		$html = $this->load->view($page, $data, true);
+		ob_clean();
+		error_reporting(0);
 		$this->pdfgenerator->generate($html, $file_pdf, $paper, $orientation);
 	}
 
@@ -785,6 +791,8 @@ class Komite extends MY_Controller
 
 		// $this->load->view($page, $data);
 		$html = $this->load->view($page, $data, true);
+		ob_clean();
+		error_reporting(0);
 		$this->pdfgenerator->generate($html, $file_pdf, $paper, $orientation);
 	}
 
@@ -810,6 +818,8 @@ class Komite extends MY_Controller
 
 		// $this->load->view($page, $data);
 		$html = $this->load->view($page, $data, true);
+		ob_clean();
+		error_reporting(0);
 		$this->pdfgenerator->generate($html, $file_pdf, $paper, $orientation);
 	}
 

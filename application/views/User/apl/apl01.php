@@ -274,7 +274,11 @@
                     },
                     dataType: "JSON",
                     success: function (response) {
-                        top.location.href = "<?= base_url('User/formulir_apl01/') . base64_encode($get_data_apl01->id_izin) ?>";
+                        if (response.status === true) {
+                            top.location.href = "<?= base_url('User/formulir_apl01/') . base64_encode($get_data_apl01->id_izin) ?>";
+                        } else {
+                            alert(response.message);
+                        }
                     },
                     error: function (xhr, status, error) {
                         alert("Gagal menyimpan tanda tangan. Silakan cek console browser Anda.");

@@ -94,7 +94,7 @@ class User extends MY_Controller
         } else if ($this->session->userdata('level') !== 'User') {
             redirect('login/keluar', 'refresh');
         }
-        ##/Cek Session Login##
+
         $id_izin = base64_decode($id_izin);
         $nik_login = $this->session->userdata('nik');
 
@@ -104,19 +104,16 @@ class User extends MY_Controller
             return;
         }
 
-        #Get Data Apl
-        $get_data_apl01 = $this->pemohon_model->get_data_apl01($id_izin);
-
         $data = array(
             'id_izin' => $id_izin,
-            'pekerjaan_sekarang_perusahaan' => str_replace(['"', '<', '>'], '', strip_tags($this->input->post('perusahaan', FALSE))),
-            'pekerjaan_sekarang_jabatan' => str_replace(['"', '<', '>'], '', strip_tags($this->input->post('jabatan', FALSE))),
-            'id_pekerjaan' => str_replace(['"', '<', '>'], '', strip_tags($this->input->post('id_pekerjaan', FALSE))),
-            'pekerjaan_sekarang_alamat_kantor' => str_replace(['"', '<', '>'], '', strip_tags($this->input->post('alamat_kantor', FALSE))),
-            'pekerjaan_sekarang_kodepos_kantor' => str_replace(['"', '<', '>'], '', strip_tags($this->input->post('kodepos_kantor', FALSE))),
-            'pekerjaan_sekarang_notlp_kantor' => str_replace(['"', '<', '>'], '', strip_tags($this->input->post('telepon_kantor', FALSE))),
-            'pekerjaan_sekarang_fax_kantor' => str_replace(['"', '<', '>'], '', strip_tags($this->input->post('fax_kantor', FALSE))),
-            'pekerjaan_sekarang_email_kantor' => str_replace(['"', '<', '>'], '', strip_tags($this->input->post('email_kantor', FALSE))),
+            'pekerjaan_sekarang_perusahaan' => str_replace(['"', '<', '>'], '', strip_tags((string) $this->input->post('perusahaan', FALSE))),
+            'pekerjaan_sekarang_jabatan' => str_replace(['"', '<', '>'], '', strip_tags((string) $this->input->post('jabatan', FALSE))),
+            'id_pekerjaan' => str_replace(['"', '<', '>'], '', strip_tags((string) $this->input->post('id_pekerjaan', FALSE))),
+            'pekerjaan_sekarang_alamat_kantor' => str_replace(['"', '<', '>'], '', strip_tags((string) $this->input->post('alamat_kantor', FALSE))),
+            'pekerjaan_sekarang_kodepos_kantor' => str_replace(['"', '<', '>'], '', strip_tags((string) $this->input->post('kodepos_kantor', FALSE))),
+            'pekerjaan_sekarang_notlp_kantor' => str_replace(['"', '<', '>'], '', strip_tags((string) $this->input->post('telepon_kantor', FALSE))),
+            'pekerjaan_sekarang_fax_kantor' => str_replace(['"', '<', '>'], '', strip_tags((string) $this->input->post('fax_kantor', FALSE))),
+            'pekerjaan_sekarang_email_kantor' => str_replace(['"', '<', '>'], '', strip_tags((string) $this->input->post('email_kantor', FALSE))),
         );
 
         $where = array(
@@ -124,14 +121,16 @@ class User extends MY_Controller
         );
 
         $this->pemohon_model->update_data($where, $data, 'data_apl01_permohonan');
-        redirect("User/formulir_apl01/" . base64_encode($id_izin), "refresh");
-        redirect("User/formulir_apl01/" . base64_encode($id_izin));
+
+        redirect("user/formulir_apl01/" . base64_encode($id_izin), "refresh");
     }
 
     public function insert_signature_apl01($id_izin)
     {
+        $id_izin_raw = base64_decode($id_izin);
+        $id_izin_clean = $this->security->xss_clean($id_izin_raw);
+        $id_izin_asli = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
 
-        $id_izin = base64_decode($id_izin);
         $img_post = $this->input->post('image', FALSE);
 
         if (empty($img_post)) {
@@ -145,10 +144,15 @@ class User extends MY_Controller
             return;
         }
 
-        $image_base64 = base64_decode($image_parts[1]);
+        $image_base64 = base64_decode(str_replace(' ', '+', $image_parts[1]));
 
-        $filename = 'ttd_apl01_apl02_' . md5($id_izin) . '_' . time() . '.png';
-        $file_path = './uploads/file_permohonan/ttd_pemohon_apl01_apl02/' . $filename;
+        $filename = 'ttd_apl01_apl02_' . md5($id_izin_asli) . '_' . time() . '.png';
+        $folder_path = FCPATH . 'uploads/file_permohonan/ttd_pemohon_apl01_apl02/';
+        $file_path = $folder_path . $filename;
+
+        if (!is_dir($folder_path)) {
+            mkdir($folder_path, 0775, true);
+        }
 
         $simpan_file = file_put_contents($file_path, $image_base64);
 
@@ -159,17 +163,16 @@ class User extends MY_Controller
             );
 
             $where = array(
-                'id_izin' => $id_izin
+                'id_izin' => $id_izin_asli
             );
 
             $this->pemohon_model->update_data($where, $update_data, 'data_apl01_permohonan');
 
             echo json_encode(['status' => true, 'message' => 'Tanda tangan berhasil disimpan!']);
         } else {
-            echo json_encode(['status' => false, 'message' => 'Gagal menyimpan file ke direktori server.']);
+            header('HTTP/1.1 500 Internal Server Error');
+            echo json_encode(['status' => false, 'message' => 'Gagal menyimpan file ke direktori server. Cek permission folder.']);
         }
-        redirect("User/formulir_apl01/" . base64_encode($id_izin), "refresh");
-        redirect("User/formulir_apl01/" . base64_encode($id_izin));
     }
 
     public function print_apl01($id_izin)
@@ -278,13 +281,12 @@ class User extends MY_Controller
 
     public function save_data_apl02($id_izin)
     {
-        ##/Cek Session Login##
         if (!$this->ion_auth->ceklogin()) {
             redirect('login', 'refresh');
         } else if ($this->session->userdata('level') !== 'User') {
             redirect('login/keluar', 'refresh');
         }
-        ##/Cek Session Login##
+
         $id_izin = base64_decode($id_izin);
         $nik_login = $this->session->userdata('nik');
 
@@ -295,13 +297,14 @@ class User extends MY_Controller
         }
         $log = date("Y-m-d H:i:s");
 
-        # Get Data Master Model
+        # Get Data Master
         $get_master_unit_kompetensi = $this->master_model->get_master_unit_kompetensi();
         $get_master_elemen_kompetensi = $this->master_model->get_master_elemen_kompetensi();
         $get_master_kriteria_unjuk_kerja = $this->master_model->get_master_kriteria_unjuk_kerja();
-
-        # Get Data Kualifikasi Klasifikasi / Permohonan
         $get_data_klasifikasi_kualifikasi = $this->pemohon_model->get_data_klasifikasi_kualifikasi($id_izin);
+
+        // Flag untuk mengecek apakah ada data yang berhasil disimpan
+        $has_saved = false;
 
         foreach ($get_master_unit_kompetensi as $master_unit_kompetensi) {
             if ($master_unit_kompetensi['kode_jabker'] == $get_data_klasifikasi_kualifikasi->jabatan_kerja) {
@@ -312,37 +315,36 @@ class User extends MY_Controller
                         foreach ($get_master_kriteria_unjuk_kerja as $master_kriteria_unjuk_kerja) {
                             if ($master_kriteria_unjuk_kerja['kode_elemen_kompetensi'] == $master_elemen_kompetensi['kode_elemen_kompetensi']) {
 
-                                #Clear Data agar bisa di jadikan name untuk parameter
                                 $kode_kuk_clear = str_replace(".", "", $master_kriteria_unjuk_kerja['kode_kuk']);
 
-                                if ($this->input->post('status_' . $kode_kuk_clear) == 1) {
-                                    $status_kuk = '1';
-                                } else {
-                                    $status_kuk = '0';
-                                }
+                                // Ambil input dan pastikan tipe datanya aman
+                                $post_status = $this->input->post('status_' . $kode_kuk_clear, TRUE);
+                                $post_bukti = $this->input->post('bukti_relavan_' . $kode_kuk_clear, TRUE);
+
+                                $status_kuk = ($post_status == 1) ? '1' : '0';
 
                                 $data_pekerjaan_sekarang = array(
                                     'id_izin' => $id_izin,
                                     'kode_kuk' => $master_kriteria_unjuk_kerja['kode_kuk'],
                                     'status' => $status_kuk,
-                                    'bukti_relavan' => $this->input->post('bukti_relavan_' . $kode_kuk_clear),
+                                    'bukti_relavan' => (string) $post_bukti,
                                     'log' => $log,
                                 );
-                                $this->db->replace('data_apl02_permohonan', $data_pekerjaan_sekarang);
 
-                                // Sweet Alert
-                                $this->session->set_flashdata('success', 'Save Apl 02');
+                                $this->db->replace('data_apl02_permohonan', $data_pekerjaan_sekarang);
+                                $has_saved = true;
                             }
                         }
-
                     }
                 }
-
             }
         }
 
-        redirect("User/formulir_apl02/" . base64_encode($id_izin), "refresh");
-        redirect("User/formulir_apl02/" . base64_encode($id_izin));
+        if ($has_saved) {
+            $this->session->set_flashdata('success', 'Save Apl 02');
+        }
+
+        redirect("user/formulir_apl02/" . base64_encode($id_izin), "refresh");
     }
 
     public function bukti_relavan_apl02($id_izin)
