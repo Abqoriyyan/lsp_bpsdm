@@ -546,27 +546,37 @@ class Asesor extends MY_Controller
         } else if ($this->session->userdata('level') !== 'Asesor') {
             redirect('login/keluar', 'refresh');
         }
-        ##/Cek Session Login##
-        $id_izin = base64_decode($id_izin);
+
+        $id_izin_asli = base64_decode($id_izin);
         $username_login = $this->session->userdata('username');
-        $cek_tugas = $this->asesor_model->cek_tugas_asesor($id_izin, $username_login);
+        $cek_tugas = $this->asesor_model->cek_tugas_asesor($id_izin_asli, $username_login);
 
         if (!$cek_tugas) {
-            show_error('Akses Ditolak. Anda tidak ditugaskan untuk manguji peserta ini.', 403, 'Forbidden');
+            show_error('Akses Ditolak. Anda tidak ditugaskan untuk menguji peserta ini.', 403, 'Forbidden');
             return;
         }
-        $log = date("Y-m-d H:i:s");
 
-        $where = array(
-            'id_izin' => $id_izin
-        );
+        $this->db->where('id_izin', $id_izin_asli);
+        $get_files = $this->db->get('data_bukti_dokumentasi_asesmen')->result();
 
-        // Delete data based on the WHERE condition.
-        $this->db->where($where);
+        foreach ($get_files as $file_data) {
+            $nama_file = $file_data->file;
+
+            if (!empty($nama_file)) {
+                $file_path = FCPATH . 'uploads/file_asesmen/bukti_dokumentasi_asesmen/' . $nama_file;
+
+                if (file_exists($file_path) && !is_dir($file_path)) {
+                    unlink($file_path);
+                }
+            }
+        }
+
+        $this->db->where('id_izin', $id_izin_asli);
         $this->db->delete('data_bukti_dokumentasi_asesmen');
 
-        $this->session->set_flashdata('success-reset-bukti', 'Berhasil Reset Bukti Dokumentasi Asesmen');
-        redirect("asesor/asesmen/" . base64_encode($id_izin), "refresh");
+        $this->session->set_flashdata('success-reset-bukti', 'Berhasil Reset Bukti Dokumentasi Asesmen beserta Filenya');
+
+        redirect("asesor/asesmen/" . base64_encode($id_izin_asli), "refresh");
     }
 
     public function rekomendasi_hasil_asesmen($id_izin)
