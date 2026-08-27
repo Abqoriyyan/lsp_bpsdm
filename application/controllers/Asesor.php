@@ -400,10 +400,10 @@ class Asesor extends MY_Controller
         } else if ($this->session->userdata('level') !== 'Asesor') {
             redirect('login/keluar', 'refresh');
         }
-        ##/Cek Session Login##
-        $id_izin = base64_decode($id_izin);
+
+        $id_izin_asli = base64_decode($id_izin);
         $username_login = $this->session->userdata('username');
-        $cek_tugas = $this->asesor_model->cek_tugas_asesor($id_izin, $username_login);
+        $cek_tugas = $this->asesor_model->cek_tugas_asesor($id_izin_asli, $username_login);
 
         if (!$cek_tugas) {
             show_error('Akses Ditolak. Anda tidak ditugaskan untuk manguji peserta ini.', 403, 'Forbidden');
@@ -411,16 +411,22 @@ class Asesor extends MY_Controller
         }
         $log = date("Y-m-d H:i:s");
 
-        # Get Data Permohonan
-        $get_data_klasifikasi_kualifikasi = $this->asesor_model->get_data_klasifikasi_kualifikasi($id_izin);
+        # Ambil input form dengan aman
+        $form_kode = (string) $this->input->post('form', TRUE);
 
-        //config upload file Asesmen
+        // Config upload file Asesmen
         $comb = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         $shfl = str_shuffle($comb);
-        $filename_unik_karakter = SUBSTR($shfl, 0, 10);
+        $filename_unik_karakter = substr($shfl, 0, 10);
 
-        $file_name = "file-" . $this->input->post('form') . "-" . md5($filename_unik_karakter) . "_" . date("Y-m-d");
-        $config['upload_path'] = FCPATH . 'uploads/file_asesmen/' . $this->input->post('form');
+        $file_name = "file-" . $form_kode . "-" . md5($filename_unik_karakter) . "_" . date("Y-m-d");
+        $upload_path = FCPATH . 'uploads/file_asesmen/' . $form_kode;
+
+        if (!is_dir($upload_path)) {
+            mkdir($upload_path, 0775, true);
+        }
+
+        $config['upload_path'] = $upload_path;
         $config['allowed_types'] = 'pdf';
         $config['file_name'] = $file_name;
         $config['overwrite'] = true;
@@ -428,25 +434,26 @@ class Asesor extends MY_Controller
 
         $this->load->library('upload', $config);
         $this->upload->initialize($config);
+
         if ($this->upload->do_upload('file_asesmen')) {
             $file_asesmen = $this->upload->data();
-            $filename_asesmen = $file_asesmen['file_name'];
 
-            $this->session->set_flashdata('success', 'Berhasil Menambahkan');
+            $data_file_asesmen = array();
+
+            $data_file_asesmen['id_izin'] = $id_izin_asli;
+            $data_file_asesmen['kode_form'] = $form_kode;
+            $data_file_asesmen['file'] = $file_asesmen['file_name'];
+            $data_file_asesmen['user_pengunggah'] = $username_login;
+            $data_file_asesmen['log'] = $log;
+
+            $this->db->insert('data_file_asesmen', $data_file_asesmen);
+
+            $this->session->set_flashdata('success', 'Berhasil Menambahkan File');
         } else {
-            $this->session->set_flashdata('gagal', 'Gagal Upload File Size Terlalu Besar dari 10 Mb');
-            redirect("asesor/asesmen/" . base64_encode($id_izin), "refresh");
+            $this->session->set_flashdata('gagal', 'Gagal Upload: ' . $this->upload->display_errors('', ''));
         }
 
-        // Insert Data File Asesmen
-        $data_file_asesmen['id_izin'] = $id_izin;
-        $data_file_asesmen['kode_form'] = $this->input->post('form');
-        $data_file_asesmen['file'] = $filename_asesmen;
-        $data_file_asesmen['user_pengunggah'] = $this->session->userdata('username');
-        $data_file_asesmen['log'] = $log;
-        $this->db->insert('data_file_asesmen', $data_file_asesmen);
-
-        redirect("asesor/asesmen/" . base64_encode($id_izin), "refresh");
+        redirect("asesor/asesmen/" . base64_encode($id_izin_asli), "refresh");
     }
     // /Upload File Asesmen Hybrid //
 
@@ -459,29 +466,32 @@ class Asesor extends MY_Controller
         } else if ($this->session->userdata('level') !== 'Asesor') {
             redirect('login/keluar', 'refresh');
         }
-        ##/Cek Session Login##
-        $id_izin = base64_decode($id_izin);
+
+        $id_izin_asli = base64_decode($id_izin);
         $username_login = $this->session->userdata('username');
-        $cek_tugas = $this->asesor_model->cek_tugas_asesor($id_izin, $username_login);
+        $cek_tugas = $this->asesor_model->cek_tugas_asesor($id_izin_asli, $username_login);
 
         if (!$cek_tugas) {
             show_error('Akses Ditolak. Anda tidak ditugaskan untuk manguji peserta ini.', 403, 'Forbidden');
             return;
         }
-        $log = date("Y-m-d H:i:s");
 
-        // Get File Lama
-        $get_file_lama = $this->asesor_model->get_file_lama($id_izin, $kode_form);
+        $get_file_lama = $this->asesor_model->get_file_lama($id_izin_asli, $kode_form);
 
-        // Delete File Lama
-        $path = './uploads/file_asesmen/' . $kode_form . '/' . $get_file_lama->file;
-        unlink($path);
+        if ($get_file_lama && !empty($get_file_lama->file)) {
 
-        $this->db->delete('data_file_asesmen', array('id_izin' => $id_izin, 'kode_form' => $kode_form));
+            $path = FCPATH . 'uploads/file_asesmen/' . $kode_form . '/' . $get_file_lama->file;
+
+            if (file_exists($path) && !is_dir($path)) {
+                unlink($path);
+            }
+        }
+
+        $this->db->delete('data_file_asesmen', array('id_izin' => $id_izin_asli, 'kode_form' => $kode_form));
 
         $this->session->set_flashdata('deleted_file_asesmen', 'Berhasil Menghapus File Asesmen');
 
-        redirect("asesor/asesmen/" . base64_encode($id_izin), "refresh");
+        redirect("asesor/asesmen/" . base64_encode($id_izin_asli), "refresh");
     }
     // /Delete File Asesmen Hybrid //
 
@@ -493,49 +503,61 @@ class Asesor extends MY_Controller
         } else if ($this->session->userdata('level') !== 'Asesor') {
             redirect('login/keluar', 'refresh');
         }
-        ##/Cek Session Login##
-        $id_izin = base64_decode($id_izin);
+
+        $id_izin_asli = base64_decode($id_izin);
         $username_login = $this->session->userdata('username');
-        $cek_tugas = $this->asesor_model->cek_tugas_asesor($id_izin, $username_login);
+        $cek_tugas = $this->asesor_model->cek_tugas_asesor($id_izin_asli, $username_login);
 
         if (!$cek_tugas) {
-            show_error('Akses Ditolak. Anda tidak ditugaskan untuk manguji peserta ini.', 403, 'Forbidden');
+            show_error('Akses Ditolak. Anda tidak ditugaskan untuk menguji peserta ini.', 403, 'Forbidden');
             return;
         }
+
         $log = date("Y-m-d H:i:s");
 
-        //config upload file Asesmen
+        // Config upload file Asesmen
         $comb = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         $shfl = str_shuffle($comb);
-        $filename_unik_karakter = SUBSTR($shfl, 0, 10);
+
+        $filename_unik_karakter = substr($shfl, 0, 10);
 
         $file_name = "bukti_dokumentasi_asesmen-" . md5($filename_unik_karakter) . "_" . date("Y-m-d");
-        $config['upload_path'] = FCPATH . 'uploads/file_asesmen/bukti_dokumentasi_asesmen';
+        $upload_path = FCPATH . 'uploads/file_asesmen/bukti_dokumentasi_asesmen';
+
+        if (!is_dir($upload_path)) {
+            mkdir($upload_path, 0775, true);
+        }
+
+        $config['upload_path'] = $upload_path;
         $config['allowed_types'] = 'pdf|jpg|jpeg|png|JPG|JPEG|PNG|PDF';
         $config['file_name'] = $file_name;
         $config['overwrite'] = true;
-        $config['max_size'] = 15360; // 10MB
+        $config['max_size'] = 15360; // 15MB
 
         $this->load->library('upload', $config);
         $this->upload->initialize($config);
+
         if ($this->upload->do_upload('file_bukti_dokumentasi_asesmen')) {
             $file_bukti_asesmen = $this->upload->data();
             $filename_bukti_asesmen = $file_bukti_asesmen['file_name'];
 
-            $this->session->set_flashdata('success-upload-bukti', 'Berhasil Menambahkan');
+            $data_bukti_dokumentasi_asesmen = array();
+
+            // Insert Data File Asesmen
+            $data_bukti_dokumentasi_asesmen['id_izin'] = $id_izin_asli;
+            $data_bukti_dokumentasi_asesmen['file'] = $filename_bukti_asesmen;
+            $data_bukti_dokumentasi_asesmen['username'] = $username_login;
+            $data_bukti_dokumentasi_asesmen['log'] = $log;
+
+            $this->db->insert('data_bukti_dokumentasi_asesmen', $data_bukti_dokumentasi_asesmen);
+
+            $this->session->set_flashdata('success-upload-bukti', 'Berhasil Menambahkan File');
         } else {
-            $this->session->set_flashdata('gagal-upload-bukti', 'Gagal Upload File Size Terlalu Besar dari 10 Mb');
-            redirect("asesor/asesmen/" . base64_encode($id_izin), "refresh");
+            $error_msg = $this->upload->display_errors('', '');
+            $this->session->set_flashdata('gagal-upload-bukti', 'Gagal Upload: ' . $error_msg);
         }
 
-        // Insert Data File Asesmen
-        $data_bukti_dokumentasi_asesmen['id_izin'] = $id_izin;
-        $data_bukti_dokumentasi_asesmen['file'] = $filename_bukti_asesmen;
-        $data_bukti_dokumentasi_asesmen['username'] = $this->session->userdata('username');
-        $data_bukti_dokumentasi_asesmen['log'] = $log;
-        $this->db->insert('data_bukti_dokumentasi_asesmen', $data_bukti_dokumentasi_asesmen);
-
-        redirect("asesor/asesmen/" . base64_encode($id_izin), "refresh");
+        redirect("asesor/asesmen/" . base64_encode($id_izin_asli), "refresh");
     }
 
     public function reset_bukti_dokumentasi_asesmen($id_izin)
