@@ -1998,6 +1998,80 @@ class Admin extends MY_Controller
 		redirect('admin/master_tuk', 'refresh');
 	}
 
+	public function edit_tuk_bnsp($id_tuk)
+	{
+		## Cek Session Login ##
+		if (!$this->ion_auth->ceklogin()) {
+			redirect('login', 'refresh');
+		} else if ($this->session->userdata('level') !== 'Admin') {
+			redirect('login/keluar', 'refresh');
+		}
+		## /Cek Session Login ##
+
+		$token_bnsp = $this->api_model->get_token_bnsp();
+
+		## Set Configuration Header ##
+		$headers = array(
+			'Content-Type: application/json',
+			'x-authorization:' . $token_bnsp->x_authorization
+		);
+
+		if ($this->input->method() === 'post') {
+
+			$payload = array(
+				"lsp" => (int) $this->input->post('lsp', TRUE),
+				"kode_tuk" => $this->input->post('kode_tuk', TRUE),
+				"nama_tuk" => $this->input->post('nama_tuk', TRUE),
+				"jenis_id" => (int) $this->input->post('jenis_id', TRUE),
+				"provinsi_id" => (int) $this->input->post('provinsi_id', TRUE),
+				"kota_id" => (int) $this->input->post('kota_id', TRUE),
+				"alamat" => $this->input->post('alamat', TRUE),
+				"lokasi" => $this->input->post('lokasi', TRUE),
+				"telepon" => $this->input->post('telepon', TRUE),
+				"hp" => $this->input->post('hp', TRUE),
+				"fax" => $this->input->post('fax', TRUE),
+				"email" => $this->input->post('email', TRUE),
+				"keterangan" => $this->input->post('keterangan', TRUE)
+			);
+
+			$payload_json = json_encode($payload);
+
+			## Set URL Source Data  ##
+			$baseUrl = $token_bnsp->host . "tuk/" . $id_tuk;
+
+			// Inisialisasi cURL
+			$ch = curl_init();
+			curl_setopt($ch, CURLOPT_URL, $baseUrl);
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $payload_json);
+			curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+			$responseBody = curl_exec($ch);
+			$responseInfo = curl_getinfo($ch);
+			curl_close($ch);
+
+			$response_array = json_decode($responseBody, TRUE);
+
+			if ($responseInfo['http_code'] == 200) {
+				echo "<script>alert('Data TUK Berhasil Diperbarui ke BNSP');</script>";
+				redirect('admin/master_tuk', 'refresh');
+			} else {
+				$pesan_error = isset($response_array['message']) ? $response_array['message'] : 'Gagal memperbarui data ke server BNSP.';
+				echo "<script>alert('Error: " . $pesan_error . "');</script>";
+			}
+		}
+
+		$data['tuk'] = $this->db->get_where('master_tuk', ['kode' => $id_tuk])->row();
+
+		if (!$data['tuk']) {
+			show_404();
+		}
+
+		$this->load->view('admin/master_tuk', $data);
+	}
+
 	public function delete_tuk($id_tuk)
 	{
 		##/Cek Session Login##
