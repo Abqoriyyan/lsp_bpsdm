@@ -182,6 +182,15 @@ class Master_model extends CI_Model
 
 
     ####### Master JSON untuk AJAX ###########
+    public function get_master_klasifikasi_json()
+    {
+        $this->db->select("*");
+        $this->db->from("master_klasifikasi");
+
+        $query = $this->db->get();
+        return $query;
+    }
+
     public function get_master_subklasifikasi_json()
     {
         $this->db->select("*");

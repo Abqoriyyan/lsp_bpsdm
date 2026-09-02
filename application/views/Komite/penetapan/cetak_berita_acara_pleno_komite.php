@@ -40,6 +40,33 @@ function tanggal_indo_full($tanggal)
     return $split[2] . ' ' . $bulan[(int) $split[1]] . ' ' . $split[0];
 }
 ?>
+
+<?php
+$path = base_url('assets/lsp/kop-lsp.png');
+$type = pathinfo($path, PATHINFO_EXTENSION);
+$arrContextOptions = array(
+    "ssl" => array(
+        "verify_peer" => false,
+        "verify_peer_name" => false,
+    ),
+);
+$data = file_get_contents($path, false, stream_context_create($arrContextOptions));
+$base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+?>
+
+<?php
+if (!function_exists('gambar_ke_base64')) {
+    function gambar_ke_base64($path_file)
+    {
+        if (file_exists($path_file) && !is_dir($path_file)) {
+            $tipe = pathinfo($path_file, PATHINFO_EXTENSION);
+            $data = file_get_contents($path_file);
+            return 'data:image/' . $tipe . ';base64,' . base64_encode($data);
+        }
+        return false;
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -47,7 +74,7 @@ function tanggal_indo_full($tanggal)
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BA Komtek <?= $get_data_hasil_penetapan_komite_teknis[0]['nama']; ?></title>
+    <title>BA Komtek <?= $get_data_hasil_penetapan_komite_teknis['nama']; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 </head>
@@ -80,18 +107,6 @@ function tanggal_indo_full($tanggal)
 
 <body>
     <!-- KOP Surat -->
-    <?php
-    $path = base_url('assets/lsp/kop-lsp.png');
-    $type = pathinfo($path, PATHINFO_EXTENSION);
-    $arrContextOptions = array(
-        "ssl" => array(
-            "verify_peer" => false,
-            "verify_peer_name" => false,
-        ),
-    );
-    $data = file_get_contents($path, false, stream_context_create($arrContextOptions));
-    $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
-    ?>
     <img src="<?= $base64; ?>" style="margin-top:25px; margin-left:50px; max-height:400px; max-width:700px;">
     <!-- /KOP Surat -->
 
@@ -110,12 +125,12 @@ function tanggal_indo_full($tanggal)
             "Jum'at",
             'Sabtu'
         );
-        $hr = date('w', strtotime($get_data_hasil_penetapan_komite_teknis[0]['tanggal_penetapan']));
+        $hr = date('w', strtotime($get_data_hasil_penetapan_komite_teknis['tanggal_penetapan']));
         $hari = $hari_array[$hr];
         ?>
         <p style="text-align:justify;">Pada hari ini, <?= $hari; ?> tanggal
-            <?= tanggal_indo(date('d-m-Y', strtotime($get_data_hasil_penetapan_komite_teknis[0]['tanggal_penetapan']))); ?>
-            tahun <?= date('Y', strtotime($get_data_hasil_penetapan_komite_teknis[0]['tanggal_penetapan'])); ?>,
+            <?= tanggal_indo(date('d-m-Y', strtotime($get_data_hasil_penetapan_komite_teknis['tanggal_penetapan']))); ?>
+            tahun <?= date('Y', strtotime($get_data_hasil_penetapan_komite_teknis['tanggal_penetapan'])); ?>,
             bertempat di Gedung LSP BPSDM Kementerian PU telah dilaksanakan sidang pleno hasil uji kompetensi dengan
             anggota sidang sebagai berikut:
         </p><br>
@@ -158,21 +173,21 @@ function tanggal_indo_full($tanggal)
                 <td style="width:20%; vertical-align: baseline; border:none;">Nama</td>
                 <td style="width:5%; vertical-align: baseline; border:none;"> : </td>
                 <td style="width:75%; vertical-align: baseline; border:none;">
-                    <?= $get_data_hasil_penetapan_komite_teknis[0]['nama']; ?>
+                    <?= $get_data_hasil_penetapan_komite_teknis['nama']; ?>
                 </td>
             </tr>
             <tr style="border:none;">
                 <td style="width:20%; vertical-align: baseline; border:none;">Jabatan Kerja</td>
                 <td style="width:5%; vertical-align: baseline; border:none;"> : </td>
                 <td style="width:75%; vertical-align: baseline; border:none;">
-                    <?= $get_data_hasil_penetapan_komite_teknis[0]['jabatan_kerja']; ?>
+                    <?= $get_data_hasil_penetapan_komite_teknis['jabatan_kerja']; ?>
                 </td>
             </tr>
             <tr style="border:none;">
                 <td style="width:20%; vertical-align: baseline; border:none;">NIK</td>
                 <td style="width:5%; vertical-align: baseline; border:none;"> : </td>
                 <td style="width:75%; vertical-align: baseline; border:none;">
-                    <?= isset($get_data_hasil_penetapan_komite_teknis[0]['nik']) ? $get_data_hasil_penetapan_komite_teknis[0]['nik'] : '-'; ?>
+                    <?= isset($get_data_hasil_penetapan_komite_teknis['nik']) ? $get_data_hasil_penetapan_komite_teknis['nik'] : '-'; ?>
                 </td>
             </tr>
             <tr style="border:none;">
@@ -180,10 +195,10 @@ function tanggal_indo_full($tanggal)
                 <td style="width:5%; vertical-align: baseline; border:none;"> : </td>
                 <td style="width:75%; vertical-align: baseline; border:none;">
                     <?php
-                    if (isset($get_data_hasil_penetapan_komite_teknis[0]['hasil_penetapan'])) {
-                        if ($get_data_hasil_penetapan_komite_teknis[0]['hasil_penetapan'] == "Kompeten") {
+                    if (isset($get_data_hasil_penetapan_komite_teknis['hasil_penetapan'])) {
+                        if ($get_data_hasil_penetapan_komite_teknis['hasil_penetapan'] == "Kompeten") {
                             echo "Kompeten";
-                        } elseif ($get_data_hasil_penetapan_komite_teknis[0]['hasil_penetapan'] == "Belum Kompeten") {
+                        } elseif ($get_data_hasil_penetapan_komite_teknis['hasil_penetapan'] == "Belum Kompeten") {
                             echo "Belum Kompeten";
                         }
                     }
@@ -199,9 +214,10 @@ function tanggal_indo_full($tanggal)
 
         <p style="text-align:center;">
             Bandung,
-            <?= Tanggal_indo_full(date("Y-m-d", strtotime($get_data_hasil_penetapan_komite_teknis[0]['tanggal_penetapan']))) ?><br />
+            <?= Tanggal_indo_full(date("Y-m-d", strtotime($get_data_hasil_penetapan_komite_teknis['tanggal_penetapan']))) ?><br />
         </p>
         <br>
+
         <table width="100%" cellpadding="5" cellspacing="0"
             style="text-align: center; border: none; border-collapse: collapse;">
             <thead style="border: none;">
@@ -212,28 +228,47 @@ function tanggal_indo_full($tanggal)
                 </tr>
             </thead>
             <tbody style="border: none;">
-                <tr style="height: 80px; border: none;">
-                    <td style="border: none; vertical-align: bottom;">
-                        <img src="<?= base_url('assets/lsp/ttd_komite/' . $get_data_komite_teknis[0]['file_ttd']) ?>"
-                            alt="TTD 1" style="max-height: 60px;">
-                    </td>
-                    <td style="border: none; vertical-align: bottom;">
-                        <?php if (!empty($get_data_komite_teknis[1]['file_ttd'])): ?>
-                            <img src="<?= base_url('assets/lsp/ttd_komite/' . $get_data_komite_teknis[1]['file_ttd']) ?>"
-                                alt="TTD 2" style="max-height: 60px;">
+                <tr style="height: 90px; border: none;">
+                    <!-- Komite 1 -->
+                    <td style="border: none; vertical-align: bottom; text-align: center;">
+                        <?php
+                        $path0 = FCPATH . 'assets/lsp/ttd_komite/' . trim($get_data_komite_teknis[0]['file_ttd']);
+                        $base64_0 = gambar_ke_base64($path0);
+                        if ($base64_0):
+                            ?>
+                            <img src="<?= $base64_0 ?>" alt="TTD 1"
+                                style="height: 85px; width: auto; display: inline-block;">
                         <?php endif; ?>
                     </td>
-                    <td style="border: none; vertical-align: bottom;">
-                        <?php if (!empty($get_data_komite_teknis[2]['file_ttd'])): ?>
-                            <img src="<?= base_url('assets/lsp/ttd_komite/' . $get_data_komite_teknis[2]['file_ttd']) ?>"
-                                alt="TTD 3" style="max-height: 60px;">
+
+                    <!-- Komite 2 -->
+                    <td style="border: none; vertical-align: bottom; text-align: center;">
+                        <?php
+                        $path1 = FCPATH . 'assets/lsp/ttd_komite/' . trim($get_data_komite_teknis[1]['file_ttd']);
+                        $base64_1 = gambar_ke_base64($path1);
+                        if ($base64_1):
+                            ?>
+                            <img src="<?= $base64_1 ?>" alt="TTD 2"
+                                style="height: 85px; width: auto; display: inline-block;">
+                        <?php endif; ?>
+                    </td>
+
+                    <!-- Komite 3 -->
+                    <td style="border: none; vertical-align: bottom; text-align: center;">
+                        <?php
+                        $path2 = FCPATH . 'assets/lsp/ttd_komite/' . trim($get_data_komite_teknis[2]['file_ttd']);
+                        $base64_2 = gambar_ke_base64($path2);
+                        if ($base64_2):
+                            ?>
+                            <img src="<?= $base64_2 ?>" alt="TTD 3"
+                                style="height: 85px; width: auto; display: inline-block;">
                         <?php endif; ?>
                     </td>
                 </tr>
                 <tr style="border: none;">
-                    <td style="border: none;"><?= $get_data_komite_teknis[0]['nama'] ?? 'Nama 1' ?></td>
-                    <td style="border: none;"><?= $get_data_komite_teknis[1]['nama'] ?? 'Nama 2' ?></td>
-                    <td style="border: none;"><?= $get_data_komite_teknis[2]['nama'] ?? 'Nama 3' ?></td>
+                    <td style="border: none;"><?= $get_data_komite_teknis[0]['nama'] ?? '' ?></td>
+                    <td style="border: none;"><?= $get_data_komite_teknis[1]['nama'] ?? '' ?></td>
+                    <td style="border: none;"><?= $get_data_komite_teknis[2]['nama'] ?? '' ?></td>
                 </tr>
             </tbody>
         </table>

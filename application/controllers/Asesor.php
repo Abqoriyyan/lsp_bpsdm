@@ -720,21 +720,25 @@ class Asesor extends MY_Controller
         ##/Cek Session Login##
         if (!$this->ion_auth->ceklogin()) {
             redirect('login', 'refresh');
-        } else if ($this->session->userdata('level') !== 'Asesor') {
+        }
+        $user_level = $this->session->userdata('level');
+        if ($user_level !== 'Asesor' && $user_level !== 'Admin') {
             redirect('login/keluar', 'refresh');
         }
+
         ##/Cek Session Login##
         $id_izin = base64_decode($id_izin);
         $username_login = $this->session->userdata('username');
-        $cek_tugas = $this->asesor_model->cek_tugas_asesor($id_izin, $username_login);
-
-        if (!$cek_tugas) {
-            show_error('Akses Ditolak. Anda tidak ditugaskan untuk manguji peserta ini.', 403, 'Forbidden');
-            return;
+        if ($user_level === 'Asesor') {
+            $cek_tugas = $this->asesor_model->cek_tugas_asesor($id_izin, $username_login);
+            if (!$cek_tugas) {
+                show_error('Akses Ditolak. Anda tidak ditugaskan untuk menguji peserta ini.', 403, 'Forbidden');
+                return;
+            }
         }
         $token = $this->api_model->get_token();
 
-        $file_pdf = 'Berita Acara Rekomendasi Aseesor - ' . $id_izin;
+        $file_pdf = 'BA Rekomendasi Asesor - ' . $id_izin;
         $paper = 'A4';
         $orientation = "potrait";
         $page = 'Asesor/cetak_berita_acara_rekomendasi_asesor';

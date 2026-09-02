@@ -1,5 +1,10 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+
+/**
+ * @property CI_DB_query_builder $db
+ */
+
 class Komite extends MY_Controller
 {
 	public function __construct()
@@ -77,7 +82,6 @@ class Komite extends MY_Controller
 		$get_data_proyek_permohonan = $this->komite_model->get_data_proyek_permohonan($id_izin);
 		$get_data_pelatihan_permohonan = $this->komite_model->get_data_pelatihan_permohonan($id_izin);
 		$get_data_klasifikasi_kualifikasi_permohonan = $this->komite_model->get_data_klasifikasi_kualifikasi_permohonan($id_izin);
-
 
 		#Get Data Rekomendasi Asesor
 		$get_data_rekomendasi_asesor = $this->komite_model->get_data_rekomendasi_asesor($id_izin);
@@ -185,7 +189,7 @@ class Komite extends MY_Controller
 				"nama" => "Berita Acara Pleno Komite Teknis",
 				"nomor" => $nomor_sertifikat,
 				"tanggal" => date("Y-m-d"),
-				"file_dokumen" => base_url('berkas/ba_pleno_komite_teknis/') . base64_encode($id_izin)
+				"file_dokumen" => base_url('komite/cetak_berita_acara_pleno_komite/') . base64_encode($id_izin)
 			);
 
 			$data_sk_hasil_sertifikasi = array(
@@ -194,7 +198,7 @@ class Komite extends MY_Controller
 				"nama" => "SK Hasil Sertifikasi Kompetensi",
 				"nomor" => $nomor_sertifikat,
 				"tanggal" => date("Y-m-d"),
-				"file_dokumen" => base_url('berkas/sk_komite_teknis/') . base64_encode($id_izin)
+				"file_dokumen" => base_url('komite/cetak_surat_keputusan_komite/') . base64_encode($id_izin)
 			);
 
 			//The JSON data.
@@ -226,8 +230,6 @@ class Komite extends MY_Controller
 				// Berhasil	
 			}
 			///////////// / Create Blanko ke BNSP /////////////////
-
-
 
 			///// Generate Nomor Registrasi ////
 			# Get Token
@@ -801,7 +803,7 @@ class Komite extends MY_Controller
 		$id_izin = base64_decode($id_izin);
 
 		$get_data_pencatatan = $this->komite_model->get_data_pencatatan($id_izin);
-		$get_data_hasil_penetapan_komite_teknis = $this->komite_model->get_data_hasil_penetapan_komite_teknis($id_izin);
+		$get_data_hasil_penetapan_komite_teknis = $this->komite_model->get_data_penetapan_perorangan($id_izin);
 		$get_data_komite_teknis = $this->komite_model->get_data_komite_teknis();
 
 		$data = array(
@@ -818,8 +820,6 @@ class Komite extends MY_Controller
 
 		// $this->load->view($page, $data);
 		$html = $this->load->view($page, $data, true);
-		ob_clean();
-		error_reporting(0);
 		$this->pdfgenerator->generate($html, $file_pdf, $paper, $orientation);
 	}
 

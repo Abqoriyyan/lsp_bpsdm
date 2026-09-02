@@ -43,7 +43,7 @@
             <h6 class="m-0 font-weight-bold text-primary">Tambah Tempat Uji Kompetensi</h6>
         </div><br />
         <div class="container">
-            <form action="<?#= base_url('admin/tambah_tuk/') ?>" method="POST" enctype="multipart/form-data"
+            <form action="<?= base_url('admin/tambah_tuk/') ?>" method="POST" enctype="multipart/form-data"
                 onsubmit="return confirm('Konfirmasi Menambahkan TUK')">
                 <div class="row">
                     <div class="col-sm-6">

@@ -81,17 +81,18 @@
             </div>
         </div>
     </div>
-    </body>
-    <?php if ($this->session->flashdata('success-tinjau-permohonan')): ?>
-        <script>
-            swal({
-                title: "Berhasil",
-                text: "Tinjau Permohonan Telah Selesai",
-                icon: "<?= base_url('assets/img/success.png') ?>",
-                button: false,
-                timer: 5000,
-            });
-        </script>
-    <?php endif; ?>
+</div>
+</body>
+<?php if ($this->session->flashdata('success-tinjau-permohonan')): ?>
+    <script>
+        swal({
+            title: "Berhasil",
+            text: "Tinjau Permohonan Telah Selesai",
+            icon: "<?= base_url('assets/img/success.png') ?>",
+            button: false,
+            timer: 5000,
+        });
+    </script>
+<?php endif; ?>
 
 </html>

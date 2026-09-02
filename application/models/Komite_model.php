@@ -7,18 +7,20 @@ class Komite_model extends CI_Model
     ## GET List Permohonan ##
     public function get_list_penetapan()
     {
+        $this->db->query("SET sql_mode = (SELECT REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY', ''))");
+
         $sql = "SELECT g.id as id_jadwal_asesmen,h.nama_tuk,h.alamat AS alamat_tuk,a.*,b.*,c.*,d.kualifikasi AS deskripsi_kualifikasi
-        FROM data_personal_permohonan a
-        JOIN data_klasifikasi_kualifikasi_permohonan b ON b.id_izin = a.id_izin 
-        JOIN data_rekomendasi_asesor c ON c.id_izin = a.id_izin 
-        JOIN master_kualifikasi d ON d.id = b.kualifikasi
-        LEFT JOIN data_pencatatan_sertifikasi e ON e.id_izin = a.id_izin
-        JOIN data_penunjukan_asesor f ON f.id_izin = a.id_izin
-        JOIN data_jadwal_asesmen g ON g.kode_jadwal = f.kode_jadwal_asesmen
-        JOIN master_tuk h ON h.id = g.id_tuk
-        LEFT JOIN data_hasil_penetapan_komite_teknis i ON i.id_izin = a.id_izin
-        WHERE e.id_izin IS NULL AND i.id_izin IS NULL
-        GROUP BY c.id_izin";
+    FROM data_personal_permohonan a
+    JOIN data_klasifikasi_kualifikasi_permohonan b ON b.id_izin = a.id_izin 
+    JOIN data_rekomendasi_asesor c ON c.id_izin = a.id_izin 
+    JOIN master_kualifikasi d ON d.id = b.kualifikasi
+    LEFT JOIN data_pencatatan_sertifikasi e ON e.id_izin = a.id_izin
+    JOIN data_penunjukan_asesor f ON f.id_izin = a.id_izin
+    JOIN data_jadwal_asesmen g ON g.kode_jadwal = f.kode_jadwal_asesmen
+    JOIN master_tuk h ON h.id = g.id_tuk
+    LEFT JOIN data_hasil_penetapan_komite_teknis i ON i.id_izin = a.id_izin
+    WHERE e.id_izin IS NULL AND i.id_izin IS NULL
+    GROUP BY c.id_izin";
 
         $query = $this->db->query($sql);
         return $query->result_array();
@@ -154,14 +156,15 @@ class Komite_model extends CI_Model
 
     public function get_list_selesai_penetapan()
     {
-        $sql = "SELECT e.*,f.file_sk
-        FROM data_personal_permohonan a
-        JOIN data_klasifikasi_kualifikasi_permohonan b ON b.id_izin = a.id_izin 
-        JOIN data_rekomendasi_asesor c ON c.id_izin = a.id_izin 
-        JOIN master_kualifikasi d ON d.id = b.kualifikasi
-        JOIN data_pencatatan_sertifikasi e ON e.id_izin = a.id_izin
-        LEFT JOIN data_sk_komite f ON f.id_izin = a.id_izin
-        GROUP BY c.id_izin";
+        $this->db->query("SET sql_mode = (SELECT REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY', ''))");
+
+        $sql = "SELECT e.*
+    FROM data_personal_permohonan a
+    JOIN data_klasifikasi_kualifikasi_permohonan b ON b.id_izin = a.id_izin 
+    JOIN data_rekomendasi_asesor c ON c.id_izin = a.id_izin 
+    JOIN master_kualifikasi d ON d.id = b.kualifikasi
+    JOIN data_pencatatan_sertifikasi e ON e.id_izin = a.id_izin
+    GROUP BY c.id_izin";
 
         $query = $this->db->query($sql);
         return $query->result_array();
@@ -217,6 +220,8 @@ class Komite_model extends CI_Model
 
     public function get_data_hasil_penetapan_komite_teknis($id_izin)
     {
+        $this->db->query("SET sql_mode = (SELECT REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY', ''))");
+
         $this->db->select('e.*, a.log AS tanggal_penetapan, f.nama AS nama_komite, f.file_ttd, g.*, h.jenjang, i.jabatan_kerja');
         $this->db->from('data_hasil_penetapan_komite_teknis a');
         $this->db->join('data_penunjukan_asesor b', 'b.id_izin = a.id_izin', 'left');
@@ -250,5 +255,22 @@ class Komite_model extends CI_Model
 
         $query = $this->db->get();
         return $query->result_array();
+    }
+
+    public function get_data_penetapan_perorangan($id_izin)
+    {
+        $this->db->query("SET sql_mode = (SELECT REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY', ''))");
+
+        $this->db->select('a.*, a.log AS tanggal_penetapan, f.nama AS nama_komite, f.file_ttd, g.*, h.jenjang, i.jabatan_kerja');
+        $this->db->from('data_hasil_penetapan_komite_teknis a');
+        $this->db->join('master_komite f', 'f.user_komite = a.user_penetap', 'left');
+        $this->db->join('data_personal_permohonan g', 'g.id_izin = a.id_izin', 'left');
+        $this->db->join('data_klasifikasi_kualifikasi_permohonan h', 'h.id_izin = a.id_izin', 'left');
+        $this->db->join('master_jabatan_kerja i', 'i.id_jabatan_kerja = h.jabatan_kerja', 'left');
+
+        $this->db->where('a.id_izin', $id_izin);
+
+        $query = $this->db->get();
+        return $query->row_array();
     }
 }
