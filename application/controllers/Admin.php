@@ -1,5 +1,10 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+
+/**
+ * @property CI_DB_query_builder $db
+ */
+
 class Admin extends MY_Controller
 {
 	public function __construct()
