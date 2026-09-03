@@ -1664,14 +1664,14 @@ class Admin extends MY_Controller
 
 		// Generate No Surat Tugas
 		$get_data_bast_terakhir = $this->admin_model->get_data_bast_terakhir();
-		if (!empty($get_data_bast_terakhir->no_surat_tugas)) {
-			$no_surat_tugas = substr($get_data_bast_terakhir->no_surat_tugas, 1, 7);
+
+		if (!empty($get_data_bast_terakhir && $get_data_bast_terakhir->no_surat_tugas)) {
+			$angka_terakhir = (int) substr($get_data_bast_terakhir->no_surat_tugas, 1, 7);
+			$no_surat_tugas_baru = $angka_terakhir + 1;
 		} else {
-			$no_surat_tugas = 0;
+			$no_surat_tugas_baru = 1;
 		}
-		$no_surat_tugas = $get_data_bast_terakhir->no_surat_tugas + 1;
-		$no_surat_tugas = sprintf("%07s", $no_surat_tugas);
-		$no_surat_tugas = $no_surat_tugas;
+		$no_surat_tugas = sprintf("%07s", $no_surat_tugas_baru);
 		// Generate No Surat Tugas
 
 		// Insert Data Penunjukan Asesor ke DB Lokal
@@ -1712,7 +1712,7 @@ class Admin extends MY_Controller
 		$jsonData = array(
 			"jadwal_id" => $get_detail_jadwal_asesmen->id,
 			"asesor_id" => $get_data_asesor->id_asesor_bnsp,
-			"url_surat_tugas" => base_url('berkas/surat_tugas_asesor/') . base64_encode($id_izin)
+			"url_surat_tugas" => base_url('asesor/cetak_surat_tugas/') . base64_encode($id_izin)
 		);
 
 		//Encode the array into JSON.
