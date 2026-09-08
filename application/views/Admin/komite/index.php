@@ -4,7 +4,6 @@
         <h1 class="h3 mb-0 text-gray-800">Sidang Komite Teknis</h1>
     </div>
 
-    <!-- Menampilkan pesan flashdata dari controller -->
     <?= $this->session->flashdata('pesan'); ?>
 
     <div class="row">
@@ -42,7 +41,7 @@
 
                                         <div class="form-group">
                                             <label class="font-weight-bold">Nomor Surat Penunjukan</label>
-                                            <input type="text" class="form-control" name="no_surat" placeholder="Contoh: 001/LSP-BPSDM/ST-KT/V/2026" value="<?= isset($get_penunjukan->no_surat) ? $get_penunjukan->no_surat : ''; ?>" required>
+                                            <input type="text" class="form-control" name="no_surat" placeholder="Contoh: LSP/ST-KT/10/2025/001" value="<?= isset($get_penunjukan->no_surat) ? $get_penunjukan->no_surat : ''; ?>" required>
                                         </div>
                                         
                                         <div class="form-group">
@@ -92,7 +91,6 @@
                                             <i class="fas fa-check-circle mr-1"></i> SK Komite Teknis telah diterbitkan dengan nomor: <br>
                                             <strong><?= $get_penunjukan->no_surat; ?></strong>
                                         </div>
-                                        <!-- Tombol cetak PDF disiapkan untuk tahap selanjutnya -->
                                         <a href="<?= base_url('Admin/cetak_sk_komite/'.base64_encode($id_izin)); ?>" target="_blank" class="btn btn-info"><i class="fas fa-print mr-1"></i> Cetak SK Penunjukan (PDF)</a>
                                     <?php else: ?>
                                         <div class="alert alert-warning">

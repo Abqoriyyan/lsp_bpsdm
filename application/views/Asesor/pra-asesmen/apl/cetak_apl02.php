@@ -312,12 +312,14 @@ if (!empty($get_ttd_asesor_2->ttd_asesor)) {
                                         </td>
 
                                         <!-- Kolom Bukti Relevan -->
-                                        <td>
+                                        <td style="text-align:center; border:1px solid #111;">
                                             <?php
                                             foreach ($get_bukti_relavan_apl02 as $bukti_relavan_apl02) {
                                                 foreach ($get_data_apl02 as $data_apl02) {
                                                     if (($data_apl02['kode_kuk'] == $master_kriteria_unjuk_kerja['kode_kuk']) && ($data_apl02['bukti_relavan'] == $bukti_relavan_apl02['file_bukti'])) {
-                                                        echo "• " . $bukti_relavan_apl02['nama_bukti'] . "<br>";
+                                                        echo "<a href='" . base_url('uploads/file_permohonan/bukti_apl02/') . $bukti_relavan_apl02['file_bukti'] . "' target=_blank>" . $bukti_relavan_apl02['nama_bukti'] . "</a>";
+                                                    } else {
+                                                        echo '';
                                                     }
                                                 }
                                             }

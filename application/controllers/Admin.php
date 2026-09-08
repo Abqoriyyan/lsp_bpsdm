@@ -3464,12 +3464,12 @@ class Admin extends MY_Controller
 			redirect('login', 'refresh');
 		}
 
-		$list_permohonan = $this->admin_model->get_list_pernyataan_terbit();
+		$list_pernyataan = $this->admin_model->get_data_terbit_sertifikat();
 
 		$this->data = array(
 			'username' => $this->session->userdata('username'),
 			'level' => $this->session->userdata('level'),
-			'list_permohonan' => $list_permohonan
+			'list_pernyataan' => $list_pernyataan
 		);
 
 		$this->template->load('menu', 'Admin/pernyataan/list_pernyataan', $this->data);

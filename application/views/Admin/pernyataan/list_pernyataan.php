@@ -50,26 +50,30 @@
                     <thead class="text-center">
                         <tr class="text-center">
                             <th width="5%">No</th>
-                            <th width="30%">Id Izin Permohonan</th>
-                            <th width="45%">Nama Lengkap Asesi</th>
-                            <th width="20%">Dokumen</th>
+                            <th width="20%">Id Izin</th>
+                            <th width="30%">Nama</th>
+                            <th width="30%">Skema Sertifikasi</th>
+                            <th width="45%">Dokumen</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php
                         $no = 1;
-                        if (!empty($list_permohonan)):
-                            foreach ($list_permohonan as $row):
+                        if (!empty($list_pernyataan)):
+                            foreach ($list_pernyataan as $row):
                                 ?>
                                 <tr>
                                     <td class="text-center">
                                         <?= $no++; ?>
                                     </td>
-                                    <td><strong>
-                                            <?= $row['id_izin']; ?>
-                                        </strong></td>
                                     <td>
-                                        <?= isset($row['nama_asesi']) ? $row['nama_asesi'] : 'Data Asesi'; ?>
+                                        <?= $row['id_izin']; ?>
+                                    </td>
+                                    <td>
+                                        <?= isset($row['nama']) ? $row['nama'] : 'Data Asesi'; ?>
+                                    </td>
+                                    <td>
+                                        <?= $row['jabatan_kerja']; ?>
                                     </td>
                                     <td class="text-center">
                                         <a href="<?= base_url('Admin/cetak_pernyataan_asesi/' . base64_encode($row['id_izin'])); ?>"
