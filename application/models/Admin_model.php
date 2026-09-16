@@ -252,25 +252,33 @@ class Admin_model extends CI_Model
     #################### Penunjukkan Asesor #####################
     public function get_list_penunjukan_asesor()
     {
-        $sql = "SELECT a.id_izin, a.nama, d.kualifikasi, c.created, c.klasifikasi, c.subklasifikasi, 
-                       i.jabatan_kerja, c.asosiasi, b.kode_status, 
-                       e.id_asesor, f.nama as nama_asesor, e.kode_jadwal_asesmen, h.nama_tuk
-                FROM data_personal_permohonan a 
-                JOIN ( 
-                    SELECT * FROM history_permohonan 
-                    WHERE LOG IN (SELECT MAX(LOG) FROM history_permohonan GROUP BY id_izin)
-                ) b ON b.id_izin = a.id_izin 
-                JOIN data_klasifikasi_kualifikasi_permohonan c ON c.id_izin = a.id_izin 
-                JOIN master_kualifikasi d ON c.kualifikasi = d.id 
-                LEFT JOIN data_penunjukan_asesor e ON e.id_izin = a.id_izin
-                LEFT JOIN master_asesor f ON f.id_asesor = e.id_asesor
-                LEFT JOIN data_jadwal_asesmen g ON g.kode_jadwal = e.kode_jadwal_asesmen
-                LEFT JOIN master_tuk h ON h.id = g.id_tuk
-                LEFT JOIN master_jabatan_kerja i ON i.id_jabatan_kerja = c.jabatan_kerja
-                WHERE b.kode_status = '31' 
-                GROUP BY a.id_izin, a.nama, d.kualifikasi, c.created, c.klasifikasi, c.subklasifikasi, 
-                         i.jabatan_kerja, c.asosiasi, b.kode_status, 
-                         e.id_asesor, f.nama, e.kode_jadwal_asesmen, h.nama_tuk";
+        $sql = "SELECT a.id_izin, 
+                   ANY_VALUE(a.nama) as nama, 
+                   ANY_VALUE(d.kualifikasi) as kualifikasi, 
+                   ANY_VALUE(c.created) as created, 
+                   ANY_VALUE(c.klasifikasi) as klasifikasi, 
+                   ANY_VALUE(c.subklasifikasi) as subklasifikasi, 
+                   ANY_VALUE(i.jabatan_kerja) as jabatan_kerja, 
+                   ANY_VALUE(c.asosiasi) asasosiasi, 
+                   ANY_VALUE(b.kode_status) as kode_status, 
+                   ANY_VALUE(e.id_asesor) as id_asesor, 
+                   ANY_VALUE(f.nama) as nama_asesor, 
+                   ANY_VALUE(e.kode_jadwal_asesmen) as kode_jadwal_asesmen, 
+                   ANY_VALUE(h.nama_tuk) as nama_tuk
+            FROM data_personal_permohonan a 
+            JOIN ( 
+                SELECT * FROM history_permohonan 
+                WHERE LOG IN (SELECT MAX(LOG) FROM history_permohonan GROUP BY id_izin)
+            ) b ON b.id_izin = a.id_izin 
+            JOIN data_klasifikasi_kualifikasi_permohonan c ON c.id_izin = a.id_izin 
+            JOIN master_kualifikasi d ON c.kualifikasi = d.id 
+            LEFT JOIN data_penunjukan_asesor e ON e.id_izin = a.id_izin
+            LEFT JOIN master_asesor f ON f.id_asesor = e.id_asesor
+            LEFT JOIN data_jadwal_asesmen g ON g.kode_jadwal = e.kode_jadwal_asesmen
+            LEFT JOIN master_tuk h ON h.id = g.id_tuk
+            LEFT JOIN master_jabatan_kerja i ON i.id_jabatan_kerja = c.jabatan_kerja
+            WHERE b.kode_status = '31' 
+            GROUP BY a.id_izin";
 
         $query = $this->db->query($sql);
         return $query->result_array();
@@ -514,9 +522,10 @@ class Admin_model extends CI_Model
     public function get_permohonan_komite()
     {
         $sql = "SELECT a.*, b.kode_status, c.nama AS nama
-                FROM list_permohonan a 
-                LEFT JOIN (SELECT * FROM history_permohonan WHERE LOG IN (SELECT MAX(LOG) FROM history_permohonan GROUP BY id_izin)) b ON b.id_izin = a.id_izin
-                LEFT JOIN data_personal_permohonan c ON a.id_izin = c.id_izin";
+            FROM list_permohonan a 
+            LEFT JOIN (SELECT * FROM history_permohonan WHERE LOG IN (SELECT MAX(LOG) FROM history_permohonan GROUP BY id_izin)) b ON b.id_izin = a.id_izin
+            LEFT JOIN data_personal_permohonan c ON a.id_izin = c.id_izin
+            WHERE b.kode_status IN ('31', '50')";
 
         $query = $this->db->query($sql);
         return $query->result_array();
@@ -555,8 +564,20 @@ class Admin_model extends CI_Model
     }
     public function get_master_komite()
     {
-        // Mengambil semua data personil dari tabel master_komite
         return $this->db->get('master_komite')->result_array();
+    }
+
+    public function get_nomor_sk_penunjukan_komite()
+    {
+        $this->db->select('no_surat');
+        $this->db->order_by('id', 'DESC');
+        $this->db->limit(1);
+        $query = $this->db->get('data_penunjukan_komite');
+
+        if ($query->num_rows() > 0) {
+            return $query->row()->no_surat;
+        }
+        return null;
     }
 
     // =======================================================================
@@ -598,6 +619,33 @@ class Admin_model extends CI_Model
         $this->db->where('kode_jadwal', $kode_jadwal);
         return $this->db->get('data_verifikasi_tuk')->row();
     }
+    public function generate_no_verifikasi_tuk()
+    {
+        $bulan = date('m');
+        $tahun = date('Y');
+
+        $array_romawi = [1 => 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+        $romawi_bulan = $array_romawi[(int) $bulan];
+
+        $this->db->select('no_surat');
+        $this->db->like('log', $tahun, 'after');
+        $this->db->order_by('id_verifikasi', 'DESC');
+        $this->db->limit(1);
+        $query = $this->db->get('data_verifikasi_tuk');
+
+        if ($query->num_rows() > 0) {
+            $row = $query->row();
+            $no_urut = (int) substr($row->no_surat, 0, 3) + 1;
+        } else {
+            $no_urut = 1;
+        }
+
+        $no_urut_padded = str_pad($no_urut, 3, '0', STR_PAD_LEFT);
+
+        return 'LSP/V-TUK/' . $romawi_bulan . '/' . $tahun . '/' . $no_urut_padded;
+    }
+
+    /////////////////////////// VERIFIKASI TUK ////////////////////
 
     public function get_list_pernyataan_terbit()
     {

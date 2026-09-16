@@ -105,13 +105,13 @@
                         <input type="hidden" name="kode_jadwal" value="<?= $kode_jadwal; ?>">
 
                         <div class="row">
-                            <div class="col-md-12 mb-3">
+                            <!-- <div class="col-md-12 mb-3">
                                 <label class="font-weight-bold text-gray-800">Nomor Surat Verifikasi</label>
                                 <input type="text" class="form-control" name="no_surat"
                                     placeholder="Contoh: 010/LSP/SV/2026"
                                     value="<?= isset($get_verifikasi->no_surat) ? $get_verifikasi->no_surat : ''; ?>"
                                     required>
-                            </div>
+                            </div> -->
 
                             <div class="col-md-6 mb-3">
                                 <label class="font-weight-bold text-gray-800">Jenis TUK</label>
@@ -163,14 +163,14 @@
 
                     <?php if (isset($get_verifikasi->file_verifikasi) && !empty($get_verifikasi->file_verifikasi)): ?>
                         <hr class="my-4">
-                        <div class="p-3 border-left-info rounded bg-white shadow-sm border"
+                        <div class="p-3 border-left-primary rounded bg-white shadow-sm border"
                             style="border-left-width: 4px !important;">
-                            <h6 class="font-weight-bold text-info mb-3">
-                                <i class="fas fa-file-alt mr-1"></i> Dokumen Verifikasi Terlampir
+                            <h6 class="font-weight-bold text-primary mb-3">
+                                <i class="fas fa-file-alt mr-1"></i> Dokumen Verifikasi Tersimpan
                             </h6>
                             <?php $file_url = base_url('uploads/file_verifikasi/' . $get_verifikasi->file_verifikasi); ?>
-                            <a href="<?= $file_url; ?>" target="_blank" class="btn btn-outline-info">
-                                <i class="fas fa-external-link-alt mr-1"></i> Buka/Lihat Dokumen di Tab Baru
+                            <a href="<?= $file_url; ?>" target="_blank" class="btn btn-primary">
+                                <i class="fas fa-external-link-alt mr-1"></i> Buka/Lihat Dokumen
                             </a>
                         </div>
                     <?php endif; ?>

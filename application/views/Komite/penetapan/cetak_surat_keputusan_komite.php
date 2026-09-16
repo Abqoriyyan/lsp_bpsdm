@@ -259,7 +259,7 @@ function getBase64Image($path)
             </h4>
             <h5>
                 NOMOR:
-                <?= $get_data_pencatatan->nomor_sertifikasi; ?>/KPTS/LSP/<?= getRomawi(date('n', strtotime($get_data_pencatatan->tanggal_ditetapkan))) ?>/<?= substr($get_data_pencatatan->nomor_registrasi_lsp, -4); ?>
+                LSP/KPTS/<?= getRomawi(date('n', strtotime($get_data_pencatatan->tanggal_ditetapkan))) ?>/<?= substr($get_data_pencatatan->nomor_registrasi_lsp, -4); ?>/<?= $get_data_pencatatan->nomor_sertifikasi; ?>
             </h5>
         </div>
 

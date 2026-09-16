@@ -1,12 +1,28 @@
 <style>
-    /* Kustomisasi Sidebar Modern */
     .bg-modern-sidebar {
         background-color: #2c395c !important;
-        /* Warna dasar Navy Blue gelap */
         background-image: none !important;
         font-family: 'Nunito', sans-serif;
         box-shadow: 4px 0 15px rgba(0, 0, 0, 0.05);
-        /* Bayangan halus ke kanan */
+
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: hidden;
+        z-index: 1000;
+    }
+
+    .bg-modern-sidebar::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .bg-modern-sidebar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+    }
+
+    .bg-modern-sidebar::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.4);
     }
 
     .bg-modern-sidebar .sidebar-brand {
@@ -14,13 +30,11 @@
         margin-bottom: 10px;
     }
 
-    /* Styling Teks dan Icon Menu */
     .bg-modern-sidebar .nav-item .nav-link {
         color: rgba(255, 255, 255, 0.7);
         padding: 12px 20px;
         margin: 4px 15px;
         border-radius: 10px;
-        /* Sudut melengkung kekinian */
         transition: all 0.3s ease;
     }
 
@@ -36,17 +50,14 @@
         letter-spacing: 0.3px;
     }
 
-    /* Hover Effect */
     .bg-modern-sidebar .nav-item .nav-link:hover {
         background-color: rgba(255, 255, 255, 0.05);
         color: #ffffff;
         transform: translateX(3px);
-        /* Animasi geser sedikit ke kanan */
     }
 
     .bg-modern-sidebar .nav-item .nav-link:hover i {
         color: #EAB360;
-        /* Icon berubah warna emas saat di-hover */
     }
 
     .bg-modern-sidebar .nav-item.active .nav-link {
@@ -141,8 +152,7 @@
                 <div class="py-2 collapse-inner">
                     <h6 class="collapse-header">Pasca-Asesmen:</h6>
                     <a class="collapse-item" href="<?= base_url('Admin/list_komite_teknis'); ?>">Penunjukan Komite</a>
-                    <a class="collapse-item" href="<?= base_url('admin/list_selesai_penetapan'); ?>">QC - Selesai
-                        Penetapan</a>
+                    <a class="collapse-item" href="<?= base_url('admin/list_selesai_penetapan'); ?>">Selesai Penetapan</a>
                     <a class="collapse-item" href="<?= base_url('admin/terbit_sertifikat'); ?>">Sertifikat Terbit</a>
                     <a class="collapse-item" href="<?= base_url('Admin/list_pernyataan_asesi'); ?>">Surat Pemegang</a>
                 </div>

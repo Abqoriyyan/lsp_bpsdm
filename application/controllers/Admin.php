@@ -2748,7 +2748,7 @@ class Admin extends MY_Controller
 							"tgl_surat_tugas" => $get_data_penetapan_komite_lpjk->tgl_surat_tugas,
 							"no_surat_tugas" => $get_data_penetapan_komite_lpjk->no_surat_tugas,
 							"tgl_penetapan" => $get_data_penetapan_komite_lpjk->tgl_penetapan,
-							"url_surat_tugas" => base_url("Admin/cetak_sk_komite/") . base64_encode($id_izin),
+							"url_surat_tugas" => base_url("Admin/cetak_st_komite/") . base64_encode($id_izin),
 							"url_ba_penetapan" => base_url("komite/cetak_berita_acara_pleno_komite/") . base64_encode($id_izin),
 
 							// item baru
@@ -3222,10 +3222,23 @@ class Admin extends MY_Controller
 		}
 
 		$id_izin = $this->input->post('id_izin', TRUE);
+		$bulan_romawi = $this->get_romawi(date('m'));
+		$tahun = date('Y');
+		$prefix = "LSP/ST-KT/" . $bulan_romawi . "/" . $tahun . "/";
 
+		$surat_terakhir = $this->admin_model->get_nomor_sk_penunjukan_komite();
+
+		if ($surat_terakhir) {
+			$no_urut_terakhir = (int) substr($surat_terakhir, -3);
+			$no_baru = $no_urut_terakhir + 1;
+		} else {
+			$no_baru = 1;
+		}
+
+		$no_surat_otomatis = $prefix . str_pad($no_baru, 3, '0', STR_PAD_LEFT);
 		$data = array(
 			'id_izin' => $id_izin,
-			'no_surat' => $this->input->post('no_surat', TRUE),
+			'no_surat' => $no_surat_otomatis,
 			'ketua_komite' => $this->input->post('ketua_komite', TRUE),
 			'anggota_1' => $this->input->post('anggota_1', TRUE),
 			'anggota_2' => $this->input->post('anggota_2', TRUE),
@@ -3233,8 +3246,38 @@ class Admin extends MY_Controller
 		);
 
 		$this->admin_model->simpan_penunjukan_komite($data);
-		$this->session->set_flashdata('pesan', '<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert">&times;</button>SK Penunjukan Komite berhasil disimpan!</div>');
+		$this->session->set_flashdata('pesan', '<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert">&times;</button>SK Penunjukan Komite berhasil disimpan dengan nomor: <b>' . $no_surat_otomatis . '</b></div>');
 		redirect($_SERVER['HTTP_REFERER']);
+	}
+
+	private function get_romawi($bln)
+	{
+		switch ($bln) {
+			case 1:
+				return "I";
+			case 2:
+				return "II";
+			case 3:
+				return "III";
+			case 4:
+				return "IV";
+			case 5:
+				return "V";
+			case 6:
+				return "VI";
+			case 7:
+				return "VII";
+			case 8:
+				return "VIII";
+			case 9:
+				return "IX";
+			case 10:
+				return "X";
+			case 11:
+				return "XI";
+			case 12:
+				return "XII";
+		}
 	}
 
 	public function simpan_absensi_komite()
@@ -3267,7 +3310,7 @@ class Admin extends MY_Controller
 		redirect($_SERVER['HTTP_REFERER']);
 	}
 
-	public function cetak_sk_komite($id_izin)
+	public function cetak_st_komite($id_izin)
 	{
 		if (!$this->ion_auth->ceklogin()) {
 			redirect('login', 'refresh');
@@ -3302,7 +3345,7 @@ class Admin extends MY_Controller
 		$file_pdf = 'SK_Penunjukan_Komite_Teknis_' . $id_izin;
 		$paper = 'A4';
 		$orientation = "portrait";
-		$page = 'Admin/komite/cetak_sk_komite';
+		$page = 'Admin/komite/cetak_st_komite';
 
 		$html = $this->load->view($page, $data, true);
 		ob_clean();
@@ -3408,10 +3451,11 @@ class Admin extends MY_Controller
 		}
 
 		$kode_jadwal = $this->input->post('kode_jadwal', TRUE);
+		$no_surat_auto = $this->admin_model->generate_no_verifikasi_tuk();
 
 		$data = array(
 			'kode_jadwal' => $kode_jadwal,
-			'no_surat' => $this->input->post('no_surat', TRUE),
+			'no_surat' => $no_surat_auto,
 			'jenis_tuk' => $this->input->post('jenis_tuk', TRUE),
 			'nama_verifikator' => $this->input->post('nama_verifikator', TRUE),
 			'log' => date('Y-m-d H:i:s')
@@ -3421,7 +3465,6 @@ class Admin extends MY_Controller
 
 			$file_name = $_FILES['file_verifikasi']['name'];
 			$file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
-
 			$allowed_ext = array('pdf', 'jpg', 'jpeg', 'png');
 
 			if (!in_array($file_ext, $allowed_ext)) {
@@ -3449,7 +3492,7 @@ class Admin extends MY_Controller
 		}
 
 		$this->admin_model->simpan_verifikasi_tuk($data);
-		$this->session->set_flashdata('pesan', '<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert">&times;</button>Data Verifikasi TUK dan file berhasil disimpan!</div>');
+		$this->session->set_flashdata('pesan', '<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert">&times;</button>Data Verifikasi TUK berhasil disimpan dengan nomor: ' . $no_surat_auto . '</div>');
 
 		redirect($_SERVER['HTTP_REFERER']);
 	}

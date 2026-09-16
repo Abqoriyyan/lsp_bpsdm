@@ -443,7 +443,6 @@ class User extends MY_Controller
         }
         ##/Cek Session Login##
         $id_izin = base64_decode($id_izin);
-        $id_izin = base64_decode($id_izin);
         $nik_login = $this->session->userdata('nik');
 
         $cek_personal = $this->pemohon_model->get_data_personal_permohonan($id_izin);
@@ -468,7 +467,6 @@ class User extends MY_Controller
         }
 
         redirect("User/bukti_relavan_apl02/" . base64_encode($id_izin), "refresh");
-
     }
 
     // public function update_bukti_relavan_apl02($id_bukti,$id_izin){

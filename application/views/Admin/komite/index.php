@@ -39,10 +39,10 @@
                                         <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>" />
                                         <input type="hidden" name="id_izin" value="<?= isset($id_izin) ? $id_izin : ''; ?>">
 
-                                        <div class="form-group">
+                                        <!-- <div class="form-group">
                                             <label class="font-weight-bold">Nomor Surat Penunjukan</label>
                                             <input type="text" class="form-control" name="no_surat" placeholder="Contoh: LSP/ST-KT/10/2025/001" value="<?= isset($get_penunjukan->no_surat) ? $get_penunjukan->no_surat : ''; ?>" required>
-                                        </div>
+                                        </div> -->
                                         
                                         <div class="form-group">
                                             <label class="font-weight-bold">Anggota Komite Teknis 1 (Ketua)</label>
@@ -91,7 +91,7 @@
                                             <i class="fas fa-check-circle mr-1"></i> SK Komite Teknis telah diterbitkan dengan nomor: <br>
                                             <strong><?= $get_penunjukan->no_surat; ?></strong>
                                         </div>
-                                        <a href="<?= base_url('Admin/cetak_sk_komite/'.base64_encode($id_izin)); ?>" target="_blank" class="btn btn-info"><i class="fas fa-print mr-1"></i> Cetak SK Penunjukan (PDF)</a>
+                                        <a href="<?= base_url('Admin/cetak_st_komite/'.base64_encode($id_izin)); ?>" target="_blank" class="btn btn-info"><i class="fas fa-print mr-1"></i> Cetak SK Penunjukan (PDF)</a>
                                     <?php else: ?>
                                         <div class="alert alert-warning">
                                             <i class="fas fa-exclamation-triangle mr-1"></i> Belum ada SK Penunjukan yang diterbitkan untuk permohonan ini.
