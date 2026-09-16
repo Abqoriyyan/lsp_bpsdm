@@ -27,6 +27,11 @@
 </style>
 
 <div class="container-fluid mt-4">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <a href="<?= base_url('Admin/list_pra_asesmen'); ?>" class="btn btn-outline-secondary btn-sm shadow-sm">
+            <i class="fas fa-arrow-left mr-1"></i> Kembali
+        </a>
+    </div>
     <div class="card shadow mb-4">
         <div class="card-header py-3 card-header-custom">
             <h6 class="m-0 font-weight-bold text-white">

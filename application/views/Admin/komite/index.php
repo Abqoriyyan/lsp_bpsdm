@@ -1,7 +1,11 @@
 <div class="container-fluid">
-
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Sidang Komite Teknis</h1>
+        <a href="<?= base_url('Admin/list_komite_teknis'); ?>" class="btn btn-outline-secondary btn-sm shadow-sm">
+            <i class="fas fa-arrow-left mr-1"></i> Kembali
+        </a>
+    </div>
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Sidang Pleno Komite Teknis</h1>
     </div>
 
     <?= $this->session->flashdata('pesan'); ?>
@@ -18,13 +22,13 @@
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" id="penunjukan-tab" data-toggle="tab"
                                 data-target="#penunjukan" type="button" role="tab">
-                                <i class="fas fa-file-alt mr-1"></i> Surat Penunjukan (3 Orang)
+                                <i class="fas fa-file-alt mr-1"></i> Surat Penunjukan
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="absensi-tab" data-toggle="tab" data-target="#absensi"
                                 type="button" role="tab">
-                                <i class="fas fa-user-check mr-1"></i> Absensi Tim
+                                <i class="fas fa-user-check mr-1"></i> Presensi Komite Teknis
                             </button>
                         </li>
                     </ul>
@@ -80,12 +84,12 @@
                                             </select>
                                         </div>
                                         
-                                        <button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i> Simpan Penunjukan</button>
+                                        <button type="submit" class="btn btn-success"><i class="fas fa-save mr-1"></i> Simpan Penunjukan</button>
                                     </form>
                                 </div>
 
                                 <div class="col-md-6 border-left">
-                                    <h5 class="font-weight-bold">Status SK Penunjukan</h5>
+                                    <h5 class="font-weight-bold">Status Surat Penunjukan</h5>
                                     <?php if(isset($get_penunjukan->no_surat)): ?>
                                         <div class="alert alert-success">
                                             <i class="fas fa-check-circle mr-1"></i> SK Komite Teknis telah diterbitkan dengan nomor: <br>
@@ -94,7 +98,7 @@
                                         <a href="<?= base_url('Admin/cetak_st_komite/'.base64_encode($id_izin)); ?>" target="_blank" class="btn btn-info"><i class="fas fa-print mr-1"></i> Cetak SK Penunjukan (PDF)</a>
                                     <?php else: ?>
                                         <div class="alert alert-warning">
-                                            <i class="fas fa-exclamation-triangle mr-1"></i> Belum ada SK Penunjukan yang diterbitkan untuk permohonan ini.
+                                            <i class="fas fa-exclamation-triangle mr-1"></i> Belum ada Surat Penunjukan untuk permohonan ini.
                                         </div>
                                     <?php endif; ?>
                                 </div>
@@ -104,8 +108,8 @@
                         <!-- TAB 2: ABSENSI -->
                         <div class="tab-pane fade" id="absensi" role="tabpanel">
                             <div class="alert alert-info">
-                                <i class="fas fa-info-circle mr-1"></i> Absensi ini digunakan sebagai bukti pemenuhan
-                                syarat kelengkapan laporan keputusan sidang pleno BNSP.
+                                <i class="fas fa-info-circle mr-1"></i> Presensi digunakan sebagai bukti pemenuhan
+                                syarat kelengkapan laporan keputusan sidang pleno komite teknis.
                             </div>
                             
                             <form action="<?= base_url('Admin/simpan_absensi_komite'); ?>" method="POST">

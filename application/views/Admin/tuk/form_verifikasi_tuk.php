@@ -28,12 +28,13 @@
 <div class="container-fluid">
 
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Form Surat Verifikasi TUK
-        </h1>
         <a href="<?= base_url('Admin/list_verifikasi_tuk'); ?>" class="btn btn-outline-secondary btn-sm shadow-sm">
             <i class="fas fa-arrow-left mr-1"></i> Kembali
         </a>
     </div>
+    <h1 class="h3 mb-0 text-gray-800 text-center">
+        Form Surat Verifikasi TUK
+    </h1>
 
     <?= $this->session->flashdata('pesan'); ?>
 
