@@ -2749,7 +2749,7 @@ class Admin extends MY_Controller
 							"no_surat_tugas" => $get_data_penetapan_komite_lpjk->no_surat_tugas,
 							"tgl_penetapan" => $get_data_penetapan_komite_lpjk->tgl_penetapan,
 							"url_surat_tugas" => base_url("Admin/cetak_st_komite/") . base64_encode($id_izin),
-							"url_ba_penetapan" => base_url("komite/cetak_berita_acara_pleno_komite/") . base64_encode($id_izin),
+							"url_ba_penetapan" => base_url("Admin/cetak_ba_komite/") . base64_encode($id_izin),
 
 							// item baru
 							"met_komtek_1" => isset($get_komite[0]['no_reg']) ? $get_komite[0]['no_reg'] : "",
@@ -3170,7 +3170,7 @@ class Admin extends MY_Controller
 	// --- AREA KOMITE TEKNIS ---
 	// =======================================================================
 
-	public function list_komite_teknis()
+	public function list_penunjukan_komite()
 	{
 		if (!$this->ion_auth->ceklogin()) {
 			redirect('login', 'refresh');
@@ -3178,16 +3178,16 @@ class Admin extends MY_Controller
 			redirect('login/keluar', 'refresh');
 		}
 
-		$list_permohonan = $this->admin_model->get_permohonan_komite();
+		$list_permohonan = $this->admin_model->get_list_penunjukan_komite();
 		$this->data = array(
 			'username' => $this->session->userdata('username'),
 			'level' => $this->session->userdata('level'),
 			'list_permohonan' => $list_permohonan,
 		);
-		$this->template->load('menu', 'Admin/komite/list_permohonan_komite', $this->data);
+		$this->template->load('menu', 'Admin/komite/list_penunjukan_komite', $this->data);
 	}
 
-	public function form_komite_teknis($id_izin)
+	public function penunjukan_komite($id_izin)
 	{
 		if (!$this->ion_auth->ceklogin()) {
 			redirect('login', 'refresh');
@@ -3202,6 +3202,7 @@ class Admin extends MY_Controller
 		$get_penunjukan = $this->admin_model->get_penunjukan_komite($id_izin);
 		$get_absensi = $this->admin_model->get_absensi_komite($id_izin);
 		$get_master_komite = $this->admin_model->get_master_komite();
+		$get_ba = $this->admin_model->get_ba_komite_by_izin($id_izin);
 
 		$this->data = array(
 			'username' => $this->session->userdata('username'),
@@ -3209,13 +3210,14 @@ class Admin extends MY_Controller
 			'id_izin' => $id_izin,
 			'get_penunjukan' => $get_penunjukan,
 			'get_absensi' => $get_absensi,
-			'get_master_komite' => $get_master_komite
+			'get_master_komite' => $get_master_komite,
+			'get_ba' => $get_ba,
 		);
 
-		$this->template->load('menu', 'Admin/komite/index', $this->data);
+		$this->template->load('menu', 'Admin/komite/penunjukan_komite', $this->data);
 	}
 
-	public function simpan_sk_komite()
+	public function simpan_st_komite()
 	{
 		if (!$this->ion_auth->ceklogin()) {
 			redirect('login', 'refresh');
@@ -3226,7 +3228,7 @@ class Admin extends MY_Controller
 		$tahun = date('Y');
 		$prefix = "LSP/ST-KT/" . $bulan_romawi . "/" . $tahun . "/";
 
-		$surat_terakhir = $this->admin_model->get_nomor_sk_penunjukan_komite();
+		$surat_terakhir = $this->admin_model->get_nomor_st_penunjukan_komite();
 
 		if ($surat_terakhir) {
 			$no_urut_terakhir = (int) substr($surat_terakhir, -3);
@@ -3388,6 +3390,72 @@ class Admin extends MY_Controller
 		$paper = 'A4';
 		$orientation = "portrait";
 		$page = 'Admin/komite/cetak_absensi_komite';
+
+		$html = $this->load->view($page, $data, true);
+		ob_clean();
+		error_reporting(0);
+		$this->pdfgenerator->generate($html, $file_pdf, $paper, $orientation);
+	}
+
+	public function simpan_ba_komite()
+	{
+		if (!$this->ion_auth->ceklogin()) {
+			redirect('login', 'refresh');
+		}
+
+		$id_izin = $this->input->post('id_izin', TRUE);
+		$tgl_pleno = $this->input->post('tgl_pleno', TRUE);
+		$hasil_rekomendasi = $this->input->post('hasil_rekomendasi', TRUE);
+		$catatan = $this->input->post('catatan', TRUE);
+
+		$data = array(
+			'id_izin' => $id_izin,
+			'tgl_pleno' => $tgl_pleno,
+			'hasil_rekomendasi' => $hasil_rekomendasi,
+			'catatan' => $catatan,
+		);
+
+		$this->admin_model->simpan_ba_komite($data, $id_izin);
+
+		$this->session->set_flashdata('pesan', '<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert">&times;</button>Berita Acara Pleno berhasil disimpan </b></div>');
+		redirect($_SERVER['HTTP_REFERER']);
+	}
+
+	public function cetak_ba_komite($id_izin)
+	{
+		if (!$this->ion_auth->ceklogin()) {
+			redirect('login', 'refresh');
+		} else if ($this->session->userdata('level') !== 'Admin') {
+			redirect('login/keluar', 'refresh');
+		}
+
+		$id_izin_raw = base64_decode($id_izin);
+		$id_izin_clean = $this->security->xss_clean($id_izin_raw);
+		$id_izin = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
+
+		$this->load->library('pdfgenerator');
+
+		$get_penunjukan = $this->admin_model->get_penunjukan_komite($id_izin);
+		$get_ba = $this->admin_model->get_ba_komite_by_izin($id_izin);
+		$get_data_klasifikasi = $this->asesor_model->get_data_klasifikasi_kualifikasi($id_izin);
+		$get_data_personal = $this->asesor_model->get_data_personal_permohonan($id_izin);
+		$get_master_komite = $this->admin_model->get_master_komite();
+		$token = $this->api_model->get_token();
+
+		$data = array(
+			'id_izin' => $id_izin,
+			'get_ba' => $get_ba,
+			'get_penunjukan' => $get_penunjukan,
+			'get_data_klasifikasi' => $get_data_klasifikasi,
+			'get_data_personal' => $get_data_personal,
+			'get_master_komite' => $get_master_komite,
+			'token' => $token
+		);
+
+		$file_pdf = 'BA_Pleno_Komite_' . $id_izin;
+		$paper = 'A4';
+		$orientation = "portrait";
+		$page = 'Admin/komite/cetak_ba_komite';
 
 		$html = $this->load->view($page, $data, true);
 		ob_clean();

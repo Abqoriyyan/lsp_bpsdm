@@ -317,8 +317,8 @@ if (file_exists($stamp_path)) {
 
     <div class="signature-section">
         <div class="signature-container-center">
-            <p>Ditetapkan di: Bandung</p>
-            <p style="margin-bottom:10px;">Pada tanggal:
+            <p>Ditetapkan di Bandung</p>
+            <p style="margin-bottom:10px;">Pada tanggal
                 <?= isset($get_penunjukan->log) ? tanggal_indo(date('Y-m-d', strtotime($get_penunjukan->log))) : tanggal_indo(date('Y-m-d')); ?>
             </p>
             <p>Ketua LSP
@@ -336,9 +336,9 @@ if (file_exists($stamp_path)) {
             </div>
 
             <span class="name-under-signature">
-                <strong><u>
-                        <?= isset($get_data_ketua_pelaksana->nama) ? $get_data_ketua_pelaksana->nama : '-'; ?>
-                    </u></strong>
+                <strong>
+                    <?= isset($get_data_ketua_pelaksana->nama) ? $get_data_ketua_pelaksana->nama : '-'; ?>
+                </strong>
             </span>
         </div>
     </div>

@@ -82,7 +82,7 @@
                                         <?php endif; ?>
                                     </td>
                                     <td class="text-center">
-                                        <a href="<?= base_url('Admin/form_komite_teknis/' . base64_encode($row['id_izin'])); ?>"
+                                        <a href="<?= base_url('Admin/penunjukan_komite/' . base64_encode($row['id_izin'])); ?>"
                                             class="btn btn-primary btn-sm shadow-sm">
                                             Kelola Komite
                                         </a>

@@ -74,21 +74,22 @@ if (!empty($file_ttd_asesi)) {
         }
 
         .kop-container img {
-            width: 100%;
+            width: 105%;
             max-height: 110px;
             object-fit: contain;
         }
 
         .judul-surat {
             text-align: center;
-            margin-bottom: 30px;
+            margin-top: 20px;
+            margin-bottom: 20px;
         }
 
         .judul-surat h4 {
             margin: 0;
             font-size: 12pt;
             font-weight: bold;
-            letter-spacing: 0.5px;
+            /* letter-spacing: 0.5px; */
         }
 
         p {
@@ -115,7 +116,7 @@ if (!empty($file_ttd_asesi)) {
         }
 
         .td-label {
-            width: 30%;
+            width: 20%;
         }
 
         .td-colon {
@@ -123,7 +124,7 @@ if (!empty($file_ttd_asesi)) {
         }
 
         .td-value {
-            width: 66%;
+            width: 76%;
         }
 
         ol {
@@ -134,6 +135,7 @@ if (!empty($file_ttd_asesi)) {
         ol li {
             text-align: justify;
             padding-bottom: 5px;
+            padding-left: 20px;
         }
 
         .signature-section {
@@ -168,6 +170,7 @@ if (!empty($file_ttd_asesi)) {
             margin-top: 5px;
             display: block;
             font-size: 11pt;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -198,7 +201,7 @@ if (!empty($file_ttd_asesi)) {
                 </strong></td>
         </tr>
         <tr>
-            <td class="td-label">ID Permohonan</td>
+            <td class="td-label">Id-Izin</td>
             <td class="td-colon">:</td>
             <td class="td-value">
                 <?= $id_izin; ?>
@@ -221,25 +224,32 @@ if (!empty($file_ttd_asesi)) {
 
     <p>Dengan ini menyatakan kesanggupan dan mengikatkan diri untuk mematuhi ketentuan pemegang sertifikat kompetensi
         kerja pada Lembaga Sertifikasi Profesi (LSP) sesuai aturan Badan Nasional Sertifikasi Profesi (BNSP), sebagai
-        berikut:</p>
+        berikut:
+    </p>
 
     <ol>
-        <li>Mematuhi dan melaksanakan seluruh ketentuan kode etik profesi secara konsisten dan penuh tanggung jawab.
+        <li>
+            Mematuhi dan melaksanakan seluruh ketentuan kode etik profesi secara konsisten dan penuh tanggung jawab.
         </li>
-        <li>Menggunakan sertifikat kompetensi secara sah sesuai dengan ruang lingkup dan jabatan kerja yang ditetapkan.
+        <li>
+            Menggunakan sertifikat kompetensi secara sah sesuai dengan ruang lingkup dan jabatan kerja yang ditetapkan.
         </li>
-        <li>Tidak akan menyalahgunakan sertifikat kompetensi yang dapat merugikan reputasi profesi maupun institusi LSP.
+        <li>
+            Tidak akan menyalahgunakan sertifikat kompetensi yang dapat merugikan reputasi profesi maupun institusi LSP.
         </li>
-        <li>Bersedia menghentikan penggunaan sertifikat kompetensi apabila masa berlaku sertifikat telah habis atau
-            dicabut oleh pihak lembaga penjamin mutu.</li>
+        <li>
+            Bersedia menghentikan penggunaan sertifikat kompetensi apabila masa berlaku sertifikat telah habis atau
+            dicabut oleh pihak lembaga penjamin mutu.
+        </li>
     </ol>
 
     <p>Demikian surat pernyataan ini saya buat dengan sadar, jujur, dan tanpa ada paksaan dari pihak manapun untuk
-        dipergunakan sebagaimana mestinya.</p>
+        dipergunakan sebagaimana mestinya.
+    </p>
 
     <div class="signature-section">
         <div class="signature-box-right">
-            <p>
+            <p class="no-indent" style="text-align: center;">
                 Bandung,
                 <?php
                 if (!empty($get_data_sertifikat->tanggal_ditetapkan)) {
@@ -249,7 +259,8 @@ if (!empty($file_ttd_asesi)) {
                 }
                 ?>
             </p>
-            <p style="margin-top: 5px;">Yang menyatakan pernyataan,</p>
+
+            <p class="no-indent" style="margin-top: 5px; text-align: center; margin-bottom: 0;">Yang menyatakan,</p>
 
             <div class="signature-space">
                 <?php if ($base64_ttd_asesi != ''): ?>
@@ -259,10 +270,8 @@ if (!empty($file_ttd_asesi)) {
                 <?php endif; ?>
             </div>
 
-            <span class="name-under-signature">
-                <strong><u>
-                        <?= isset($get_data_personal->nama) ? $get_data_personal->nama : '-'; ?>
-                    </u></strong>
+            <span class="name-under-signature" style="text-align: center;">
+                <?= isset($get_data_personal->nama) ? $get_data_personal->nama : '-'; ?>
             </span>
         </div>
     </div>

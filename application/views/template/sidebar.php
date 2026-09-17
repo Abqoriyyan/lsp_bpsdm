@@ -8,52 +8,76 @@
         position: sticky;
         top: 0;
         height: 100vh;
-        overflow-y: hidden;
+        overflow-y: auto;
+        overflow-x: hidden;
         z-index: 1000;
+        width: 250px !important;
+        transition: width 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    .bg-modern-sidebar * {
+        box-sizing: border-box;
     }
 
     .bg-modern-sidebar::-webkit-scrollbar {
-        width: 5px;
+        width: 4px;
     }
 
     .bg-modern-sidebar::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.15);
         border-radius: 10px;
     }
 
-    .bg-modern-sidebar::-webkit-scrollbar-thumb:hover {
-        background: rgba(255, 255, 255, 0.4);
+    .bg-modern-sidebar .sidebar-brand {
+        padding: 1.25rem 1rem;
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
-    .bg-modern-sidebar .sidebar-brand {
-        padding: 1.5rem 1rem;
-        margin-bottom: 10px;
+    .bg-modern-sidebar .nav-item {
+        width: 100%;
     }
 
     .bg-modern-sidebar .nav-item .nav-link {
         color: rgba(255, 255, 255, 0.7);
-        padding: 12px 20px;
-        margin: 4px 15px;
-        border-radius: 10px;
-        transition: all 0.3s ease;
+        padding: 10px 12px;
+        margin: 3px 10px;
+        border-radius: 8px;
+        transition: background-color 0.2s ease, color 0.2s ease;
+        display: flex;
+        align-items: center;
+        width: calc(100% - 20px);
     }
 
     .bg-modern-sidebar .nav-item .nav-link i {
         color: rgba(255, 255, 255, 0.5);
-        font-size: 1.1rem;
-        transition: all 0.3s ease;
+        font-size: 1.05rem;
+        width: 24px;
+        min-width: 24px;
+        flex-shrink: 0;
+        text-align: center;
+        transition: color 0.2s ease;
     }
 
     .bg-modern-sidebar .nav-item .nav-link span {
         font-weight: 600;
-        font-size: 0.9rem;
-        letter-spacing: 0.3px;
+        font-size: 0.85rem;
+        letter-spacing: 0.2px;
+        margin-left: 10px;
+        flex: 1;
+        min-width: 0;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        line-height: 1.3;
     }
 
     .bg-modern-sidebar .nav-item .nav-link:hover {
-        background-color: rgba(255, 255, 255, 0.05);
+        background-color: rgba(255, 255, 255, 0.08);
         color: #ffffff;
-        transform: translateX(3px);
     }
 
     .bg-modern-sidebar .nav-item .nav-link:hover i {
@@ -63,7 +87,8 @@
     .bg-modern-sidebar .nav-item.active .nav-link {
         background-color: #374774;
         color: #EAB360;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        font-weight: 700;
     }
 
     .bg-modern-sidebar .nav-item.active .nav-link i {
@@ -72,21 +97,82 @@
 
     .bg-modern-sidebar .collapse-inner {
         background-color: #ffffff;
-        border-radius: 10px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        margin: 0 15px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin: 4px 10px 10px 10px;
+        padding: 0.5rem 0;
+    }
+
+    .bg-modern-sidebar .collapse-inner .collapse-header {
+        font-size: 0.7rem;
+        font-weight: 800;
+        color: #b7b9cc;
+        text-transform: uppercase;
+        padding: 0.5rem 1rem;
+        margin: 0;
     }
 
     .bg-modern-sidebar .collapse-inner .collapse-item {
-        border-radius: 8px;
-        transition: all 0.2s ease;
+        border-radius: 6px;
+        transition: background-color 0.2s ease, color 0.2s ease;
+        font-size: 0.82rem;
+        padding: 8px 12px;
+        margin: 2px 6px;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        display: block;
+        color: #3a3b45;
     }
 
     .bg-modern-sidebar .collapse-inner .collapse-item:hover {
-        background-color: #f8f9fc;
-        color: #374774;
+        background-color: #f1f3f9;
+        color: #2c395c;
         font-weight: 700;
-        padding-left: 20px;
+        text-decoration: none;
+    }
+
+    .bg-modern-sidebar.toggled {
+        width: 6.5rem !important;
+        overflow: visible !important;
+    }
+
+    .bg-modern-sidebar.toggled .nav-item .nav-link span,
+    .bg-modern-sidebar.toggled .sidebar-brand-text,
+    .bg-modern-sidebar.toggled .nav-item .nav-link::after {
+        display: none !important;
+    }
+
+    .bg-modern-sidebar.toggled .nav-item .nav-link {
+        width: calc(100% - 16px);
+        margin: 4px 8px;
+        padding: 10px 0;
+        justify-content: center;
+    }
+
+    .bg-modern-sidebar.toggled .nav-item .nav-link i {
+        margin: 0;
+        width: auto;
+        min-width: 0;
+        font-size: 1.15rem;
+    }
+
+    .bg-modern-sidebar.toggled .nav-item {
+        position: relative;
+    }
+
+    .bg-modern-sidebar.toggled .nav-item .collapse {
+        position: absolute;
+        left: calc(6.5rem + 5px);
+        top: 0;
+        z-index: 1050;
+        width: 13rem;
+    }
+
+    .bg-modern-sidebar.toggled .nav-item .collapse .collapse-inner {
+        margin: 0;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        border: 1px solid #e3e6f0;
     }
 </style>
 
@@ -151,7 +237,7 @@
             <div id="pasca" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                 <div class="py-2 collapse-inner">
                     <h6 class="collapse-header">Pasca-Asesmen:</h6>
-                    <a class="collapse-item" href="<?= base_url('Admin/list_komite_teknis'); ?>">Penunjukan Komite</a>
+                    <a class="collapse-item" href="<?= base_url('Admin/list_penunjukan_komite'); ?>">Penunjukan Komite</a>
                     <a class="collapse-item" href="<?= base_url('admin/list_selesai_penetapan'); ?>">Selesai Penetapan</a>
                     <a class="collapse-item" href="<?= base_url('admin/terbit_sertifikat'); ?>">Sertifikat Terbit</a>
                     <a class="collapse-item" href="<?= base_url('Admin/list_pernyataan_asesi'); ?>">Surat Pemegang</a>

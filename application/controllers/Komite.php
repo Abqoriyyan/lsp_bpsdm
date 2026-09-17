@@ -515,8 +515,8 @@ class Komite extends MY_Controller
 				"tgl_surat_tugas" => $get_data_penetapan_komite_lpjk->tgl_surat_tugas,
 				"no_surat_tugas" => $get_data_penetapan_komite_lpjk->no_surat_tugas,
 				"tgl_penetapan" => $get_data_penetapan_komite_lpjk->tgl_penetapan,
-				"url_surat_tugas" => base_url("Admin/cetak_sk_komite/") . base64_encode($id_izin),
-				"url_ba_penetapan" => base_url("komite/cetak_berita_acara_pleno_komite/") . base64_encode($id_izin),
+				"url_surat_tugas" => base_url("Admin/cetak_st_komite/") . base64_encode($id_izin),
+				"url_ba_penetapan" => base_url("Admin/cetak_ba_komite/") . base64_encode($id_izin),
 
 				// item baru
 				"met_komtek_1" => isset($get_komite[0]['no_reg']) ? $get_komite[0]['no_reg'] : "",

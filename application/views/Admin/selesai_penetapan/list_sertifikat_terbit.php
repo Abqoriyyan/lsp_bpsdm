@@ -85,7 +85,7 @@
                                         <a href="<?= base_url('asesor/cetak_berita_acara_rekomendasi_asesor/') . base64_encode($data_terbit_sertifikat['id_izin']); ?>"
                                             class="btn btn-outline-success btn-xs" target="_blank"
                                             title="BA Rekomendasi Asesor">BA Rek</a>
-                                        <a href="<?= base_url('komite/cetak_berita_acara_pleno_komite/') . base64_encode($data_terbit_sertifikat['id_izin']); ?>"
+                                        <a href="<?= base_url('Admin/cetak_ba_komite/') . base64_encode($data_terbit_sertifikat['id_izin']); ?>"
                                             class="btn btn-outline-success btn-xs" target="_blank"
                                             title="BA Pleno Komite">Pleno</a>
                                         <a href="<?= base_url('komite/cetak_surat_keputusan_komite/') . base64_encode($data_terbit_sertifikat['id_izin']); ?>"

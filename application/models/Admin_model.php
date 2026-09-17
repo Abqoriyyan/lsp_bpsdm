@@ -519,7 +519,7 @@ class Admin_model extends CI_Model
     // --- KOMITE TEKNIS ---
     // =======================================================================
 
-    public function get_permohonan_komite()
+    public function get_list_penunjukan_komite()
     {
         $sql = "SELECT a.*, b.kode_status, c.nama AS nama
             FROM list_permohonan a 
@@ -567,7 +567,7 @@ class Admin_model extends CI_Model
         return $this->db->get('master_komite')->result_array();
     }
 
-    public function get_nomor_sk_penunjukan_komite()
+    public function get_nomor_st_penunjukan_komite()
     {
         $this->db->select('no_surat');
         $this->db->order_by('id', 'DESC');
@@ -578,6 +578,22 @@ class Admin_model extends CI_Model
             return $query->row()->no_surat;
         }
         return null;
+    }
+
+    public function get_ba_komite_by_izin($id_izin)
+    {
+        return $this->db->get_where('data_ba_komite', array('id_izin' => $id_izin))->row();
+    }
+
+    public function simpan_ba_komite($data, $id_izin)
+    {
+        $cek = $this->get_ba_komite_by_izin($id_izin);
+        if ($cek) {
+            $this->db->where('id_izin', $id_izin);
+            return $this->db->update('data_ba_komite', $data);
+        } else {
+            return $this->db->insert('data_ba_komite', $data);
+        }
     }
 
     // =======================================================================
