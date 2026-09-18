@@ -1,3 +1,9 @@
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sidang Pleno Komite Teknis</title>
+</head>
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <a href="<?= base_url('Admin/list_penunjukan_komite'); ?>" class="btn btn-outline-secondary btn-sm shadow-sm">
@@ -6,8 +12,11 @@
     </div>
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Sidang Pleno Komite Teknis</h1>
+                <a href="<?= site_url('Admin/post_siki_komtek/' . $id_izin); ?>" class="btn btn-primary"
+            onclick="return confirm('Apakah Anda yakin ingin mengirim data Komtek ini ke API SIKI PU?');">
+            <i class="fa fa-paper-plane"></i> Sync data ke SIKI PU
+        </a>
     </div>
-
     <?= $this->session->flashdata('pesan'); ?>
 
     <div class="row">
@@ -246,7 +255,8 @@
                                 <div class="mt-3">
                                     <?php if (!empty($nama_ketua)): ?>
                                         <button type="submit" class="btn btn-success"><i
-                                                class="fas fa-check-circle mr-1"></i> Simpan Absensi</button>
+                                                class="fas fa-check-circle mr-1"></i>
+                                            Simpan Absensi</button>
 
                                         <?php if (!empty($get_absensi)): ?>
                                             <a href="<?= base_url('Admin/cetak_absensi_komite/' . base64_encode($id_izin)); ?>"
@@ -286,10 +296,14 @@
                                                     class="text-danger">*</span></label>
                                             <select class="form-control" name="hasil_rekomendasi" required>
                                                 <option value="">-- Pilih Rekomendasi --</option>
-                                                <option value="Kompeten" <?= (isset($get_ba->hasil_rekomendasi) && $get_ba->hasil_rekomendasi == 'Kompeten') ? 'selected' : ''; ?>>Kompeten</option>
-                                                <option value="Belum Kompeten" <?= (isset($get_ba->hasil_rekomendasi) && $get_ba->hasil_rekomendasi == 'Belum Kompeten') ? 'selected' : ''; ?>>Belum Kompeten
+                                                <option value="Kompeten" <?= (isset($get_ba->hasil_rekomendasi) && $get_ba->hasil_rekomendasi == 'Kompeten') ? 'selected' : ''; ?>>
+                                                    Kompeten
                                                 </option>
-                                                <option value="Perlu Perbaikan" <?= (isset($get_ba->hasil_rekomendasi) && $get_ba->hasil_rekomendasi == 'Perlu Perbaikan') ? 'selected' : ''; ?>>Perlu Perbaikan (Banding/Revisi)</option>
+                                                <option value="Belum Kompeten" <?= (isset($get_ba->hasil_rekomendasi) && $get_ba->hasil_rekomendasi == 'Belum Kompeten') ? 'selected' : ''; ?>>
+                                                    Belum Kompeten
+                                                </option>
+                                                <option value="Perlu Perbaikan" <?= (isset($get_ba->hasil_rekomendasi) && $get_ba->hasil_rekomendasi == 'Perlu Perbaikan') ? 'selected' : ''; ?>>
+                                                    Perlu Perbaikan (Banding/Revisi)</option>
                                             </select>
                                         </div>
 

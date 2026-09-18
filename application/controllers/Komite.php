@@ -189,7 +189,7 @@ class Komite extends MY_Controller
 				"nama" => "Berita Acara Pleno Komite Teknis",
 				"nomor" => $nomor_sertifikat,
 				"tanggal" => date("Y-m-d"),
-				"file_dokumen" => base_url('komite/cetak_berita_acara_pleno_komite/') . base64_encode($id_izin)
+				"file_dokumen" => base_url('Admin/cetak_ba_pleno_komite/') . base64_encode($id_izin)
 			);
 
 			$data_sk_hasil_sertifikasi = array(
@@ -406,8 +406,8 @@ class Komite extends MY_Controller
 				"penyelenggaraan_uji" => '1',
 				"url_surat_tugas" => base_url("asesor/cetak_surat_tugas") . base64_encode($id_izin),
 				"url_surat_rekomendasi_akhir" => base_url("asesor/cetak_berita_acara_rekomendasi_asesor/") . base64_encode($id_izin),
-				"url_apl01" => base_url("cetak_form_asesmen/apl01/") . base64_encode($id_izin),
-				"url_apl02" => base_url("cetak_form_asesmen/apl02/") . base64_encode($id_izin),
+				"url_apl01" => base_url("asesor/form_apl01/") . base64_encode($id_izin),
+				"url_apl02" => base_url("asesor/form_apl02/") . base64_encode($id_izin),
 				"url_dokumentasi_asesmen" => base_url("uploads/file_asesmen/bukti_dokumentasi_asesmen/") . $get_bukti_dokumentasi_asesmen->file,
 				"url_form_uji_tulis" => $url_form_uji_tulis,
 				"tgl_pelaksaaan_form_uji_tulis" => $tgl_pelaksaaan_form_uji_tulis,
@@ -604,14 +604,26 @@ class Komite extends MY_Controller
 		}
 
 		// // // Insert Hasil Penetapan Komite Teknis // // //
-		$hasil_penetapan['id_izin'] = $id_izin;
-		$hasil_penetapan['hasil_penetapan'] = $this->input->post('penetapan');
-		$hasil_penetapan['catatan'] = $this->input->post('catatan');
-		$hasil_penetapan['user_penetap'] = $this->session->userdata('username');
-		$hasil_penetapan['ketua_pelaksana'] = $get_data_ketua_pelaksana->nama;
-		$hasil_penetapan['ttd_ketua_pelaksana'] = $get_data_ketua_pelaksana->file_ttd;
-		$hasil_penetapan['log'] = date("Y-m-d H:i:s");
-		$this->db->replace('data_hasil_penetapan_komite_teknis', $hasil_penetapan);
+		// $hasil_penetapan['id_izin'] = $id_izin;
+		// $hasil_penetapan['hasil_penetapan'] = $this->input->post('penetapan');
+		// $hasil_penetapan['catatan'] = $this->input->post('catatan');
+		// $hasil_penetapan['user_penetap'] = $this->session->userdata('username');
+		// $hasil_penetapan['ketua_pelaksana'] = $get_data_ketua_pelaksana->nama;
+		// $hasil_penetapan['ttd_ketua_pelaksana'] = $get_data_ketua_pelaksana->file_ttd;
+		// $hasil_penetapan['log'] = date("Y-m-d H:i:s");
+		// $this->db->replace('data_hasil_penetapan_komite_teknis', $hasil_penetapan);
+
+		$data_penetapan = array(
+			'id_izin' => $id_izin,
+			'hasil_penetapan' => $this->input->post('penetapan'),
+			'catatan' => $this->input->post('catatan'),
+			'user_penetap' => $this->session->userdata('username'),
+			'ketua_pelaksana' => $get_data_ketua_pelaksana->nama,
+			'ttd_ketua_pelaksana' => $get_data_ketua_pelaksana->file_ttd,
+			'log' => date("Y-m-d H:i:s")
+		);
+
+		$this->db->replace('data_hasil_penetapan_komite_teknis', $data_penetapan);
 
 		redirect("Komite/list_penetapan", "refresh");
 	}

@@ -58,6 +58,24 @@ function getBase64Image($path)
     $data = file_get_contents($physical_path, false, stream_context_create($arrContextOptions));
     return 'data:image/' . $type . ';base64,' . base64_encode($data);
 }
+
+$base64_ketua = '';
+if (!empty($get_data_ketua_pelaksana->file_ttd)) {
+    $path_ketua = FCPATH . 'assets/lsp/ttd_ketua_pelaksana/' . $get_data_ketua_pelaksana->file_ttd;
+    if (file_exists($path_ketua)) {
+        $type = pathinfo($path_ketua, PATHINFO_EXTENSION);
+        $data = file_get_contents($path_ketua);
+        $base64_ketua = 'data:image/' . $type . ';base64,' . base64_encode($data);
+    }
+}
+
+$stamp_path = FCPATH . 'assets/lsp/cap.png';
+$base64_stamp = '';
+if (file_exists($stamp_path)) {
+    $type = pathinfo($stamp_path, PATHINFO_EXTENSION);
+    $stamp_data = file_get_contents($stamp_path);
+    $base64_stamp = 'data:image/' . $type . ';base64,' . base64_encode($stamp_data);
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -192,17 +210,39 @@ function getBase64Image($path)
             vertical-align: top;
         }
 
-        .signature-img {
-            max-height: 120px;
-            margin-bottom: -35px;
-            position: relative;
-            z-index: 1;
-        }
-
         .nama-ketua {
             position: relative;
             z-index: 2;
             margin-top: 0;
+        }
+
+        .signature-space {
+            position: relative;
+            height: 90px;
+            margin: 5px auto;
+            width: 100%;
+        }
+
+        .signature-img {
+            width: 180px;
+            height: auto;
+            position: absolute;
+            z-index: 1;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .stamp-img {
+            width: 145px;
+            height: auto;
+            position: absolute;
+            z-index: 3;
+            top: -25px;
+            left: 50%;
+            margin-left: -140px;
+            opacity: 0.90;
+            transform: rotate(-8deg);
         }
 
         .signature-box {
@@ -368,21 +408,27 @@ function getBase64Image($path)
                         <br><br>
 
                         Ketua LSP <?= $token->username; ?><br>
+                        <div class="signature-space">
 
-                        <?php
-                        $filename = $get_data_pencatatan->ttd_ketua_pelaksana;
-                        $filepath = FCPATH . 'assets/lsp/ttd_ketua_pelaksana/' . $filename;
+                            <?php
+                            $filename = $get_data_pencatatan->ttd_ketua_pelaksana;
+                            $filepath = FCPATH . 'assets/lsp/ttd_ketua_pelaksana/' . $filename;
 
-                        if (!empty($filename) && file_exists($filepath)) {
-                            $type = pathinfo($filepath, PATHINFO_EXTENSION);
-                            $data = file_get_contents($filepath);
-                            $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+                            if (!empty($filename) && file_exists($filepath)) {
+                                $type = pathinfo($filepath, PATHINFO_EXTENSION);
+                                $data = file_get_contents($filepath);
+                                $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
 
-                            echo '<center><img src="' . $base64 . '" style="max-height: 190px; max-width: 120px;"></center>';
-                        } else {
-                            echo '<p style="color: red; font-size: 11px;">[Tanda Tangan Tidak Ditemukan]</p>';
-                        }
-                        ?>
+                                echo '<center><img src="' . $base64 . '" style="max-height: 190px; max-width: 120px;"></center>';
+                            } else {
+                                echo '<p style="color: red; font-size: 11px;">[Tanda Tangan Tidak Ditemukan]</p>';
+                            }
+                            ?>
+
+                            <?php if ($base64_stamp): ?>
+                                <img src="<?= $base64_stamp ?>" class="stamp-img" alt="Stempel">
+                            <?php endif; ?>
+                        </div>
 
                         <div class="nama-ketua">
                             <?= $get_data_pencatatan->nama_ketua_pelaksana; ?><br>

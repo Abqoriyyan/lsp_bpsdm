@@ -683,8 +683,8 @@ class Asesor extends MY_Controller
                 "uji_lisan" => $uji_lisan,
                 "wawancara" => $wawancara,
                 "penyelenggara" => 1,
-                "apl_01" => base_url("cetak_form_asesmen/apl01/") . base64_encode($id_izin),
-                "apl_02" => base_url("cetak_form_asesmen/apl02/") . base64_encode($id_izin),
+                "apl_01" => base_url("asesor/form_apl01/") . base64_encode($id_izin),
+                "apl_02" => base_url("asesor/form_apl02/") . base64_encode($id_izin),
                 "url_dokumentasi_asesmen" => base_url("uploads/file_asesmen/bukti_dokumentasi_asesmen/") . $get_bukti_dokumentasi_asesmen->file
             );
 

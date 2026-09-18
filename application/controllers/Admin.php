@@ -3252,36 +3252,6 @@ class Admin extends MY_Controller
 		redirect($_SERVER['HTTP_REFERER']);
 	}
 
-	private function get_romawi($bln)
-	{
-		switch ($bln) {
-			case 1:
-				return "I";
-			case 2:
-				return "II";
-			case 3:
-				return "III";
-			case 4:
-				return "IV";
-			case 5:
-				return "V";
-			case 6:
-				return "VI";
-			case 7:
-				return "VII";
-			case 8:
-				return "VIII";
-			case 9:
-				return "IX";
-			case 10:
-				return "X";
-			case 11:
-				return "XI";
-			case 12:
-				return "XII";
-		}
-	}
-
 	public function simpan_absensi_komite()
 	{
 		if (!$this->ion_auth->ceklogin()) {
@@ -3461,6 +3431,83 @@ class Admin extends MY_Controller
 		ob_clean();
 		error_reporting(0);
 		$this->pdfgenerator->generate($html, $file_pdf, $paper, $orientation);
+	}
+
+	public function post_siki_komtek($id_izin)
+	{
+		$this->load->model('admin_model');
+		$data_komtek = $this->admin_model->get_data_komtek_siki($id_izin);
+		$token = $this->api_model->get_token();
+
+		if (!$data_komtek) {
+			$this->session->set_flashdata('error', 'Data komite teknis tidak ditemukan.');
+			redirect('admin/penunjukan_komite/' . $id_izin);
+			return;
+		}
+
+		$hasil_penetapan = 'K';
+		if (!empty($data_komtek->hasil_penetapan)) {
+			if (strpos(strtoupper($data_komtek->hasil_penetapan), 'BELUM') !== false || strtoupper($data_komtek->hasil_penetapan) == 'BK') {
+				$hasil_penetapan = 'BK';
+			}
+		}
+
+		$payload = array(
+			"nama_komite_teknis" => $data_komtek->nama_komite_teknis ?? "",
+			"jabatan_komite_teknis" => !empty($data_komtek->jabatan_komite_teknis) ? $data_komtek->jabatan_komite_teknis : "Ketua Komite Teknis",
+			"hasil_penetapan" => $hasil_penetapan,
+			"catatan" => ($hasil_penetapan == 'BK') ? ($data_komtek->catatan ?? "") : "",
+			"tgl_surat_tugas" => !empty($data_komtek->tgl_surat_tugas) ? date('Y-m-d', strtotime($data_komtek->tgl_surat_tugas)) : date('Y-m-d'),
+			"no_surat_tugas" => $data_komtek->no_surat_tugas ?? "",
+			"tgl_penetapan" => !empty($data_komtek->tgl_penetapan) ? date('Y-m-d', strtotime($data_komtek->tgl_penetapan)) : date('Y-m-d'),
+			"url_surat_tugas" => $data_komtek->url_surat_tugas,
+			"url_ba_penetapan" => $data_komtek->url_ba_penetapan,
+			"met_komtek_1" => $data_komtek->met_komtek_1 ?? "",
+			"met_komtek_2" => $data_komtek->met_komtek_2 ?? "",
+			"met_komtek_3" => $data_komtek->met_komtek_3 ?? "",
+			"url_absensi_tim_komtek" => $data_komtek->url_absensi_tim_komtek
+		);
+
+		$endpoint = "https://siki.pu.go.id/siki-api/v1/komtek-lsp-penugasan/" . $id_izin;
+
+		$ch = curl_init($endpoint);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+			'token: ' . $token->token,
+			'Content-Type: application/json'
+		));
+
+		$response = curl_exec($ch);
+		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		$curl_error = curl_error($ch);
+		curl_close($ch);
+
+		if ($curl_error) {
+			$this->session->set_flashdata('error', 'cURL Error: ' . $curl_error);
+		} else {
+			$res_data = json_decode($response, true);
+
+			if ($http_code == 200 || $http_code == 201) {
+				$this->admin_model->update_status_siki($id_izin, 'SUCCESS');
+				$this->session->set_flashdata('success', 'Data Komtek berhasil di-post ke SIKI!');
+			} else {
+				$msg = isset($res_data['message']) ? $res_data['message'] : 'Gagal sinkronisasi API SIKI.';
+				$this->session->set_flashdata('error', 'API SIKI [' . $http_code . ']: ' . $msg);
+			}
+		}
+		// echo "<pre>HTTP CODE: " . $http_code . "</pre>";
+		// echo "<pre>RESPONSE: ";
+		// var_dump($response);
+		// echo "</pre>";
+		// echo "<pre>PAYLOAD SENT: ";
+		// print_r(json_encode($payload));
+		// echo "</pre>";
+		// die();
+		redirect('Admin/penunjukan_komite/' . base64_encode($id_izin));
 	}
 
 	// =======================================================================
@@ -3765,6 +3812,36 @@ class Admin extends MY_Controller
 		}
 
 		redirect('Admin/form_asesmen/' . base64_encode($kode_jadwal));
+	}
+
+	private function get_romawi($bln)
+	{
+		switch ($bln) {
+			case 1:
+				return "I";
+			case 2:
+				return "II";
+			case 3:
+				return "III";
+			case 4:
+				return "IV";
+			case 5:
+				return "V";
+			case 6:
+				return "VI";
+			case 7:
+				return "VII";
+			case 8:
+				return "VIII";
+			case 9:
+				return "IX";
+			case 10:
+				return "X";
+			case 11:
+				return "XI";
+			case 12:
+				return "XII";
+		}
 	}
 
 }

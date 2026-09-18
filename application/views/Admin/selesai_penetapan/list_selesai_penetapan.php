@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quality Check - Hasil Penetapan Komite Teknis</title>
+    <title>Hasil Penetapan Komite Teknis</title>
 
     <style>
         .table-compact th,
@@ -40,7 +40,7 @@
     <div class="card shadow mb-4">
         <div class="card-header py-3 card-header-custom">
             <h6 class="m-0 font-weight-bold text-white">
-                <i class="fas fa-file-signature"></i> Quality Check - Hasil Penetapan Komite Teknis
+                <i class="fas fa-file-signature"></i> Hasil Penetapan Komite Teknis
             </h6>
         </div>
         <div class="card-body">

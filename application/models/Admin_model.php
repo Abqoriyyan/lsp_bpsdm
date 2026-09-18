@@ -595,6 +595,51 @@ class Admin_model extends CI_Model
             return $this->db->insert('data_ba_komite', $data);
         }
     }
+    public function get_data_komtek_siki($id_izin)
+    {
+        $this->db->select('
+        p.ketua_komite AS nama_komite_teknis,
+        COALESCE(mk_ketua.jabatan_komite_teknis, "Ketua Komite Teknis") AS jabatan_komite_teknis,
+
+        ba.hasil_rekomendasi AS hasil_penetapan,
+        ba.catatan,
+        ba.tgl_pleno AS tgl_penetapan,
+
+        p.no_surat AS no_surat_tugas,
+        p.log AS tgl_surat_tugas,
+
+        IFNULL(mk_ketua.no_reg, "") AS met_komtek_1,
+        IFNULL(mk_anggota1.no_reg, "") AS met_komtek_2,
+        IFNULL(mk_anggota2.no_reg, "") AS met_komtek_3
+    ');
+
+        $this->db->from('data_penunjukan_komite p');
+        $this->db->join('data_ba_komite ba', 'ba.id_izin = p.id_izin', 'left');
+        $this->db->join('master_komite mk_ketua', 'TRIM(mk_ketua.nama) = TRIM(p.ketua_komite)', 'left', FALSE);
+        $this->db->join('master_komite mk_anggota1', 'TRIM(mk_anggota1.nama) = TRIM(p.anggota_1)', 'left', FALSE);
+        $this->db->join('master_komite mk_anggota2', 'TRIM(mk_anggota2.nama) = TRIM(p.anggota_2)', 'left', FALSE);
+
+        $this->db->where('p.id_izin', $id_izin);
+
+        $row = $this->db->get()->row();
+
+        if ($row) {
+            $id_izin_b64 = base64_encode($id_izin);
+
+            $row->url_surat_tugas = site_url('Admin/cetak_st_komite/' . $id_izin_b64);
+            $row->url_ba_penetapan = site_url('Admin/cetak_ba_komite/' . $id_izin_b64);
+            $row->url_absensi_tim_komtek = site_url('Admin/cetak_absensi_komite/' . $id_izin_b64);
+        }
+
+        return $row;
+    }
+
+    public function update_status_siki($id_izin, $status)
+    {
+        $this->db->select('data_post_komite_siki');
+        $this->db->where('id_izin', $id_izin);
+        $this->db->update('data_post_komite_siki', array('status_siki' => $status, 'updated_at' => date('Y-m-d H:i:s')));
+    }
 
     // =======================================================================
     // --- VERIFIKASI TUK ---
