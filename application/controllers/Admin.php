@@ -16,12 +16,11 @@ class Admin extends MY_Controller
 
 		// $this->load->library('../controllers/mail','mail');
 		## GET Model Admin Model
-		$this->load->model('admin_model');
-		$this->load->model('asesor_model');
-		$this->load->model('master_model');
-		$this->load->model('api_model');
-		$this->load->model('report_model');
-		$this->load->model('home_model');
+		$this->load->model('Admin_model');
+		$this->load->model('Asesor_model');
+		$this->load->model('Master_model');
+		$this->load->model('Api_model');
+		$this->load->model('Report_model');
 
 		## GET Model Admin Model
 		date_default_timezone_set('Asia/Jakarta');
@@ -35,7 +34,7 @@ class Admin extends MY_Controller
 			redirect('login/keluar', 'refresh');
 		}
 		##/Cek Session Login##
-		$report_dashboard_admin = $this->report_model->report_dashboard_admin();
+		$report_dashboard_admin = $this->Report_model->report_dashboard_admin();
 
 		$this->data = array(
 			'username' => $this->session->userdata('username'),
@@ -57,7 +56,7 @@ class Admin extends MY_Controller
 		}
 		##/Cek Session Login##
 
-		$list_permohonan = $this->admin_model->get_list_permohonan();
+		$list_permohonan = $this->Admin_model->get_list_permohonan();
 		$this->data = array(
 			'username' => $this->session->userdata('username'),
 			'level' => $this->session->userdata('level'),
@@ -76,7 +75,7 @@ class Admin extends MY_Controller
 		}
 		##/Cek Session Login##
 
-		$token = $this->api_model->get_token();
+		$token = $this->Api_model->get_token();
 		## Set Configuration Header.
 		$headers = array(
 			'Content-Type: application/json',
@@ -117,7 +116,7 @@ class Admin extends MY_Controller
 
 			echo "<script>
                 alert('Data List Permohonan Berhasil Di Update');
-                window.location.href='" . base_url('Admin/list_permohonan') . "';
+                window.location.href='" . base_url('admin/list_permohonan') . "';
             </script>";
 		}
 	}
@@ -134,10 +133,10 @@ class Admin extends MY_Controller
 	// 	$id_izin = base64_decode($id_izin);
 
 	// 	#Get Data Master
-	// 	$get_master_jenis_permohonan =  $this->master_model->get_master_jenis_permohonan();
+	// 	$get_master_jenis_permohonan =  $this->Master_model->get_master_jenis_permohonan();
 
 
-	// 	$token = $this->api_model->get_token();
+	// 	$token = $this->Api_model->get_token();
 	// 	## Set Configuration Header.
 	// 	$headers = array(
 	// 		'Content-Type: application/json',
@@ -196,7 +195,7 @@ class Admin extends MY_Controller
 		$id_izin_clean = $this->security->xss_clean($id_izin_raw);
 		$id_izin = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
 		$log = date("Y-m-d H:i:s");
-		$token = $this->api_model->get_token();
+		$token = $this->Api_model->get_token();
 
 		$curl = curl_init();
 
@@ -221,7 +220,7 @@ class Admin extends MY_Controller
 		$result = json_decode($response, true);
 
 		if ($result['current_status'] == NULL) {
-			// header("location:".base_url('Admin/entry_data_permohonan/').base64_encode($id_izin));
+			// header("location:".base_url('admin/entry_data_permohonan/').base64_encode($id_izin));
 			$this->entry_data_permohonan(base64_encode($id_izin));
 		} else {
 			echo "<script>
@@ -246,7 +245,7 @@ class Admin extends MY_Controller
 		$id_izin = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
 		$log = date("Y-m-d H:i:s");
 
-		$token = $this->api_model->get_token();
+		$token = $this->Api_model->get_token();
 		## Set Configuration Header.
 		$headers = array(
 			'Content-Type: application/json',
@@ -283,7 +282,7 @@ class Admin extends MY_Controller
 			$data_tinjau['kode_status'] = "20";
 			$data_tinjau['log'] = date("Y-m-d H:i:s");
 			$data_tinjau['username'] = $this->session->userdata('username');
-			$this->admin_model->insert_log_history_permohonan($data_tinjau);
+			$this->Admin_model->insert_log_history_permohonan($data_tinjau);
 
 
 			/////////////////////// Hit Status ke API SIKI & PORTAL ///////////////
@@ -328,12 +327,12 @@ class Admin extends MY_Controller
 
 			$usr = rand();
 			$nik_pemohon = $array['personal'][0]['nik'];
-			$cek_user = $this->admin_model->cek_user_pemohon($nik_pemohon);
+			$cek_user = $this->Admin_model->cek_user_pemohon($nik_pemohon);
 
 
 			#Get Data Master
-			$get_master_jabatan_kerja = $this->master_model->get_master_jabatan_kerja();
-			$get_data_lsp = $this->api_model->get_token();
+			$get_master_jabatan_kerja = $this->Master_model->get_master_jabatan_kerja();
+			$get_data_lsp = $this->Api_model->get_token();
 
 
 			if (!empty($cek_user->nik)) {
@@ -547,7 +546,7 @@ class Admin extends MY_Controller
 				$this->db->insert('data_klasifikasi_kualifikasi_permohonan', $data_klasifikasi_kualifikasi);
 			}
 
-			header("location:" . base_url('Admin/tinjau_permohonan/') . base64_encode($id_izin));
+			header("location:" . base_url('admin/tinjau_permohonan/') . base64_encode($id_izin));
 		}
 	}
 
@@ -562,10 +561,10 @@ class Admin extends MY_Controller
 		##/Cek Session Login##
 
 		#Get Master
-		$get_master_jenis_permohonan = $this->master_model->get_master_jenis_permohonan();
+		$get_master_jenis_permohonan = $this->Master_model->get_master_jenis_permohonan();
 
 
-		$list_tinjau_permohonan = $this->admin_model->get_list_tinjau_permohonan();
+		$list_tinjau_permohonan = $this->Admin_model->get_list_tinjau_permohonan();
 
 		$this->data = array(
 			'username' => $this->session->userdata('username'),
@@ -591,23 +590,23 @@ class Admin extends MY_Controller
 		$id_izin = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
 
 		# Info Data Permohonan
-		$info_data_permohonan = $this->admin_model->info_data_permohonan($id_izin);
+		$info_data_permohonan = $this->Admin_model->info_data_permohonan($id_izin);
 
 		# Get Master 
-		$get_master_persyaratan_kompeten = $this->master_model->get_master_persyaratan_kompeten();
+		$get_master_persyaratan_kompeten = $this->Master_model->get_master_persyaratan_kompeten();
 
 		# Get Data Detail Permohonan
-		$get_data_personal_permohonan = $this->admin_model->get_data_personal_permohonan($id_izin);
-		$get_data_pendidikan_permohonan = $this->admin_model->get_data_pendidikan_permohonan($id_izin);
-		$data_pendidikan_yang_sudah_dipilih = $this->admin_model->data_pendidikan_yang_sudah_dipilih($id_izin);
-		$get_data_proyek_permohonan = $this->admin_model->get_data_proyek_permohonan($id_izin);
-		$get_data_pelatihan_permohonan = $this->admin_model->get_data_pelatihan_permohonan($id_izin);
-		$get_data_klasifikasi_kualifikasi_permohonan = $this->admin_model->get_data_klasifikasi_kualifikasi_permohonan($id_izin);
+		$get_data_personal_permohonan = $this->Admin_model->get_data_personal_permohonan($id_izin);
+		$get_data_pendidikan_permohonan = $this->Admin_model->get_data_pendidikan_permohonan($id_izin);
+		$data_pendidikan_yang_sudah_dipilih = $this->Admin_model->data_pendidikan_yang_sudah_dipilih($id_izin);
+		$get_data_proyek_permohonan = $this->Admin_model->get_data_proyek_permohonan($id_izin);
+		$get_data_pelatihan_permohonan = $this->Admin_model->get_data_pelatihan_permohonan($id_izin);
+		$get_data_klasifikasi_kualifikasi_permohonan = $this->Admin_model->get_data_klasifikasi_kualifikasi_permohonan($id_izin);
 
 		# Opsi Persyaratan Kompetensi APL 01
-		$option_persyaratan_kompetensi_apl01 = $this->admin_model->option_persyaratan_kompetensi_apl01($id_izin);
+		$option_persyaratan_kompetensi_apl01 = $this->Admin_model->option_persyaratan_kompetensi_apl01($id_izin);
 
-		$get_data_apl01 = $this->admin_model->get_data_apl01($id_izin);
+		$get_data_apl01 = $this->Admin_model->get_data_apl01($id_izin);
 		if (empty($get_data_apl01)) {
 			$get_data_apl01 = (object) [
 				'id_izin' => $id_izin,
@@ -621,7 +620,7 @@ class Admin extends MY_Controller
 		}
 
 		# Get Data Tinjau Permohonan
-		$get_data_tinjau_permohonan = $this->admin_model->get_data_tinjau_permohonan($id_izin);
+		$get_data_tinjau_permohonan = $this->Admin_model->get_data_tinjau_permohonan($id_izin);
 
 		$data = array(
 			'username' => $this->session->userdata('username'),
@@ -743,7 +742,7 @@ class Admin extends MY_Controller
 		$this->db->replace('tinjau_permohonan', $ceklis_administrasi);
 
 		$this->session->set_flashdata('success', 'Save Ceklis Administrasi');
-		header("location:" . base_url('Admin/tinjau_permohonan/') . base64_encode($id_izin));
+		header("location:" . base_url('admin/tinjau_permohonan/') . base64_encode($id_izin));
 	}
 
 	#Proses Tinjau Permohonan Pendidikan
@@ -811,7 +810,7 @@ class Admin extends MY_Controller
 		$this->db->replace('tinjau_permohonan', $ceklis_pendidikan);
 
 		$this->session->set_flashdata('success', 'Save Ceklis Pendidikan');
-		header("location:" . base_url('Admin/tinjau_permohonan/') . base64_encode($id_izin));
+		header("location:" . base_url('admin/tinjau_permohonan/') . base64_encode($id_izin));
 	}
 
 	#Proses Tinjau Permohonan Proyek / Pengalaman
@@ -885,7 +884,7 @@ class Admin extends MY_Controller
 		$this->db->replace('tinjau_permohonan', $ceklis_proyek);
 
 		$this->session->set_flashdata('success', 'Save Ceklis Proyek');
-		header("location:" . base_url('Admin/tinjau_permohonan/') . base64_encode($id_izin));
+		header("location:" . base_url('admin/tinjau_permohonan/') . base64_encode($id_izin));
 	}
 
 	#Proses Tinjau Permohonan Pelatihan
@@ -920,7 +919,7 @@ class Admin extends MY_Controller
 		$this->db->replace('tinjau_permohonan', $ceklis_pelatihan);
 
 		$this->session->set_flashdata('success', 'Save Ceklis Pelatihan');
-		header("location:" . base_url('Admin/tinjau_permohonan/') . base64_encode($id_izin));
+		header("location:" . base_url('admin/tinjau_permohonan/') . base64_encode($id_izin));
 	}
 
 
@@ -940,7 +939,7 @@ class Admin extends MY_Controller
 		$id_izin = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
 		$log = date("Y-m-d H:i:s");
 
-		$get_data_apl01 = $this->admin_model->get_data_apl01($id_izin);
+		$get_data_apl01 = $this->Admin_model->get_data_apl01($id_izin);
 
 		$apl01_tinjau_permohonan = array(
 			'id_izin' => $id_izin,
@@ -969,7 +968,7 @@ class Admin extends MY_Controller
 		$this->db->replace('data_apl01_permohonan', $apl01_tinjau_permohonan);
 		$this->session->set_flashdata('success', 'Save Ceklis Apl01');
 
-		redirect('Admin/tinjau_permohonan/' . base64_encode($id_izin));
+		redirect('admin/tinjau_permohonan/' . base64_encode($id_izin));
 	}
 
 	// Keperluan Signature / TTD Peninjau di APL 01
@@ -1005,7 +1004,7 @@ class Admin extends MY_Controller
 			exit;
 		}
 
-		$get_data_apl01 = $this->admin_model->get_data_apl01($id_izin);
+		$get_data_apl01 = $this->Admin_model->get_data_apl01($id_izin);
 
 		if (empty($get_data_apl01) || empty($get_data_apl01->tanggal_ttd_peninjau)) {
 			$tanggal_ttd_peninjau = $log;
@@ -1023,7 +1022,7 @@ class Admin extends MY_Controller
 			'id_izin' => $id_izin
 		);
 
-		$this->admin_model->update_data($where, $data_update, 'data_apl01_permohonan');
+		$this->Admin_model->update_data($where, $data_update, 'data_apl01_permohonan');
 		echo "Tanda Tangan Berhasil Disimpan";
 	}
 
@@ -1053,7 +1052,7 @@ class Admin extends MY_Controller
 	// 	);
 	// 	$this->db->replace('tinjau_permohonan', $ceklis_sertifikat_surat_keterangan);
 
-	// 	header("location:".base_url('Admin/tinjau_permohonan/').$id_izin);
+	// 	header("location:".base_url('admin/tinjau_permohonan/').$id_izin);
 	// }
 
 	#Proses Tinjau Klasifikasi & Kualifikasi
@@ -1152,7 +1151,7 @@ class Admin extends MY_Controller
 		$this->db->replace('tinjau_permohonan', $ceklis_klasifikasi_kualifikasi);
 
 		$this->session->set_flashdata('success', 'Save Ceklis Klasifikasi Kualifikasi');
-		header("location:" . base_url('Admin/tinjau_permohonan/') . base64_encode($id_izin));
+		header("location:" . base_url('admin/tinjau_permohonan/') . base64_encode($id_izin));
 
 	}
 
@@ -1172,10 +1171,10 @@ class Admin extends MY_Controller
 		$log = date("Y-m-d H:i:s");
 
 		#Get Data
-		$get_data_tinjau_permohonan = $this->admin_model->get_data_tinjau_permohonan_untuk_hasil_tinjau($id_izin);
-		$get_data_personal_permohonan = $this->admin_model->get_data_personal_permohonan($id_izin);
-		$info_data_permohonan = $this->admin_model->info_data_permohonan($id_izin);
-		$get_data_apl01 = $this->admin_model->get_data_apl01($id_izin);
+		$get_data_tinjau_permohonan = $this->Admin_model->get_data_tinjau_permohonan_untuk_hasil_tinjau($id_izin);
+		$get_data_personal_permohonan = $this->Admin_model->get_data_personal_permohonan($id_izin);
+		$info_data_permohonan = $this->Admin_model->info_data_permohonan($id_izin);
+		$get_data_apl01 = $this->Admin_model->get_data_apl01($id_izin);
 
 		$this->data = array(
 			'username' => $this->session->userdata('username'),
@@ -1204,19 +1203,19 @@ class Admin extends MY_Controller
 		$log = date("Y-m-d H:i:s");
 
 		#Get Data
-		$get_data_personal = $this->admin_model->get_data_personal($id_izin);
+		$get_data_personal = $this->Admin_model->get_data_personal($id_izin);
 
 		// Insert Log History Permohonan Selesai Tinjau Permohonan Status 10 / 11
 		$data_tinjau['id_izin'] = $id_izin;
 		$data_tinjau['kode_status'] = $this->input->post('hasil_tinjau_permohonan', TRUE);
 		$data_tinjau['log'] = date("Y-m-d H:i:s");
 		$data_tinjau['username'] = $this->session->userdata('username');
-		$this->admin_model->insert_log_history_permohonan($data_tinjau);
+		$this->Admin_model->insert_log_history_permohonan($data_tinjau);
 
 		## Kirim Pemberitahuan Hasil Tinjau Permohonan
 		if ($this->input->post('hasil_tinjau_permohonan', TRUE) == '10') {
 
-			$get_data_lsp = $this->api_model->get_token();
+			$get_data_lsp = $this->Api_model->get_token();
 
 			#email kirim user hasil generate
 			$from = $this->config->item('smtp_user');
@@ -1244,7 +1243,7 @@ class Admin extends MY_Controller
 
 			/////////////////////// Hit Status ke API SIKI & PORTAL ///////////////
 			//API Url
-			$token = $this->api_model->get_token();
+			$token = $this->Api_model->get_token();
 			$url = $token->host . '/siki-api/v1/permohonan-skk/' . $id_izin;
 
 			//Initiate cURL.
@@ -1272,7 +1271,7 @@ class Admin extends MY_Controller
 			// Ketika gagal hit status 10
 			if ($arr['status'] == 'errors') {
 				$this->session->set_flashdata('message_hasil_pemeriksaan', $arr['message']);
-				redirect('Admin/hasil_tinjau_permohonan/' . base64_encode($id_izin), 'refresh');
+				redirect('admin/hasil_tinjau_permohonan/' . base64_encode($id_izin), 'refresh');
 			}
 
 			$log_hit_status_siki_portal['id_izin'] = $id_izin;
@@ -1285,8 +1284,8 @@ class Admin extends MY_Controller
 
 		} elseif ($this->input->post('hasil_tinjau_permohonan', TRUE) == '11') {
 			#Get Data Perbaikan
-			$get_data_perbaikan = $this->admin_model->get_data_perbaikan($id_izin);
-			$get_data_lsp = $this->api_model->get_token();
+			$get_data_perbaikan = $this->Admin_model->get_data_perbaikan($id_izin);
+			$get_data_lsp = $this->Api_model->get_token();
 
 			#email kirim user hasil generate
 			$from = $this->config->item('smtp_user');
@@ -1315,7 +1314,7 @@ class Admin extends MY_Controller
 
 			/////////////////////// Hit Status ke API SIKI & PORTAL ///////////////
 			//API Url
-			$token = $this->api_model->get_token();
+			$token = $this->Api_model->get_token();
 			$url = $token->host . '/siki-api/v1/permohonan-skk/' . $id_izin;
 
 			//Initiate cURL.
@@ -1348,13 +1347,13 @@ class Admin extends MY_Controller
 			$this->db->insert('log_hit_status_permohonan_siki_portal', $log_hit_status_siki_portal);
 
 			// Reset Data untuk Keperluan Perbaikan
-			$this->admin_model->reset_data($id_izin);
+			$this->Admin_model->reset_data($id_izin);
 
 			/////////////////////// / Hit Status ke API SIKI & PORTAL ///////////////
 		} elseif ($this->input->post('hasil_tinjau_permohonan', TRUE) == '90') {
 			/////////////////////// Hit Status ke API SIKI & PORTAL ///////////////
 			//API Url
-			$token = $this->api_model->get_token();
+			$token = $this->Api_model->get_token();
 			$url = $token->host . '/siki-api/v1/permohonan-skk/' . $id_izin;
 
 			//Initiate cURL.
@@ -1390,7 +1389,7 @@ class Admin extends MY_Controller
 		}
 
 		$this->session->set_flashdata('success-tinjau-permohonan', 'Hasil Tinjau Permohonan');
-		header("location:" . base_url('Admin/list_tinjau_permohonan'));
+		header("location:" . base_url('admin/list_tinjau_permohonan'));
 	}
 	################################### / Tinjau Permohonan #######################################
 
@@ -1404,7 +1403,7 @@ class Admin extends MY_Controller
 			redirect('login/keluar', 'refresh');
 		}
 		##/Cek Session Login##
-		$get_list_tagihan_pembayaran = $this->admin_model->get_list_tagihan_pembayaran();
+		$get_list_tagihan_pembayaran = $this->Admin_model->get_list_tagihan_pembayaran();
 
 		$this->data = array(
 			'username' => $this->session->userdata('username'),
@@ -1434,12 +1433,12 @@ class Admin extends MY_Controller
 		$data_tinjau['kode_status'] = '30';
 		$data_tinjau['log'] = date("Y-m-d H:i:s");
 		$data_tinjau['username'] = $this->session->userdata('username');
-		$this->admin_model->insert_log_history_permohonan($data_tinjau);
+		$this->Admin_model->insert_log_history_permohonan($data_tinjau);
 
 
 		/////////////////////// Hit Status ke API SIKI & PORTAL ///////////////
 		//API Url
-		$token = $this->api_model->get_token();
+		$token = $this->Api_model->get_token();
 		$url = $token->host . '/siki-api/v1/permohonan-skk/' . $id_izin;
 
 		//Initiate cURL.
@@ -1473,8 +1472,8 @@ class Admin extends MY_Controller
 		/////////////////////// / Hit Status ke API SIKI & PORTAL ///////////////
 
 		/// Send Mail ke Pemohon //
-		$get_data_personal = $this->admin_model->get_data_personal($id_izin);
-		$get_data_lsp = $this->api_model->get_token();
+		$get_data_personal = $this->Admin_model->get_data_personal($id_izin);
+		$get_data_lsp = $this->Api_model->get_token();
 
 		$from = $this->config->item('smtp_user');
 		$to = $get_data_personal->email;
@@ -1503,7 +1502,7 @@ class Admin extends MY_Controller
 		/// /Send Mail ke Pemohon //
 
 
-		header("location:" . base_url('Admin/list_tagihan_pembayaran'));
+		header("location:" . base_url('admin/list_tagihan_pembayaran'));
 	}
 
 	################################## /Pembayaran ####################################
@@ -1519,7 +1518,7 @@ class Admin extends MY_Controller
 			redirect('login/keluar', 'refresh');
 		}
 		##/Cek Session Login##
-		$get_list_penunjukan_asesor = $this->admin_model->get_list_penunjukan_asesor();
+		$get_list_penunjukan_asesor = $this->Admin_model->get_list_penunjukan_asesor();
 
 		$this->data = array(
 			'username' => $this->session->userdata('username'),
@@ -1543,11 +1542,11 @@ class Admin extends MY_Controller
 		$id_izin = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
 
 		## Info Data Permohonan
-		$info_data_permohonan = $this->admin_model->info_data_permohonan($id_izin);
-		$get_data_personal_permohonan = $this->admin_model->get_data_personal_permohonan($id_izin);
-		$get_data_klasifikasi_kualifikasi_permohonan = $this->admin_model->get_data_klasifikasi_kualifikasi_permohonan($id_izin);
-		$get_data_jadwal_asesmen = $this->admin_model->get_data_jadwal_asesmen();
-		$get_list_asesor = $this->admin_model->get_list_asesor($get_data_klasifikasi_kualifikasi_permohonan[0]['subklasifikasi'], $get_data_klasifikasi_kualifikasi_permohonan[0]['jenjang']);
+		$info_data_permohonan = $this->Admin_model->info_data_permohonan($id_izin);
+		$get_data_personal_permohonan = $this->Admin_model->get_data_personal_permohonan($id_izin);
+		$get_data_klasifikasi_kualifikasi_permohonan = $this->Admin_model->get_data_klasifikasi_kualifikasi_permohonan($id_izin);
+		$get_data_jadwal_asesmen = $this->Admin_model->get_data_jadwal_asesmen();
+		$get_list_asesor = $this->Admin_model->get_list_asesor($get_data_klasifikasi_kualifikasi_permohonan[0]['subklasifikasi'], $get_data_klasifikasi_kualifikasi_permohonan[0]['jenjang']);
 
 		$this->data = array(
 			'username' => $this->session->userdata('username'),
@@ -1575,10 +1574,10 @@ class Admin extends MY_Controller
 		$id_izin = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
 
 		// // // Insert Peserta ke Jadwal BNSP // // //
-		$get_data_pemohon_peserta_dalam_jadwal_asesmen = $this->admin_model->get_data_pemohon_peserta_dalam_jadwal_asesmen($id_izin);
-		$get_detail_jadwal_asesmen = $this->admin_model->get_detail_jadwal_asesmen($this->input->post('kode_jadwal_asesmen', TRUE));
-		$get_data_asesor = $this->admin_model->get_data_asesor($this->input->post('asesor1', TRUE));
-		$token_bnsp = $this->api_model->get_token_bnsp();
+		$get_data_pemohon_peserta_dalam_jadwal_asesmen = $this->Admin_model->get_data_pemohon_peserta_dalam_jadwal_asesmen($id_izin);
+		$get_detail_jadwal_asesmen = $this->Admin_model->get_detail_jadwal_asesmen($this->input->post('kode_jadwal_asesmen', TRUE));
+		$get_data_asesor = $this->Admin_model->get_data_asesor($this->input->post('asesor1', TRUE));
+		$token_bnsp = $this->Api_model->get_token_bnsp();
 
 		//API Url
 		$url = $token_bnsp->host . "jadwal/peserta";
@@ -1652,19 +1651,19 @@ class Admin extends MY_Controller
 
 		if ($responseBody['code'] == "ERR") {
 			echo "<script>alert('" . $responseBody['message'] . "')</script>";
-			redirect('Admin/penunjukan_asesor/' . base64_encode($id_izin), 'refresh');
+			redirect('admin/penunjukan_asesor/' . base64_encode($id_izin), 'refresh');
 		}
 
 		// if ($responseBody["code"]="ERR"){
 		// 	echo '<script>alert("Insert Peserta ke BNSP Gagal silahkan kontak Admin IT")</script>';
-		// 	redirect('Admin/list_penunjukan_asesor','refresh');
+		// 	redirect('admin/list_penunjukan_asesor','refresh');
 		// }else{
 		// 	// Berhasil	
 		// }s
 		// // // / Insert Peserta ke Jadwal BNSP // // //
 
 		// Generate No Surat Tugas
-		$get_data_bast_terakhir = $this->admin_model->get_data_bast_terakhir();
+		$get_data_bast_terakhir = $this->Admin_model->get_data_bast_terakhir();
 
 		if (!empty($get_data_bast_terakhir && $get_data_bast_terakhir->no_surat_tugas)) {
 			$angka_terakhir = (int) substr($get_data_bast_terakhir->no_surat_tugas, 1, 7);
@@ -1702,8 +1701,8 @@ class Admin extends MY_Controller
 
 		// // // Surat Tugas Asesor ke BNSP // // //
 		//API Url
-		$get_detail_jadwal_asesmen = $this->admin_model->get_detail_jadwal_asesmen($this->input->post('kode_jadwal_asesmen', TRUE));
-		$get_data_asesor = $this->admin_model->get_data_asesor($this->input->post('asesor1', TRUE));
+		$get_detail_jadwal_asesmen = $this->Admin_model->get_detail_jadwal_asesmen($this->input->post('kode_jadwal_asesmen', TRUE));
+		$get_data_asesor = $this->Admin_model->get_data_asesor($this->input->post('asesor1', TRUE));
 		$url = $token_bnsp->host . "jadwal/asesor/surat-tugas";
 
 		//Initiate cURL.
@@ -1741,8 +1740,8 @@ class Admin extends MY_Controller
 
 
 		/// Send Mail ke Asesor 1//
-		$get_data_asesor = $this->admin_model->get_data_asesor($this->input->post('asesor1', TRUE));
-		$get_data_lsp = $this->api_model->get_token();
+		$get_data_asesor = $this->Admin_model->get_data_asesor($this->input->post('asesor1', TRUE));
+		$get_data_lsp = $this->Api_model->get_token();
 
 		$from = $this->config->item('smtp_user');
 		$to = $get_data_asesor->email;
@@ -1771,8 +1770,8 @@ class Admin extends MY_Controller
 		/// /Send Mail ke Asesor 1//
 
 		/// Send Mail ke Asesor 2//
-		$get_data_asesor = $this->admin_model->get_data_asesor($this->input->post('asesor2', TRUE));
-		$get_data_lsp = $this->api_model->get_token();
+		$get_data_asesor = $this->Admin_model->get_data_asesor($this->input->post('asesor2', TRUE));
+		$get_data_lsp = $this->Api_model->get_token();
 
 		$from = $this->config->item('smtp_user');
 		$to = $get_data_asesor->email;
@@ -1801,9 +1800,9 @@ class Admin extends MY_Controller
 		/// /Send Mail ke Asesor 2//
 
 		/// Send Mail ke User //
-		$get_data_personal_permohonan = $this->admin_model->get_data_personal_permohonan($id_izin);
-		$get_data_penunjukan_asesor = $this->admin_model->get_data_penunjukan_asesor($id_izin);
-		$get_data_lsp = $this->api_model->get_token();
+		$get_data_personal_permohonan = $this->Admin_model->get_data_personal_permohonan($id_izin);
+		$get_data_penunjukan_asesor = $this->Admin_model->get_data_penunjukan_asesor($id_izin);
+		$get_data_lsp = $this->Api_model->get_token();
 
 
 		$from = $this->config->item('smtp_user');
@@ -1833,7 +1832,7 @@ class Admin extends MY_Controller
 		/// /Send Mail ke User //
 
 		$this->session->set_flashdata('success', 'Penunjukan Asesor Berhasil');
-		redirect('Admin/list_penunjukan_asesor', 'refresh');
+		redirect('admin/list_penunjukan_asesor', 'refresh');
 	}
 	#################### / Penunjukan Asesor #######################################
 
@@ -1851,7 +1850,7 @@ class Admin extends MY_Controller
 		##/Cek Session Login##
 
 		# Get Data Master
-		$get_master_tuk = $this->master_model->get_master_tuk();
+		$get_master_tuk = $this->Master_model->get_master_tuk();
 
 		$this->data = array(
 			'username' => $this->session->userdata('username'),
@@ -1871,7 +1870,7 @@ class Admin extends MY_Controller
 		}
 		##/Cek Session Login##
 
-		$token_bnsp = $this->api_model->get_token_bnsp();
+		$token_bnsp = $this->Api_model->get_token_bnsp();
 		## Set Configuration Header.
 		$headers = array(
 			'Content-Type: application/json',
@@ -1915,7 +1914,7 @@ class Admin extends MY_Controller
 		}
 
 		######### Sync TUK SIKI #####
-		$token = $this->api_model->get_token();
+		$token = $this->Api_model->get_token();
 		$baseUrl = $token->host . "/siki-api/v2/tuk?id_lsp=" . $token->id_lsp;
 
 		## Set Configuration Header.
@@ -1948,7 +1947,7 @@ class Admin extends MY_Controller
 		}
 
 		echo "<script>alert('Data TUK Berhasil Di Update');</script>";
-		redirect('Admin/master_tuk', 'refresh');
+		redirect('admin/master_tuk', 'refresh');
 	}
 
 	public function tambah_tuk()
@@ -1960,7 +1959,7 @@ class Admin extends MY_Controller
 			redirect('login/keluar', 'refresh');
 		}
 		##/Cek Session Login##
-		$token_bnsp = $this->api_model->get_token_bnsp();
+		$token_bnsp = $this->Api_model->get_token_bnsp();
 
 
 		//config upload file izin
@@ -1996,7 +1995,7 @@ class Admin extends MY_Controller
 		$data_bukti_relavan['masa_berlaku_tuk'] = $this->input->post('masa_berlaku_tuk', TRUE);
 		$this->db->insert('master_tuk', $data_bukti_relavan);
 
-		redirect('Admin/master_tuk', 'refresh');
+		redirect('admin/master_tuk', 'refresh');
 	}
 
 	public function edit_tuk_bnsp($id_tuk)
@@ -2009,7 +2008,7 @@ class Admin extends MY_Controller
 		}
 		## /Cek Session Login ##
 
-		$token_bnsp = $this->api_model->get_token_bnsp();
+		$token_bnsp = $this->Api_model->get_token_bnsp();
 
 		## Set Configuration Header ##
 		$headers = array(
@@ -2057,7 +2056,7 @@ class Admin extends MY_Controller
 
 			if ($responseInfo['http_code'] == 200) {
 				echo "<script>alert('Data TUK Berhasil Diperbarui ke BNSP');</script>";
-				redirect('Admin/master_tuk', 'refresh');
+				redirect('admin/master_tuk', 'refresh');
 			} else {
 				$pesan_error = isset($response_array['message']) ? $response_array['message'] : 'Gagal memperbarui data ke server BNSP.';
 				echo "<script>alert('Error: " . $pesan_error . "');</script>";
@@ -2070,7 +2069,7 @@ class Admin extends MY_Controller
 			show_404();
 		}
 
-		$this->load->view('Admin/master_tuk', $data);
+		$this->load->view('admin/master_tuk', $data);
 	}
 
 	public function delete_tuk($id_tuk)
@@ -2084,7 +2083,7 @@ class Admin extends MY_Controller
 		##/Cek Session Login##
 
 		$this->db->delete('master_tuk', array('id' => $id_tuk));
-		redirect('Admin/master_tuk', 'refresh');
+		redirect('admin/master_tuk', 'refresh');
 	}
 
 	/// /TUK
@@ -2101,8 +2100,8 @@ class Admin extends MY_Controller
 		##/Cek Session Login##
 
 		# Get Data Master
-		$get_master_asesor = $this->master_model->get_master_asesor();
-		$get_master_subklasifikasi = $this->master_model->get_master_subklasifikasi();
+		$get_master_asesor = $this->Master_model->get_master_asesor();
+		$get_master_subklasifikasi = $this->Master_model->get_master_subklasifikasi();
 
 		$this->data = array(
 			'username' => $this->session->userdata('username'),
@@ -2150,7 +2149,7 @@ class Admin extends MY_Controller
 		$user_login['status'] = '1';
 		$this->db->insert('user_login', $user_login);
 
-		redirect('Admin/master_asesor', 'refresh');
+		redirect('admin/master_asesor', 'refresh');
 	}
 
 	public function aktivasi_asesor($no_reg_asesor_bnsp)
@@ -2164,7 +2163,7 @@ class Admin extends MY_Controller
 		##/Cek Session Login##
 
 		#Get Data Master
-		$token_bnsp = $this->api_model->get_token_bnsp();
+		$token_bnsp = $this->Api_model->get_token_bnsp();
 
 
 		$curl = curl_init();
@@ -2201,14 +2200,14 @@ class Admin extends MY_Controller
 			$where = array(
 				'no_reg_bnsp' => urldecode($no_reg_asesor_bnsp)
 			);
-			$this->admin_model->update_data($where, $data, 'master_asesor');
+			$this->Admin_model->update_data($where, $data, 'master_asesor');
 
 			echo '<script>alert("Asesor Berhasil di Aktivasi")</script>';
 		} elseif ($result['code'] == "ERR") {
 			echo '<script>alert("' . $result['message'] . ' - Pastikan No Registrasi Asesor Sesuai dengan diBNSP & Sertifikat Kompetensi Asesor Telah diUpload di BNSP")</script>';
 		}
 
-		redirect('Admin/master_asesor', 'refresh');
+		redirect('admin/master_asesor', 'refresh');
 	}
 
 	/////// Jadwal Asesmen /////////
@@ -2223,11 +2222,11 @@ class Admin extends MY_Controller
 		##/Cek Session Login##
 
 		# Get Data Master
-		$get_data_jadwal_asesmen = $this->master_model->get_data_jadwal_asesmen();
-		$get_master_tuk = $this->master_model->get_master_tuk();
-		$get_master_jenis_jadwal = $this->master_model->master_bnsp_jenis_jadwal();
-		$get_master_jenis_anggaran = $this->master_model->master_bnsp_jenis_anggaran();
-		$get_master_jabatan_kerja = $this->master_model->get_master_jabatan_kerja();
+		$get_data_jadwal_asesmen = $this->Master_model->get_data_jadwal_asesmen();
+		$get_master_tuk = $this->Master_model->get_master_tuk();
+		$get_master_jenis_jadwal = $this->Master_model->master_bnsp_jenis_jadwal();
+		$get_master_jenis_anggaran = $this->Master_model->master_bnsp_jenis_anggaran();
+		$get_master_jabatan_kerja = $this->Master_model->get_master_jabatan_kerja();
 
 		$this->data = array(
 			'username' => $this->session->userdata('username'),
@@ -2251,8 +2250,8 @@ class Admin extends MY_Controller
 		}
 		##/Cek Session Login##
 
-		$token_bnsp = $this->api_model->get_token_bnsp();
-		$get_data_detail_jabker = $this->master_model->get_data_detail_jabker($this->input->post('skema', TRUE));
+		$token_bnsp = $this->Api_model->get_token_bnsp();
+		$get_data_detail_jabker = $this->Master_model->get_data_detail_jabker($this->input->post('skema', TRUE));
 
 		//API Url
 		$url = $token_bnsp->host . "jadwal";
@@ -2299,10 +2298,10 @@ class Admin extends MY_Controller
 		if ($arr['code'] == "ERR") {
 			echo "<script>
 			alert('" . $arr['message'] . "');
-			window.location.href='" . base_url('Admin/jadwal_asesmen') . "';
+			window.location.href='" . base_url('admin/jadwal_asesmen') . "';
 			</script>";
 		} else {
-			redirect('Admin/update_jadwal_asesmen', 'refresh');
+			redirect('admin/update_jadwal_asesmen', 'refresh');
 		}
 		//Execute the request to array
 		// $arr = json_decode(curl_exec($ch), true);
@@ -2319,7 +2318,7 @@ class Admin extends MY_Controller
 			redirect('login/keluar', 'refresh');
 		}
 		##/Cek Session Login##
-		$token_bnsp = $this->api_model->get_token_bnsp();
+		$token_bnsp = $this->Api_model->get_token_bnsp();
 
 		//API Url
 		$url = $token_bnsp->host . "jadwal/confirm";
@@ -2365,10 +2364,10 @@ class Admin extends MY_Controller
 		$where = array(
 			'id' => $id_jadwal
 		);
-		$this->admin_model->update_data($where, $data, 'data_jadwal_asesmen');
+		$this->Admin_model->update_data($where, $data, 'data_jadwal_asesmen');
 
 
-		redirect('Admin/update_jadwal_asesmen', 'refresh');
+		redirect('admin/update_jadwal_asesmen', 'refresh');
 	}
 
 	public function konfirm_terima_blanko($id_jadwal)
@@ -2380,7 +2379,7 @@ class Admin extends MY_Controller
 			redirect('login/keluar', 'refresh');
 		}
 		##/Cek Session Login##
-		$token_bnsp = $this->api_model->get_token_bnsp();
+		$token_bnsp = $this->Api_model->get_token_bnsp();
 
 		//API Url
 		$url = $token_bnsp->host . "jadwal/cetak";
@@ -2422,9 +2421,9 @@ class Admin extends MY_Controller
 		$where = array(
 			'id' => $id_jadwal
 		);
-		$this->admin_model->update_data($where, $data, 'data_jadwal_asesmen');
+		$this->Admin_model->update_data($where, $data, 'data_jadwal_asesmen');
 
-		redirect('Admin/update_jadwal_asesmen', 'refresh');
+		redirect('admin/update_jadwal_asesmen', 'refresh');
 	}
 
 	public function update_jadwal_asesmen()
@@ -2438,7 +2437,7 @@ class Admin extends MY_Controller
 		##/Cek Session Login##
 
 
-		$token_bnsp = $this->api_model->get_token_bnsp();
+		$token_bnsp = $this->Api_model->get_token_bnsp();
 		## Set Configuration Header.
 		$headers = array(
 			'Content-Type: application/json',
@@ -2484,7 +2483,7 @@ class Admin extends MY_Controller
 		}
 
 		echo "<script>alert('Data Jadwal Asesmen Berhasil di Update/Syncron dengan BNSP');</script>";
-		redirect('Admin/jadwal_asesmen', 'refresh');
+		redirect('admin/jadwal_asesmen', 'refresh');
 	}
 
 	#################### / Master #######################################
@@ -2498,7 +2497,7 @@ class Admin extends MY_Controller
 			redirect('login/keluar', 'refresh');
 		}
 		##/Cek Session Login##
-		$get_data_selesai_penetapan = $this->admin_model->get_data_selesai_penetapan();
+		$get_data_selesai_penetapan = $this->Admin_model->get_data_selesai_penetapan();
 
 		$this->data = array(
 			'username' => $this->session->userdata('username'),
@@ -2521,17 +2520,17 @@ class Admin extends MY_Controller
 		$id_izin_clean = $this->security->xss_clean($id_izin_raw);
 		$id_izin = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
 		$log = date("Y-m-d H:i:s");
-		$token_bnsp = $this->api_model->get_token_bnsp();
-		$get_data_pencatatan = $this->admin_model->get_data_pencatatan($id_izin);
-		$get_detail_jadwal_asesmen_per_permohonan = $this->admin_model->get_detail_jadwal_asesmen_per_permohonan($id_izin);
-		$get_data_rekomendasi_asesor_lpjk = $this->admin_model->get_data_rekomendasi_asesor_lpjk($id_izin);
-		$get_bukti_dokumentasi_asesmen = $this->asesor_model->get_bukti_dokumentasi_asesmen($id_izin);
-		$get_data_pelaporan_asesor = $this->admin_model->get_data_pelaporan_asesor($id_izin);
-		$kode_jadwal = $this->admin_model->get_detail_jadwal_asesmen_per_permohonan($id_izin);
-		$get_verifikasi_tuk = $this->admin_model->get_verifikasi_tuk($kode_jadwal);
-		$get_absensi_pra_asesmen = $this->admin_model->get_absensi_pra_asesmen($kode_jadwal);
-		$get_absensi_asesmen = $this->admin_model->get_absensi_asesmen($kode_jadwal);
-		$token = $this->api_model->get_token();
+		$token_bnsp = $this->Api_model->get_token_bnsp();
+		$get_data_pencatatan = $this->Admin_model->get_data_pencatatan($id_izin);
+		$get_detail_jadwal_asesmen_per_permohonan = $this->Admin_model->get_detail_jadwal_asesmen_per_permohonan($id_izin);
+		$get_data_rekomendasi_asesor_lpjk = $this->Admin_model->get_data_rekomendasi_asesor_lpjk($id_izin);
+		$get_bukti_dokumentasi_asesmen = $this->Asesor_model->get_bukti_dokumentasi_asesmen($id_izin);
+		$get_data_pelaporan_asesor = $this->Admin_model->get_data_pelaporan_asesor($id_izin);
+		$kode_jadwal = $this->Admin_model->get_detail_jadwal_asesmen_per_permohonan($id_izin);
+		$get_verifikasi_tuk = $this->Admin_model->get_verifikasi_tuk($kode_jadwal);
+		$get_absensi_pra_asesmen = $this->Admin_model->get_absensi_pra_asesmen($kode_jadwal);
+		$get_absensi_asesmen = $this->Admin_model->get_absensi_asesmen($kode_jadwal);
+		$token = $this->Api_model->get_token();
 
 		## Set Configuration Header.
 		$headers = array(
@@ -2727,12 +2726,12 @@ class Admin extends MY_Controller
 						if (substr($arr['message'], -15) == 'tidak terdaftar') {
 							if (substr($arr['message'], -15) == 'tidak terdaftar') {
 								$this->session->set_flashdata('message_pelaporan_asesor', $arr['message'] . ' Pastikan Asesor tersebut telah tercatat di Lisensi LPJK');
-								redirect('Admin/list_selesai_penetapan', 'refresh');
+								redirect('admin/list_selesai_penetapan', 'refresh');
 							}
 						}
 						// Pemenuhan Penetapan Komite ke LPJK
-						$get_data_penetapan_komite_lpjk = $this->admin_model->get_data_penetapan_komite_lpjk($id_izin);
-						$get_komite = $this->admin_model->get_data_penetapan_komite_lpjk($id_izin);
+						$get_data_penetapan_komite_lpjk = $this->Admin_model->get_data_penetapan_komite_lpjk($id_izin);
+						$get_komite = $this->Admin_model->get_data_penetapan_komite_lpjk($id_izin);
 						$curl = curl_init();
 
 						if ($get_data_penetapan_komite_lpjk->hasil_penetapan == "Kompeten") {
@@ -2793,7 +2792,7 @@ class Admin extends MY_Controller
 						$where = array(
 							'id_izin' => $id_izin
 						);
-						$this->admin_model->update_data($where, $data, 'data_pencatatan_sertifikasi');
+						$this->Admin_model->update_data($where, $data, 'data_pencatatan_sertifikasi');
 
 						// Update data Pencatatan ke SIKI
 						//API Url
@@ -2829,28 +2828,28 @@ class Admin extends MY_Controller
 							$this->hit_status_ulang(base64_encode($id_izin), '10');
 							$this->hit_status_ulang(base64_encode($id_izin), '30');
 							$this->hit_status_ulang(base64_encode($id_izin), '31');
-							redirect('Admin/get_blanko_bnsp/' . base64_encode($id_izin), 'refresh');
+							redirect('admin/get_blanko_bnsp/' . base64_encode($id_izin), 'refresh');
 
 						} elseif (substr($arr['message'], -2) == "20") {
 							$this->hit_status_ulang(base64_encode($id_izin), '10');
 							$this->hit_status_ulang(base64_encode($id_izin), '30');
 							$this->hit_status_ulang(base64_encode($id_izin), '31');
-							redirect('Admin/get_blanko_bnsp/' . base64_encode($id_izin), 'refresh');
+							redirect('admin/get_blanko_bnsp/' . base64_encode($id_izin), 'refresh');
 
 						} elseif (substr($arr['message'], -2) == "10") {
 							$this->hit_status_ulang(base64_encode($id_izin), '30');
 							$this->hit_status_ulang(base64_encode($id_izin), '31');
-							redirect('Admin/get_blanko_bnsp/' . base64_encode($id_izin), 'refresh');
+							redirect('admin/get_blanko_bnsp/' . base64_encode($id_izin), 'refresh');
 
 						} elseif (substr($arr['message'], -2) == "30") {
 							$this->hit_status_ulang(base64_encode($id_izin), '31');
-							redirect('Admin/get_blanko_bnsp/' . base64_encode($id_izin), 'refresh');
+							redirect('admin/get_blanko_bnsp/' . base64_encode($id_izin), 'refresh');
 
 						}
 
 						if ($arr['status'] == 'errors') {
 							$this->session->set_flashdata('message_pencatatan_siki', $arr['message']);
-							redirect('Admin/list_selesai_penetapan', 'refresh');
+							redirect('admin/list_selesai_penetapan', 'refresh');
 						}
 
 						// Ketika gagal generate blanko
@@ -2862,10 +2861,10 @@ class Admin extends MY_Controller
 								$this->kirim_ba_ujikom_balai(base64_encode($id_izin));
 								$this->konfirm_pembayaran_balai(base64_encode($id_izin));
 
-								// redirect('Admin/get_blanko_bnsp/'.base64_encode($id_izin),'refresh');
+								// redirect('admin/get_blanko_bnsp/'.base64_encode($id_izin),'refresh');
 							} elseif (substr($arr['message'], -2) == '33') {
 								$this->konfirm_pembayaran_balai(base64_encode($id_izin));
-								// redirect('Admin/get_blanko_bnsp/'.base64_encode($id_izin),'refresh');
+								// redirect('admin/get_blanko_bnsp/'.base64_encode($id_izin),'refresh');
 							}
 						}
 
@@ -2879,7 +2878,7 @@ class Admin extends MY_Controller
 						$where = array(
 							'id_izin' => $id_izin
 						);
-						$this->admin_model->update_data($where, $data, 'data_pencatatan_sertifikasi');
+						$this->Admin_model->update_data($where, $data, 'data_pencatatan_sertifikasi');
 
 						echo "<script>alert('Data Blanko Berhasil di GET');</script>";
 					}
@@ -2888,7 +2887,7 @@ class Admin extends MY_Controller
 		} else {
 			echo "<script>alert('Permohonan Blanko Belum di Approve');</script>";
 		}
-		redirect('Admin/list_selesai_penetapan', 'refresh');
+		redirect('admin/list_selesai_penetapan', 'refresh');
 	}
 
 	public function izin_final_siki_portal($id_izin)
@@ -2907,7 +2906,7 @@ class Admin extends MY_Controller
 
 		///////////////////////{ Pencatatan SKK } //////////////////////////
 		//API Url
-		$token = $this->api_model->get_token();
+		$token = $this->Api_model->get_token();
 		$url = $token->host . '/siki-api/v1/izin-final-skk/' . $id_izin;
 
 		//Initiate cURL.
@@ -2939,9 +2938,9 @@ class Admin extends MY_Controller
 
 
 		///////////// Pencatatan ke BNSP ///////////////////
-		$token_bnsp = $this->api_model->get_token_bnsp();
-		$get_detail_jadwal_asesmen_per_permohonan = $this->admin_model->get_detail_jadwal_asesmen_per_permohonan($id_izin);
-		$get_data_pencatatan = $this->admin_model->get_data_pencatatan($id_izin);
+		$token_bnsp = $this->Api_model->get_token_bnsp();
+		$get_detail_jadwal_asesmen_per_permohonan = $this->Admin_model->get_detail_jadwal_asesmen_per_permohonan($id_izin);
+		$get_data_pencatatan = $this->Admin_model->get_data_pencatatan($id_izin);
 
 		//API Url
 		$url = $token_bnsp->host . "jadwal/peserta/sertifikat";
@@ -2982,7 +2981,7 @@ class Admin extends MY_Controller
 
 		// if ($responseBody["code"]="ERR"){
 		// 	echo '<script>alert("Izin Final ke BNSP Gagal silahkan kontak Admin IT")</script>';
-		// 	redirect('Admin/list_selesai_penetapan','refresh');
+		// 	redirect('admin/list_selesai_penetapan','refresh');
 		// }else{
 		// 	// Berhasil	
 		// }
@@ -2995,9 +2994,9 @@ class Admin extends MY_Controller
 		$data_tinjau['kode_status'] = "50";
 		$data_tinjau['log'] = date("Y-m-d H:i:s");
 		$data_tinjau['username'] = $this->session->userdata('username');
-		$this->admin_model->insert_log_history_permohonan($data_tinjau);
+		$this->Admin_model->insert_log_history_permohonan($data_tinjau);
 
-		redirect('Admin/list_selesai_penetapan', 'refresh');
+		redirect('admin/list_selesai_penetapan', 'refresh');
 
 	}
 
@@ -3010,7 +3009,7 @@ class Admin extends MY_Controller
 			redirect('login/keluar', 'refresh');
 		}
 		##/Cek Session Login##
-		$get_data_terbit_sertifikat = $this->admin_model->get_data_terbit_sertifikat();
+		$get_data_terbit_sertifikat = $this->Admin_model->get_data_terbit_sertifikat();
 
 		$this->data = array(
 			'username' => $this->session->userdata('username'),
@@ -3046,13 +3045,13 @@ class Admin extends MY_Controller
 			redirect('login/keluar', 'refresh');
 		}
 		##/Cek Session Login##
-		$get_status_terkahir = $this->master_model->get_status_terkahir($this->input->post('id_izin', TRUE));
+		$get_status_terkahir = $this->Master_model->get_status_terkahir($this->input->post('id_izin', TRUE));
 		if ($get_status_terkahir->kode_status == "50") {
 			$this->session->set_flashdata('failed', 'Sertifikat Sudah Terbit Silahkan menggunakan Metode Pencabutan');
-			header("location:" . base_url('Admin/tolak_permohonan/'));
+			header("location:" . base_url('admin/tolak_permohonan/'));
 		} else {
 			//API Url
-			$token = $this->api_model->get_token($this->session->userdata('id_lsp'));
+			$token = $this->Api_model->get_token($this->session->userdata('id_lsp'));
 			$url = $token->host . '/siki-api/v1/permohonan-skk/' . $this->input->post('id_izin', TRUE);
 
 			//Initiate cURL.
@@ -3087,10 +3086,10 @@ class Admin extends MY_Controller
 				$status['kode_status'] = '90';
 				$status['log'] = date("Y-m-d H:i:s");
 				$status['username'] = $this->session->userdata('username');
-				$this->admin_model->insert_log_history_permohonan($status);
+				$this->Admin_model->insert_log_history_permohonan($status);
 
 				$this->session->set_flashdata('success', 'Tolak Permohonan Berhasil Dilakukan');
-				header("location:" . base_url('Admin/tolak_permohonan/'));
+				header("location:" . base_url('admin/tolak_permohonan/'));
 			}
 		}
 	}
@@ -3098,13 +3097,13 @@ class Admin extends MY_Controller
 	################# Master Subklasifikasi Kualifikasi ################
 	function get_master_klasifikasi_json()
 	{
-		$data = $this->master_model->get_master_klasifikasi_json()->result();
+		$data = $this->Master_model->get_master_klasifikasi_json()->result();
 		echo json_encode($data);
 	}
 
 	function get_master_subklasifikasi_json()
 	{
-		$data = $this->master_model->get_master_subklasifikasi_json()->result();
+		$data = $this->Master_model->get_master_subklasifikasi_json()->result();
 		echo json_encode($data);
 	}
 
@@ -3124,7 +3123,7 @@ class Admin extends MY_Controller
 		$id_izin = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
 		$log = date("Y-m-d H:i:s");
 
-		$token = $this->api_model->get_token();
+		$token = $this->Api_model->get_token();
 
 		if ($kode_status == "20") {
 			$keterangan = "Tinjau Permohonan";
@@ -3179,7 +3178,7 @@ class Admin extends MY_Controller
 			redirect('login/keluar', 'refresh');
 		}
 
-		$list_permohonan = $this->admin_model->get_list_penunjukan_komite();
+		$list_permohonan = $this->Admin_model->get_list_penunjukan_komite();
 		$this->data = array(
 			'username' => $this->session->userdata('username'),
 			'level' => $this->session->userdata('level'),
@@ -3200,10 +3199,10 @@ class Admin extends MY_Controller
 		$id_izin_clean = $this->security->xss_clean($id_izin_raw);
 		$id_izin = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
 
-		$get_penunjukan = $this->admin_model->get_penunjukan_komite($id_izin);
-		$get_absensi = $this->admin_model->get_absensi_komite($id_izin);
-		$get_master_komite = $this->admin_model->get_master_komite();
-		$get_ba = $this->admin_model->get_ba_komite_by_izin($id_izin);
+		$get_penunjukan = $this->Admin_model->get_penunjukan_komite($id_izin);
+		$get_absensi = $this->Admin_model->get_absensi_komite($id_izin);
+		$get_master_komite = $this->Admin_model->get_master_komite();
+		$get_ba = $this->Admin_model->get_ba_komite_by_izin($id_izin);
 
 		$this->data = array(
 			'username' => $this->session->userdata('username'),
@@ -3229,7 +3228,7 @@ class Admin extends MY_Controller
 		$tahun = date('Y');
 		$prefix = "LSP/ST-KT/" . $bulan_romawi . "/" . $tahun . "/";
 
-		$surat_terakhir = $this->admin_model->get_nomor_st_penunjukan_komite();
+		$surat_terakhir = $this->Admin_model->get_nomor_st_penunjukan_komite();
 
 		if ($surat_terakhir) {
 			$no_urut_terakhir = (int) substr($surat_terakhir, -3);
@@ -3248,7 +3247,7 @@ class Admin extends MY_Controller
 			'log' => date('Y-m-d H:i:s')
 		);
 
-		$this->admin_model->simpan_penunjukan_komite($data);
+		$this->Admin_model->simpan_penunjukan_komite($data);
 		$this->session->set_flashdata('pesan', '<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert">&times;</button>SK Penunjukan Komite berhasil disimpan dengan nomor: <b>' . $no_surat_otomatis . '</b></div>');
 		redirect($_SERVER['HTTP_REFERER']);
 	}
@@ -3277,7 +3276,7 @@ class Admin extends MY_Controller
 		}
 
 		if (!empty($data_batch)) {
-			$this->admin_model->simpan_absensi_komite($data_batch, $id_izin);
+			$this->Admin_model->simpan_absensi_komite($data_batch, $id_izin);
 			$this->session->set_flashdata('pesan', '<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert">&times;</button>Absensi Komite berhasil disimpan!</div>');
 		}
 		redirect($_SERVER['HTTP_REFERER']);
@@ -3297,12 +3296,12 @@ class Admin extends MY_Controller
 
 		$this->load->library('pdfgenerator');
 
-		$token = $this->api_model->get_token();
+		$token = $this->Api_model->get_token();
 
-		$get_penunjukan = $this->admin_model->get_penunjukan_komite($id_izin);
-		$get_data_klasifikasi_kualifikasi = $this->asesor_model->get_data_klasifikasi_kualifikasi($id_izin);
-		$get_data_personal_permohonan = $this->asesor_model->get_data_personal_permohonan($id_izin);
-		$get_master_komite = $this->admin_model->get_master_komite();
+		$get_penunjukan = $this->Admin_model->get_penunjukan_komite($id_izin);
+		$get_data_klasifikasi_kualifikasi = $this->Asesor_model->get_data_klasifikasi_kualifikasi($id_izin);
+		$get_data_personal_permohonan = $this->Asesor_model->get_data_personal_permohonan($id_izin);
+		$get_master_komite = $this->Admin_model->get_master_komite();
 		$get_data_ketua_pelaksana = $this->db->get('master_ketua_pelaksana')->row();
 
 		$data = array(
@@ -3339,13 +3338,13 @@ class Admin extends MY_Controller
 		$id_izin = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
 
 		$this->load->library('pdfgenerator');
-		$token = $this->api_model->get_token();
+		$token = $this->Api_model->get_token();
 
-		$get_absensi = $this->admin_model->get_absensi_komite($id_izin);
-		$get_penunjukan = $this->admin_model->get_penunjukan_komite($id_izin);
-		$get_data_klasifikasi = $this->asesor_model->get_data_klasifikasi_kualifikasi($id_izin);
-		$get_data_personal = $this->asesor_model->get_data_personal_permohonan($id_izin);
-		$get_master_komite = $this->admin_model->get_master_komite();
+		$get_absensi = $this->Admin_model->get_absensi_komite($id_izin);
+		$get_penunjukan = $this->Admin_model->get_penunjukan_komite($id_izin);
+		$get_data_klasifikasi = $this->Asesor_model->get_data_klasifikasi_kualifikasi($id_izin);
+		$get_data_personal = $this->Asesor_model->get_data_personal_permohonan($id_izin);
+		$get_master_komite = $this->Admin_model->get_master_komite();
 
 		$data = array(
 			'id_izin' => $id_izin,
@@ -3386,7 +3385,7 @@ class Admin extends MY_Controller
 			'catatan' => $catatan,
 		);
 
-		$this->admin_model->simpan_ba_komite($data, $id_izin);
+		$this->Admin_model->simpan_ba_komite($data, $id_izin);
 
 		$this->session->set_flashdata('pesan', '<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert">&times;</button>Berita Acara Pleno berhasil disimpan </b></div>');
 		redirect($_SERVER['HTTP_REFERER']);
@@ -3406,12 +3405,12 @@ class Admin extends MY_Controller
 
 		$this->load->library('pdfgenerator');
 
-		$get_penunjukan = $this->admin_model->get_penunjukan_komite($id_izin);
-		$get_ba = $this->admin_model->get_ba_komite_by_izin($id_izin);
-		$get_data_klasifikasi = $this->asesor_model->get_data_klasifikasi_kualifikasi($id_izin);
-		$get_data_personal = $this->asesor_model->get_data_personal_permohonan($id_izin);
-		$get_master_komite = $this->admin_model->get_master_komite();
-		$token = $this->api_model->get_token();
+		$get_penunjukan = $this->Admin_model->get_penunjukan_komite($id_izin);
+		$get_ba = $this->Admin_model->get_ba_komite_by_izin($id_izin);
+		$get_data_klasifikasi = $this->Asesor_model->get_data_klasifikasi_kualifikasi($id_izin);
+		$get_data_personal = $this->Asesor_model->get_data_personal_permohonan($id_izin);
+		$get_master_komite = $this->Admin_model->get_master_komite();
+		$token = $this->Api_model->get_token();
 
 		$data = array(
 			'id_izin' => $id_izin,
@@ -3436,13 +3435,13 @@ class Admin extends MY_Controller
 
 	public function post_siki_komtek($id_izin)
 	{
-		$this->load->model('admin_model');
-		$data_komtek = $this->admin_model->get_data_komtek_siki($id_izin);
-		$token = $this->api_model->get_token();
+		$this->load->model('Admin_model');
+		$data_komtek = $this->Admin_model->get_data_komtek_siki($id_izin);
+		$token = $this->Api_model->get_token();
 
 		if (!$data_komtek) {
 			$this->session->set_flashdata('error', 'Data komite teknis tidak ditemukan.');
-			redirect('Admin/penunjukan_komite/' . $id_izin);
+			redirect('admin/penunjukan_komite/' . $id_izin);
 			return;
 		}
 
@@ -3493,7 +3492,7 @@ class Admin extends MY_Controller
 			$res_data = json_decode($response, true);
 
 			if ($http_code == 200 || $http_code == 201) {
-				$this->admin_model->update_status_siki($id_izin, 'SUCCESS');
+				$this->Admin_model->update_status_siki($id_izin, 'SUCCESS');
 				$this->session->set_flashdata('success', 'Data Komtek berhasil di-post ke SIKI!');
 			} else {
 				$msg = isset($res_data['message']) ? $res_data['message'] : 'Gagal sinkronisasi API SIKI.';
@@ -3523,7 +3522,7 @@ class Admin extends MY_Controller
 			redirect('login/keluar', 'refresh');
 		}
 
-		$list_jadwal = $this->admin_model->get_list_jadwal_asesmen();
+		$list_jadwal = $this->Admin_model->get_list_jadwal_asesmen();
 
 		$this->data = array(
 			'username' => $this->session->userdata('username'),
@@ -3543,8 +3542,8 @@ class Admin extends MY_Controller
 		}
 
 		$kode_jadwal = base64_decode($kode_jadwal);
-		$get_jadwal = $this->admin_model->get_detail_jadwal_asesmen($kode_jadwal);
-		$get_verifikasi = $this->admin_model->get_verifikasi_tuk($kode_jadwal);
+		$get_jadwal = $this->Admin_model->get_detail_jadwal_asesmen($kode_jadwal);
+		$get_verifikasi = $this->Admin_model->get_verifikasi_tuk($kode_jadwal);
 
 		$get_master_verifikator = $this->db->get('master_verifikator')->result_array();
 
@@ -3567,7 +3566,7 @@ class Admin extends MY_Controller
 		}
 
 		$kode_jadwal = $this->input->post('kode_jadwal', TRUE);
-		$no_surat_auto = $this->admin_model->generate_no_verifikasi_tuk();
+		$no_surat_auto = $this->Admin_model->generate_no_verifikasi_tuk();
 
 		$data = array(
 			'kode_jadwal' => $kode_jadwal,
@@ -3607,7 +3606,7 @@ class Admin extends MY_Controller
 			}
 		}
 
-		$this->admin_model->simpan_verifikasi_tuk($data);
+		$this->Admin_model->simpan_verifikasi_tuk($data);
 		$this->session->set_flashdata('pesan', '<div class="alert alert-success alert-dismissible"><button type="button" class="close" data-dismiss="alert">&times;</button>Data Verifikasi TUK berhasil disimpan dengan nomor: ' . $no_surat_auto . '</div>');
 
 		redirect($_SERVER['HTTP_REFERER']);
@@ -3623,7 +3622,7 @@ class Admin extends MY_Controller
 			redirect('login', 'refresh');
 		}
 
-		$list_pernyataan = $this->admin_model->get_data_terbit_sertifikat();
+		$list_pernyataan = $this->Admin_model->get_data_terbit_sertifikat();
 
 		$this->data = array(
 			'username' => $this->session->userdata('username'),
@@ -3643,10 +3642,10 @@ class Admin extends MY_Controller
 		$this->load->library('pdfgenerator');
 
 		$id_izin = base64_decode($id_izin);
-		$token = $this->api_model->get_token();
+		$token = $this->Api_model->get_token();
 
-		$get_data_personal = $this->asesor_model->get_data_personal_permohonan($id_izin);
-		$get_data_klasifikasi = $this->asesor_model->get_data_klasifikasi_kualifikasi($id_izin);
+		$get_data_personal = $this->Asesor_model->get_data_personal_permohonan($id_izin);
+		$get_data_klasifikasi = $this->Asesor_model->get_data_klasifikasi_kualifikasi($id_izin);
 		$get_data_apl01 = $this->db->get_where('data_apl01_permohonan', array('id_izin' => $id_izin))->row();
 		$get_data_sertifikat = $this->db->get_where('data_pencatatan_sertifikasi', array('id_izin' => $id_izin))->row();
 
@@ -3676,7 +3675,7 @@ class Admin extends MY_Controller
 
 	public function list_pra_asesmen()
 	{
-		$list_jadwal = $this->admin_model->get_list_jadwal_asesmen();
+		$list_jadwal = $this->Admin_model->get_list_jadwal_asesmen();
 		$this->data = array('list_jadwal' => $list_jadwal);
 		$this->template->load('menu', 'Admin/pra_asesmen/list_pra_asesmen', $this->data);
 	}
@@ -3687,7 +3686,7 @@ class Admin extends MY_Controller
 		$kode_jadwal_clean = $this->security->xss_clean($kode_jadwal_raw);
 		$kode_jadwal = preg_replace('/[^a-zA-Z0-9-]/', '', $kode_jadwal_clean);
 
-		$get_jadwal = $this->admin_model->get_detail_jadwal_asesmen($kode_jadwal);
+		$get_jadwal = $this->Admin_model->get_detail_jadwal_asesmen($kode_jadwal);
 
 		$get_absen_terakhir = $this->db->get_where('data_absensi_pra_asesmen', array('kode_jadwal' => $kode_jadwal))->row();
 
@@ -3731,7 +3730,7 @@ class Admin extends MY_Controller
 				'log' => date('Y-m-d H:i:s')
 			);
 
-			$this->admin_model->simpan_absensi_pra_asesmen($data);
+			$this->Admin_model->simpan_absensi_pra_asesmen($data);
 
 			$this->session->set_flashdata('success', 'File absensi pra-asesmen berhasil diunggah!');
 		} else {
@@ -3748,7 +3747,7 @@ class Admin extends MY_Controller
 
 	public function list_asesmen()
 	{
-		$list_jadwal = $this->admin_model->get_list_jadwal_asesmen();
+		$list_jadwal = $this->Admin_model->get_list_jadwal_asesmen();
 		$this->data = array('list_jadwal' => $list_jadwal);
 		$this->template->load('menu', 'Admin/asesmen/list_asesmen', $this->data);
 	}
@@ -3759,7 +3758,7 @@ class Admin extends MY_Controller
 		$kode_jadwal_clean = $this->security->xss_clean($kode_jadwal_raw);
 		$kode_jadwal = preg_replace('/[^a-zA-Z0-9-]/', '', $kode_jadwal_clean);
 
-		$get_jadwal = $this->admin_model->get_detail_jadwal_asesmen($kode_jadwal);
+		$get_jadwal = $this->Admin_model->get_detail_jadwal_asesmen($kode_jadwal);
 
 		$get_absen_terakhir = $this->db->get_where('data_absensi_asesmen', array('kode_jadwal' => $kode_jadwal))->row();
 
@@ -3804,7 +3803,7 @@ class Admin extends MY_Controller
 				'log' => date('Y-m-d H:i:s')
 			);
 
-			$this->admin_model->simpan_absensi_asesmen($data);
+			$this->Admin_model->simpan_absensi_asesmen($data);
 			$this->session->set_flashdata('pesan', '<div class="alert alert-success">File berhasil diunggah!</div>');
 		} else {
 			$this->session->set_flashdata('pesan', '<div class="alert alert-danger">' . $this->upload->display_errors() . '</div>');
