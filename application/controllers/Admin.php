@@ -3195,7 +3195,9 @@ class Admin extends MY_Controller
 			redirect('login/keluar', 'refresh');
 		}
 
-		$id_izin_raw = base64_decode($id_izin);
+		$base64_standard = str_replace(['-', '_'], ['+', '/'], $id_izin);
+		$id_izin_raw = base64_decode($base64_standard);
+
 		$id_izin_clean = $this->security->xss_clean($id_izin_raw);
 		$id_izin = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
 
