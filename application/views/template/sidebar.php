@@ -257,6 +257,10 @@
                     <a class="collapse-item" href="<?= base_url('admin/master_tuk'); ?>">TUK</a>
                     <a class="collapse-item" href="<?= base_url('admin/master_asesor'); ?>">Asesor</a>
                     <a class="collapse-item" href="<?= base_url('admin/jadwal_asesmen'); ?>">Jadwal Asesmen</a>
+                    <a class="collapse-item" href="<?= base_url('admin/galeri'); ?>">Galeri</a>
+                    <a class="collapse-item" href="<?= base_url('admin/pengumuman'); ?>">Pengumuman</a>
+                    <a class="collapse-item" href="<?= base_url('admin/berita'); ?>">Berita</a>
+                    <a class="collapse-item" href="<?= base_url('admin/kontak'); ?>">Kontak</a>
                 </div>
             </div>
         </li>

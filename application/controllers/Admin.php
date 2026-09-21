@@ -21,6 +21,7 @@ class Admin extends MY_Controller
 		$this->load->model('master_model');
 		$this->load->model('api_model');
 		$this->load->model('report_model');
+		$this->load->model('home_model');
 
 		## GET Model Admin Model
 		date_default_timezone_set('Asia/Jakarta');
@@ -2703,7 +2704,7 @@ class Admin extends MY_Controller
 						$jsonData_rekom_asesor_encode = json_encode($jsonData_rekom_asesor);
 
 						curl_setopt_array($curl, array(
-							CURLOPT_URL => $token->host . '/siki-api/v2/asesor-lsp-penugasan/' . $id_izin,
+							CURLOPT_URL => $token->host . '/siki-api/v3/asesor-lsp-penugasan/' . $id_izin,
 							CURLOPT_RETURNTRANSFER => true,
 							CURLOPT_ENCODING => '',
 							CURLOPT_MAXREDIRS => 10,
@@ -3468,7 +3469,7 @@ class Admin extends MY_Controller
 			"url_absensi_tim_komtek" => $data_komtek->url_absensi_tim_komtek
 		);
 
-		$endpoint = "https://siki.pu.go.id/siki-api/v1/komtek-lsp-penugasan/" . $id_izin;
+		$endpoint = $token->host . '/siki-api/v1/komtek-lsp-penugasan/' . $id_izin;
 
 		$ch = curl_init($endpoint);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -3715,7 +3716,7 @@ class Admin extends MY_Controller
 		$ext = pathinfo($_FILES['file_absen']['name'], PATHINFO_EXTENSION);
 		$config['file_name'] = 'Absen_Pra_' . str_replace('/', '_', $kode_jadwal) . '_' . time() . '.' . $ext;
 
-		$config['upload_path'] = $upload_path; // Pakai variabel yang sudah didefinisikan
+		$config['upload_path'] = $upload_path;
 		$config['allowed_types'] = 'pdf|jpg|jpeg|png';
 		$config['max_size'] = 5120; // 5 MB
 
@@ -3732,10 +3733,8 @@ class Admin extends MY_Controller
 
 			$this->admin_model->simpan_absensi_pra_asesmen($data);
 
-			// Cukup kirim teks, HTML sudah di-handle oleh View
 			$this->session->set_flashdata('success', 'File absensi pra-asesmen berhasil diunggah!');
 		} else {
-			// Hapus tag HTML bawaan <p> dari display_errors CodeIgniter agar rapi saat masuk ke alert
 			$error_msg = strip_tags($this->upload->display_errors());
 			$this->session->set_flashdata('error', 'Gagal mengunggah file: ' . $error_msg);
 		}
@@ -3843,5 +3842,4 @@ class Admin extends MY_Controller
 				return "XII";
 		}
 	}
-
 }

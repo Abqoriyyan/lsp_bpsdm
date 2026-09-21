@@ -45,7 +45,6 @@ if (file_exists($stamp_path)) {
     $base64_stamp = 'data:image/' . $type . ';base64,' . base64_encode($stamp_data);
 }
 
-// Ambil data utama dari baris pertama array untuk info surat
 $surat_info = isset($get_data_surat_tugas[0]) ? $get_data_surat_tugas[0] : $get_data_surat_tugas;
 ?>
 <!DOCTYPE html>
@@ -75,7 +74,7 @@ $surat_info = isset($get_data_surat_tugas[0]) ? $get_data_surat_tugas[0] : $get_
         .kop-container {
             width: 100%;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         .kop-container img {
@@ -86,7 +85,7 @@ $surat_info = isset($get_data_surat_tugas[0]) ? $get_data_surat_tugas[0] : $get_
 
         .judul-surat {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         .judul-surat h4 {
@@ -104,14 +103,14 @@ $surat_info = isset($get_data_surat_tugas[0]) ? $get_data_surat_tugas[0] : $get_
 
         p {
             margin-top: 0;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             text-align: justify;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         .table-bordered th,
@@ -131,7 +130,7 @@ $surat_info = isset($get_data_surat_tugas[0]) ? $get_data_surat_tugas[0] : $get_
         .table-noborder td {
             padding: 3px 0;
             vertical-align: top;
-            font-size: 11pt;
+            font-size: 12pt;
         }
 
         .td-label {
@@ -170,13 +169,13 @@ $surat_info = isset($get_data_surat_tugas[0]) ? $get_data_surat_tugas[0] : $get_
         }
 
         .signature-img {
-            width: 180px;
+            width: 130px;
             height: auto;
             position: absolute;
             z-index: 1;
             top: -25px;
             left: 50%;
-            margin-left: -90px;
+            margin-left: -70px;
         }
 
         .stamp-img {
@@ -186,7 +185,7 @@ $surat_info = isset($get_data_surat_tugas[0]) ? $get_data_surat_tugas[0] : $get_
             z-index: 3;
             top: -25px;
             left: 50%;
-            margin-left: -140px;
+            margin-left: -170px;
             opacity: 0.90;
             transform: rotate(-8deg);
         }
@@ -238,28 +237,27 @@ $surat_info = isset($get_data_surat_tugas[0]) ? $get_data_surat_tugas[0] : $get_
     <div class="judul-surat">
         <h4>SURAT TUGAS</h4>
         <p>Nomor:
-            <?= isset($surat_info['no_surat_tugas']) ? $surat_info['no_surat_tugas'] : '-'; ?>/ST/LSP/<?= isset($surat_info['tanggal_mulai']) ? date('Y', strtotime($surat_info['tanggal_mulai'])) : '-'; ?>
+            SM05/ST/Mj/LSP/<?= isset($surat_info['tanggal_mulai']) ? date('Y', strtotime($surat_info['tanggal_mulai'])) : '-'; ?>/<?= isset($surat_info['no_surat_tugas']) ? $surat_info['no_surat_tugas'] : '-'; ?>
         </p>
     </div>
 
     <!-- Paragraf Pembuka -->
-    <p>Yang bertanda tangan di bawah ini, atas nama Ketua Lembaga Sertifikasi Profesi Badan Pengembangan Sumber Daya
-        Manusia Kementerian Pekerjaan Umum (LSP
-        <?= isset($token->username) ? $token->username : ''; ?>):
+    <p>Sehubungan dengan akan diselenggarakannya Uji Kompetensi Skema
+        <?= isset($surat_info['jabatan_kerja']) ? $surat_info['jabatan_kerja'] : '-'; ?> di
+        <?= isset($surat_info['nama_tuk']) ? $surat_info['nama_tuk'] : '-'; ?>, maka dengan ini Ketua Lembaga
+        Sertifikasi Profesi (LSP)
+        <?= isset($token->username) ? $token->username : ''; ?> menugaskan nama-nama dibawah
+        ini:
     </p>
-
     <!-- Poin Kesatu -->
     <div class="list-section">
-        <div class="list-title">KESATU: Memerintahkan kepada Asesor Kompetensi LSP
-            <?= isset($token->username) ? $token->username : ''; ?> berikut:
-        </div>
-
         <table class="table-bordered">
             <thead>
                 <tr>
                     <th width="5%">No.</th>
-                    <th width="50%">Nama</th>
-                    <th width="45%">No. Registrasi</th>
+                    <th width="35%">Nama</th>
+                    <th width="35%">No. Registrasi</th>
+                    <th width="25%">Jabatan</th>
                 </tr>
             </thead>
             <tbody>
@@ -272,122 +270,74 @@ $surat_info = isset($get_data_surat_tugas[0]) ? $get_data_surat_tugas[0] : $get_
                         <td class="center">
                             <?= isset($asesor['no_reg_bnsp_asesor']) ? $asesor['no_reg_bnsp_asesor'] : '-'; ?>
                         </td>
+                        <td>Asesor Kompetensi</td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
+        <p>
+            Untuk melaksanakan:
+        </p>
+        <ol>
+            <li>
+                Menjadi Tim Asesor pada Uji Kompetensi Skema
+                <?= isset($surat_info['jabatan_kerja']) ? $surat_info['jabatan_kerja'] : '-'; ?>;
+            </li>
+            <li>
+                Melaksanakan Uji Kompetensi pada hari Rabu tanggal 23 September 2026 di
+                <?= isset($surat_info['nama_tuk']) ? $surat_info['nama_tuk'] : '-'; ?> dengan sebaik baiknya;
+            </li>
+            <li>
+                Melaporkan hasil Uji Kompetensi kepada Ketua LSP BPSDM Kementerian PU.
+            </li>
 
-        <p style="margin-top:15px; margin-bottom:5px;">Untuk melaksanakan kegiatan asesmen untuk Skema
-            <strong><?= isset($surat_info['jabatan_kerja']) ? $surat_info['jabatan_kerja'] : '-'; ?></strong> pada:
+        </ol>
+
+        <p>
+            Demikian surat tugas ini disampaikan, atas perhatiannya kami ucapkan terima kasih.
         </p>
 
-        <table class="table-noborder" style="margin-left: 15px; width: 95%;">
-            <tr>
-                <td class="td-label">Nama TUK</td>
-                <td class="td-colon">:</td>
-                <td class="td-value">
-                    <strong><?= isset($surat_info['nama_tuk']) ? $surat_info['nama_tuk'] : '-'; ?></strong>
-                </td>
-            </tr>
-            <tr>
-                <td class="td-label">Alamat</td>
-                <td class="td-colon">:</td>
-                <td class="td-value"><?= isset($surat_info['alamat']) ? $surat_info['alamat'] : '-'; ?></td>
-            </tr>
-            <tr>
-                <td class="td-label">Tanggal</td>
-                <td class="td-colon">:</td>
-                <td class="td-value">
-                    <?= isset($surat_info['tanggal_mulai']) ? tanggal_indo(date('Y-m-d', strtotime($surat_info['tanggal_mulai']))) : '-'; ?>
-                    s/d
-                    <?= isset($surat_info['tanggal_selesai']) ? tanggal_indo(date('Y-m-d', strtotime($surat_info['tanggal_selesai']))) : '-'; ?>
-                </td>
-            </tr>
-        </table>
+        <div class="signature-section">
+            <div class="signature-container-center">
+                <p style="margin-bottom: 0px;">Bandung,
+                    <?= isset($surat_info['log']) ? tanggal_indo(date('Y-m-d', strtotime($surat_info['log']))) : tanggal_indo(date('Y-m-d')); ?>
+                </p>
 
-        <p style="margin-top:15px; margin-bottom:5px;">Dengan data asesi sebagai berikut:</p>
-        <table class="table-noborder" style="margin-left: 15px; width: 95%;">
-            <tr>
-                <td class="td-label">Nama Asesi</td>
-                <td class="td-colon">:</td>
-                <td class="td-value">
-                    <strong><?= isset($surat_info['nama_asesi']) ? $surat_info['nama_asesi'] : '-'; ?></strong>
-                </td>
-            </tr>
-            <tr>
-                <td class="td-label">Unit Kerja</td>
-                <td class="td-colon">:</td>
-                <td class="td-value">
-                    <?= isset($surat_info['perusahaan_asesi']) ? $surat_info['perusahaan_asesi'] : '-'; ?>
-                </td>
-            </tr>
-            <tr>
-                <td class="td-label">Jenis Permohonan</td>
-                <td class="td-colon">:</td>
-                <td class="td-value">
-                    <?php
-                    if (isset($surat_info['jenis_permohonan'])) {
-                        if ($surat_info['jenis_permohonan'] == 1) {
-                            echo 'Baru';
-                        } elseif ($surat_info['jenis_permohonan'] == 2) {
-                            echo 'Perpanjangan';
-                        } else {
-                            echo '-';
-                        }
-                    } else {
-                        echo '-';
-                    }
-                    ?>
-                </td>
-            </tr>
-            <tr>
-                <td class="td-label">Jenjang</td>
-                <td class="td-colon">:</td>
-                <td class="td-value"><?= isset($surat_info['jenjang']) ? $surat_info['jenjang'] : '-'; ?></td>
-            </tr>
-        </table>
-    </div>
+                <p style="margin-bottom: 0px;">Ketua LSP
+                    <?= isset($token->username) ? $token->username : ''; ?>
+                </p>
 
-    <!-- Poin Kedua -->
-    <div class="list-section" style="margin-top: 25px;">
-        <div class="list-title">KEDUA: Melaksanakan tugas dengan penuh tanggung jawab dan independen serta melaporkan
-            hasil asesmen segera setelah kegiatan pelaksanaan asesmen selesai.</div>
-        <p>Demikian surat tugas ini dibuat untuk dapat dilaksanakan sebagaimana mestinya.</p>
-    </div>
+                <div class="signature-space">
+                    <?php if ($base64_ketua != ''): ?>
+                        <img src="<?= $base64_ketua ?>" class="signature-img" alt="TTD Ketua Pelaksana">
+                    <?php endif; ?>
 
-    <!-- REFIXTURE: Struktur Tanda Tangan Tengah Bawah & Overlap Teks Nama -->
-    <div class="signature-section">
-        <div class="signature-container-center">
-            <p style="margin-bottom: 0px;">Bandung,
-                <?= isset($surat_info['log']) ? tanggal_indo(date('Y-m-d', strtotime($surat_info['log']))) : tanggal_indo(date('Y-m-d')); ?>
-            </p>
+                    <?php if ($base64_stamp): ?>
+                        <img src="<?= $base64_stamp ?>" class="stamp-img" alt="Stempel Resmi">
+                    <?php endif; ?>
+                </div>
 
-            <p style="margin-bottom: 0px;">Ketua LSP
-                <?= isset($token->username) ? $token->username : ''; ?>
-            </p>
-
-            <div class="signature-space">
-                <?php if ($base64_ketua != ''): ?>
-                    <img src="<?= $base64_ketua ?>" class="signature-img" alt="TTD Ketua Pelaksana">
-                <?php endif; ?>
-
-                <?php if ($base64_stamp): ?>
-                    <img src="<?= $base64_stamp ?>" class="stamp-img" alt="Stempel Resmi">
-                <?php endif; ?>
+                <span class="name-under-signature">
+                    <strong><?= isset($get_data_ketua_pelaksana->nama) ? $get_data_ketua_pelaksana->nama : '-'; ?></strong><br>
+                </span>
             </div>
-
-            <span class="name-under-signature">
-                <strong><u><?= isset($get_data_ketua_pelaksana->nama) ? $get_data_ketua_pelaksana->nama : '-'; ?></u></strong><br>
-            </span>
         </div>
-    </div>
 
-    <!-- Tembusan -->
-    <div class="tembusan">
-        <p>Tembusan:</p>
-        <p>1. Yang bersangkutan;<br>
-            2. Arsip.</p>
-    </div>
+        <!-- Tembusan -->
+        <div class="tembusan">
+            <p>Tembusan:</p>
+            <ol>
+                <li>
+                    Kepala Badan Pengembangan Sumber Daya Manusia, Kementerian PU;
+                </li>
+                <li>
+                    Yang Bersangkutan;
+                </li>
+                <li>
+                    Kepala <?= isset($surat_info['nama_tuk']) ? $surat_info['nama_tuk'] : '-'; ?>.
+                </li>
+            </ol>
+        </div>
 
 </body>
 

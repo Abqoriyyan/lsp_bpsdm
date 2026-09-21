@@ -14,7 +14,7 @@
         <h1 class="h3 mb-0 text-gray-800">Sidang Pleno Komite Teknis</h1>
                 <a href="<?= site_url('Admin/post_siki_komtek/' . $id_izin); ?>" class="btn btn-primary"
             onclick="return confirm('Apakah Anda yakin ingin mengirim data Komtek ini ke API SIKI PU?');">
-            <i class="fa fa-paper-plane"></i> Sync data ke SIKI PU
+            <i class="fa fa-paper-plane"></i> Post Penugasan ke SIKI
         </a>
     </div>
     <?= $this->session->flashdata('pesan'); ?>
@@ -279,8 +279,7 @@
                                     <form action="<?= base_url('Admin/simpan_ba_komite'); ?>" method="POST">
                                         <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>"
                                             value="<?= $this->security->get_csrf_hash(); ?>" />
-                                        <input type="hidden" name="id_izin"
-                                            value="<?= isset($id_izin) ? $id_izin : ''; ?>">
+                                        <input type="hidden" name="id_izin" value="<?= isset($id_izin) ? $id_izin : (isset($get_ba->id_izin) ? $get_ba->id_izin : ''); ?>">
 
 
                                         <div class="form-group">
@@ -318,7 +317,7 @@
                                                 <i class="fas fa-save mr-1"></i> Simpan Berita Acara
                                             </button>
 
-                                            <?php if (isset($get_ba->id)): ?>
+                                            <?php if (isset($get_ba->id_izin)): ?>
                                                 <a href="<?= base_url('Admin/cetak_ba_komite/' . base64_encode($id_izin)); ?>"
                                                     class="btn btn-danger" target="_blank">
                                                     <i class="fas fa-file-pdf mr-1"></i> Cetak BA Pleno (PDF)

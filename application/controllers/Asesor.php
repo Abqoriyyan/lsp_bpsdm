@@ -80,7 +80,7 @@ class Asesor extends MY_Controller
         $token = $this->api_model->get_token();
         $get_data_ketua_pelaksana = $this->asesor_model->get_data_ketua_pelaksana();
 
-        $file_pdf = 'Surat Tugas Permohonan ID-Izin' . $id_izin;
+        $file_pdf = 'ST Asesor' . $id_izin;
         $paper = 'A4';
         $orientation = "potrait";
         $page = 'Asesor/cetak_surat_tugas';

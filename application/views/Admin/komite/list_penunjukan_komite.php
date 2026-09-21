@@ -102,7 +102,6 @@
         </div>
     </div>
 
-    <!-- Inisialisasi DataTables jika belum ada di template bawaan -->
     <script>
         $(document).ready(function () {
             $('#dataTable').DataTable();

@@ -64,7 +64,3 @@ $route['berkas/ba_pleno_komite_teknis/(:any)'] = 'komite/cetak_berita_acara_plen
 $route['berkas/asesmen/(:any)'] = 'audit/berkas_asesmen/$1';
 $route['berkas/sk_komite_teknis/(:any)'] = 'komite/cetak_surat_keputusan_komite/$1';
 $route['berkas/surat_tugas_komite_teknis/(:any)'] = 'komite/cetak_surat_tugas_komite/$1';
-
-
-// Profile
-$route['profile'] = 'login/profile';
