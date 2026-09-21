@@ -252,29 +252,25 @@ class Admin_model extends CI_Model
     #################### Penunjukkan Asesor #####################
     public function get_list_penunjukan_asesor()
     {
-        $subquery = $this->db->select('id_izin, MAX(log) as max_log')
-            ->from('history_permohonan')
-            ->group_by('id_izin')
-            ->get_compiled_select();
+        $subquery_history = "(SELECT * FROM history_permohonan WHERE LOG IN (SELECT MAX(LOG) FROM history_permohonan GROUP BY id_izin))";
 
-        $this->db->select('
+        $this->db->select("
         a.id_izin, 
-        ANY_VALUE(a.nama) as nama, 
-        ANY_VALUE(d.kualifikasi) as kualifikasi, 
-        ANY_VALUE(c.created) as created, 
-        ANY_VALUE(c.klasifikasi) as klasifikasi, 
-        ANY_VALUE(c.subklasifikasi) as subklasifikasi, 
-        ANY_VALUE(i.jabatan_kerja) as jabatan_kerja, 
-        ANY_VALUE(c.asosiasi) as asosiasi, 
-        ANY_VALUE(b.kode_status) as kode_status, 
-        GROUP_CONCAT(DISTINCT f.nama SEPARATOR " - ") as nama_asesor, 
-        ANY_VALUE(e.kode_jadwal_asesmen) as kode_jadwal_asesmen, 
-        ANY_VALUE(h.nama_tuk) as nama_tuk
-    ', FALSE);
+        a.nama, 
+        d.kualifikasi, 
+        c.created, 
+        c.klasifikasi, 
+        c.subklasifikasi, 
+        i.jabatan_kerja, 
+        c.asosiasi, 
+        b.kode_status, 
+        GROUP_CONCAT(DISTINCT f.nama SEPARATOR ' & ') as nama_asesor, 
+        e.kode_jadwal_asesmen, 
+        h.nama_tuk
+    ", FALSE);
 
         $this->db->from('data_personal_permohonan a');
-        $this->db->join("($subquery) latest_hist", 'latest_hist.id_izin = a.id_izin', 'inner');
-        $this->db->join('history_permohonan b', 'b.id_izin = latest_hist.id_izin AND b.log = latest_hist.max_log', 'inner');
+        $this->db->join("$subquery_history b", 'b.id_izin = a.id_izin', 'inner');
         $this->db->join('data_klasifikasi_kualifikasi_permohonan c', 'c.id_izin = a.id_izin', 'inner');
         $this->db->join('master_kualifikasi d', 'c.kualifikasi = d.id', 'inner');
         $this->db->join('data_penunjukan_asesor e', 'e.id_izin = a.id_izin', 'left');
@@ -284,7 +280,20 @@ class Admin_model extends CI_Model
         $this->db->join('master_jabatan_kerja i', 'i.id_jabatan_kerja = c.jabatan_kerja', 'left');
 
         $this->db->where('b.kode_status', '31');
-        $this->db->group_by('a.id_izin');
+
+        $this->db->group_by([
+            'a.id_izin',
+            'a.nama',
+            'd.kualifikasi',
+            'c.created',
+            'c.klasifikasi',
+            'c.subklasifikasi',
+            'i.jabatan_kerja',
+            'c.asosiasi',
+            'b.kode_status',
+            'e.kode_jadwal_asesmen',
+            'h.nama_tuk'
+        ]);
 
         return $this->db->get()->result_array();
     }
