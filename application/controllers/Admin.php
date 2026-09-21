@@ -117,7 +117,7 @@ class Admin extends MY_Controller
 
 			echo "<script>
                 alert('Data List Permohonan Berhasil Di Update');
-                window.location.href='" . base_url('admin/list_permohonan') . "';
+                window.location.href='" . base_url('Admin/list_permohonan') . "';
             </script>";
 		}
 	}
@@ -221,7 +221,7 @@ class Admin extends MY_Controller
 		$result = json_decode($response, true);
 
 		if ($result['current_status'] == NULL) {
-			// header("location:".base_url('admin/entry_data_permohonan/').base64_encode($id_izin));
+			// header("location:".base_url('Admin/entry_data_permohonan/').base64_encode($id_izin));
 			$this->entry_data_permohonan(base64_encode($id_izin));
 		} else {
 			echo "<script>
@@ -547,7 +547,7 @@ class Admin extends MY_Controller
 				$this->db->insert('data_klasifikasi_kualifikasi_permohonan', $data_klasifikasi_kualifikasi);
 			}
 
-			header("location:" . base_url('admin/tinjau_permohonan/') . base64_encode($id_izin));
+			header("location:" . base_url('Admin/tinjau_permohonan/') . base64_encode($id_izin));
 		}
 	}
 
@@ -743,7 +743,7 @@ class Admin extends MY_Controller
 		$this->db->replace('tinjau_permohonan', $ceklis_administrasi);
 
 		$this->session->set_flashdata('success', 'Save Ceklis Administrasi');
-		header("location:" . base_url('admin/tinjau_permohonan/') . base64_encode($id_izin));
+		header("location:" . base_url('Admin/tinjau_permohonan/') . base64_encode($id_izin));
 	}
 
 	#Proses Tinjau Permohonan Pendidikan
@@ -811,7 +811,7 @@ class Admin extends MY_Controller
 		$this->db->replace('tinjau_permohonan', $ceklis_pendidikan);
 
 		$this->session->set_flashdata('success', 'Save Ceklis Pendidikan');
-		header("location:" . base_url('admin/tinjau_permohonan/') . base64_encode($id_izin));
+		header("location:" . base_url('Admin/tinjau_permohonan/') . base64_encode($id_izin));
 	}
 
 	#Proses Tinjau Permohonan Proyek / Pengalaman
@@ -885,7 +885,7 @@ class Admin extends MY_Controller
 		$this->db->replace('tinjau_permohonan', $ceklis_proyek);
 
 		$this->session->set_flashdata('success', 'Save Ceklis Proyek');
-		header("location:" . base_url('admin/tinjau_permohonan/') . base64_encode($id_izin));
+		header("location:" . base_url('Admin/tinjau_permohonan/') . base64_encode($id_izin));
 	}
 
 	#Proses Tinjau Permohonan Pelatihan
@@ -920,7 +920,7 @@ class Admin extends MY_Controller
 		$this->db->replace('tinjau_permohonan', $ceklis_pelatihan);
 
 		$this->session->set_flashdata('success', 'Save Ceklis Pelatihan');
-		header("location:" . base_url('admin/tinjau_permohonan/') . base64_encode($id_izin));
+		header("location:" . base_url('Admin/tinjau_permohonan/') . base64_encode($id_izin));
 	}
 
 
@@ -969,7 +969,7 @@ class Admin extends MY_Controller
 		$this->db->replace('data_apl01_permohonan', $apl01_tinjau_permohonan);
 		$this->session->set_flashdata('success', 'Save Ceklis Apl01');
 
-		redirect('admin/tinjau_permohonan/' . base64_encode($id_izin));
+		redirect('Admin/tinjau_permohonan/' . base64_encode($id_izin));
 	}
 
 	// Keperluan Signature / TTD Peninjau di APL 01
@@ -1053,7 +1053,7 @@ class Admin extends MY_Controller
 	// 	);
 	// 	$this->db->replace('tinjau_permohonan', $ceklis_sertifikat_surat_keterangan);
 
-	// 	header("location:".base_url('admin/tinjau_permohonan/').$id_izin);
+	// 	header("location:".base_url('Admin/tinjau_permohonan/').$id_izin);
 	// }
 
 	#Proses Tinjau Klasifikasi & Kualifikasi
@@ -1152,7 +1152,7 @@ class Admin extends MY_Controller
 		$this->db->replace('tinjau_permohonan', $ceklis_klasifikasi_kualifikasi);
 
 		$this->session->set_flashdata('success', 'Save Ceklis Klasifikasi Kualifikasi');
-		header("location:" . base_url('admin/tinjau_permohonan/') . base64_encode($id_izin));
+		header("location:" . base_url('Admin/tinjau_permohonan/') . base64_encode($id_izin));
 
 	}
 
@@ -1272,7 +1272,7 @@ class Admin extends MY_Controller
 			// Ketika gagal hit status 10
 			if ($arr['status'] == 'errors') {
 				$this->session->set_flashdata('message_hasil_pemeriksaan', $arr['message']);
-				redirect('admin/hasil_tinjau_permohonan/' . base64_encode($id_izin), 'refresh');
+				redirect('Admin/hasil_tinjau_permohonan/' . base64_encode($id_izin), 'refresh');
 			}
 
 			$log_hit_status_siki_portal['id_izin'] = $id_izin;
@@ -1390,7 +1390,7 @@ class Admin extends MY_Controller
 		}
 
 		$this->session->set_flashdata('success-tinjau-permohonan', 'Hasil Tinjau Permohonan');
-		header("location:" . base_url('admin/list_tinjau_permohonan'));
+		header("location:" . base_url('Admin/list_tinjau_permohonan'));
 	}
 	################################### / Tinjau Permohonan #######################################
 
@@ -1503,7 +1503,7 @@ class Admin extends MY_Controller
 		/// /Send Mail ke Pemohon //
 
 
-		header("location:" . base_url('admin/list_tagihan_pembayaran'));
+		header("location:" . base_url('Admin/list_tagihan_pembayaran'));
 	}
 
 	################################## /Pembayaran ####################################
@@ -1652,12 +1652,12 @@ class Admin extends MY_Controller
 
 		if ($responseBody['code'] == "ERR") {
 			echo "<script>alert('" . $responseBody['message'] . "')</script>";
-			redirect('admin/penunjukan_asesor/' . base64_encode($id_izin), 'refresh');
+			redirect('Admin/penunjukan_asesor/' . base64_encode($id_izin), 'refresh');
 		}
 
 		// if ($responseBody["code"]="ERR"){
 		// 	echo '<script>alert("Insert Peserta ke BNSP Gagal silahkan kontak Admin IT")</script>';
-		// 	redirect('admin/list_penunjukan_asesor','refresh');
+		// 	redirect('Admin/list_penunjukan_asesor','refresh');
 		// }else{
 		// 	// Berhasil	
 		// }s
@@ -1833,7 +1833,7 @@ class Admin extends MY_Controller
 		/// /Send Mail ke User //
 
 		$this->session->set_flashdata('success', 'Penunjukan Asesor Berhasil');
-		redirect('admin/list_penunjukan_asesor', 'refresh');
+		redirect('Admin/list_penunjukan_asesor', 'refresh');
 	}
 	#################### / Penunjukan Asesor #######################################
 
@@ -1948,7 +1948,7 @@ class Admin extends MY_Controller
 		}
 
 		echo "<script>alert('Data TUK Berhasil Di Update');</script>";
-		redirect('admin/master_tuk', 'refresh');
+		redirect('Admin/master_tuk', 'refresh');
 	}
 
 	public function tambah_tuk()
@@ -1996,7 +1996,7 @@ class Admin extends MY_Controller
 		$data_bukti_relavan['masa_berlaku_tuk'] = $this->input->post('masa_berlaku_tuk', TRUE);
 		$this->db->insert('master_tuk', $data_bukti_relavan);
 
-		redirect('admin/master_tuk', 'refresh');
+		redirect('Admin/master_tuk', 'refresh');
 	}
 
 	public function edit_tuk_bnsp($id_tuk)
@@ -2057,7 +2057,7 @@ class Admin extends MY_Controller
 
 			if ($responseInfo['http_code'] == 200) {
 				echo "<script>alert('Data TUK Berhasil Diperbarui ke BNSP');</script>";
-				redirect('admin/master_tuk', 'refresh');
+				redirect('Admin/master_tuk', 'refresh');
 			} else {
 				$pesan_error = isset($response_array['message']) ? $response_array['message'] : 'Gagal memperbarui data ke server BNSP.';
 				echo "<script>alert('Error: " . $pesan_error . "');</script>";
@@ -2070,7 +2070,7 @@ class Admin extends MY_Controller
 			show_404();
 		}
 
-		$this->load->view('admin/master_tuk', $data);
+		$this->load->view('Admin/master_tuk', $data);
 	}
 
 	public function delete_tuk($id_tuk)
@@ -2084,7 +2084,7 @@ class Admin extends MY_Controller
 		##/Cek Session Login##
 
 		$this->db->delete('master_tuk', array('id' => $id_tuk));
-		redirect('admin/master_tuk', 'refresh');
+		redirect('Admin/master_tuk', 'refresh');
 	}
 
 	/// /TUK
@@ -2150,7 +2150,7 @@ class Admin extends MY_Controller
 		$user_login['status'] = '1';
 		$this->db->insert('user_login', $user_login);
 
-		redirect('admin/master_asesor', 'refresh');
+		redirect('Admin/master_asesor', 'refresh');
 	}
 
 	public function aktivasi_asesor($no_reg_asesor_bnsp)
@@ -2208,7 +2208,7 @@ class Admin extends MY_Controller
 			echo '<script>alert("' . $result['message'] . ' - Pastikan No Registrasi Asesor Sesuai dengan diBNSP & Sertifikat Kompetensi Asesor Telah diUpload di BNSP")</script>';
 		}
 
-		redirect('admin/master_asesor', 'refresh');
+		redirect('Admin/master_asesor', 'refresh');
 	}
 
 	/////// Jadwal Asesmen /////////
@@ -2299,10 +2299,10 @@ class Admin extends MY_Controller
 		if ($arr['code'] == "ERR") {
 			echo "<script>
 			alert('" . $arr['message'] . "');
-			window.location.href='" . base_url('admin/jadwal_asesmen') . "';
+			window.location.href='" . base_url('Admin/jadwal_asesmen') . "';
 			</script>";
 		} else {
-			redirect('admin/update_jadwal_asesmen', 'refresh');
+			redirect('Admin/update_jadwal_asesmen', 'refresh');
 		}
 		//Execute the request to array
 		// $arr = json_decode(curl_exec($ch), true);
@@ -2368,7 +2368,7 @@ class Admin extends MY_Controller
 		$this->admin_model->update_data($where, $data, 'data_jadwal_asesmen');
 
 
-		redirect('admin/update_jadwal_asesmen', 'refresh');
+		redirect('Admin/update_jadwal_asesmen', 'refresh');
 	}
 
 	public function konfirm_terima_blanko($id_jadwal)
@@ -2424,7 +2424,7 @@ class Admin extends MY_Controller
 		);
 		$this->admin_model->update_data($where, $data, 'data_jadwal_asesmen');
 
-		redirect('admin/update_jadwal_asesmen', 'refresh');
+		redirect('Admin/update_jadwal_asesmen', 'refresh');
 	}
 
 	public function update_jadwal_asesmen()
@@ -2484,7 +2484,7 @@ class Admin extends MY_Controller
 		}
 
 		echo "<script>alert('Data Jadwal Asesmen Berhasil di Update/Syncron dengan BNSP');</script>";
-		redirect('admin/jadwal_asesmen', 'refresh');
+		redirect('Admin/jadwal_asesmen', 'refresh');
 	}
 
 	#################### / Master #######################################
@@ -2727,7 +2727,7 @@ class Admin extends MY_Controller
 						if (substr($arr['message'], -15) == 'tidak terdaftar') {
 							if (substr($arr['message'], -15) == 'tidak terdaftar') {
 								$this->session->set_flashdata('message_pelaporan_asesor', $arr['message'] . ' Pastikan Asesor tersebut telah tercatat di Lisensi LPJK');
-								redirect('admin/list_selesai_penetapan', 'refresh');
+								redirect('Admin/list_selesai_penetapan', 'refresh');
 							}
 						}
 						// Pemenuhan Penetapan Komite ke LPJK
@@ -2829,28 +2829,28 @@ class Admin extends MY_Controller
 							$this->hit_status_ulang(base64_encode($id_izin), '10');
 							$this->hit_status_ulang(base64_encode($id_izin), '30');
 							$this->hit_status_ulang(base64_encode($id_izin), '31');
-							redirect('admin/get_blanko_bnsp/' . base64_encode($id_izin), 'refresh');
+							redirect('Admin/get_blanko_bnsp/' . base64_encode($id_izin), 'refresh');
 
 						} elseif (substr($arr['message'], -2) == "20") {
 							$this->hit_status_ulang(base64_encode($id_izin), '10');
 							$this->hit_status_ulang(base64_encode($id_izin), '30');
 							$this->hit_status_ulang(base64_encode($id_izin), '31');
-							redirect('admin/get_blanko_bnsp/' . base64_encode($id_izin), 'refresh');
+							redirect('Admin/get_blanko_bnsp/' . base64_encode($id_izin), 'refresh');
 
 						} elseif (substr($arr['message'], -2) == "10") {
 							$this->hit_status_ulang(base64_encode($id_izin), '30');
 							$this->hit_status_ulang(base64_encode($id_izin), '31');
-							redirect('admin/get_blanko_bnsp/' . base64_encode($id_izin), 'refresh');
+							redirect('Admin/get_blanko_bnsp/' . base64_encode($id_izin), 'refresh');
 
 						} elseif (substr($arr['message'], -2) == "30") {
 							$this->hit_status_ulang(base64_encode($id_izin), '31');
-							redirect('admin/get_blanko_bnsp/' . base64_encode($id_izin), 'refresh');
+							redirect('Admin/get_blanko_bnsp/' . base64_encode($id_izin), 'refresh');
 
 						}
 
 						if ($arr['status'] == 'errors') {
 							$this->session->set_flashdata('message_pencatatan_siki', $arr['message']);
-							redirect('admin/list_selesai_penetapan', 'refresh');
+							redirect('Admin/list_selesai_penetapan', 'refresh');
 						}
 
 						// Ketika gagal generate blanko
@@ -2862,10 +2862,10 @@ class Admin extends MY_Controller
 								$this->kirim_ba_ujikom_balai(base64_encode($id_izin));
 								$this->konfirm_pembayaran_balai(base64_encode($id_izin));
 
-								// redirect('admin/get_blanko_bnsp/'.base64_encode($id_izin),'refresh');
+								// redirect('Admin/get_blanko_bnsp/'.base64_encode($id_izin),'refresh');
 							} elseif (substr($arr['message'], -2) == '33') {
 								$this->konfirm_pembayaran_balai(base64_encode($id_izin));
-								// redirect('admin/get_blanko_bnsp/'.base64_encode($id_izin),'refresh');
+								// redirect('Admin/get_blanko_bnsp/'.base64_encode($id_izin),'refresh');
 							}
 						}
 
@@ -2888,7 +2888,7 @@ class Admin extends MY_Controller
 		} else {
 			echo "<script>alert('Permohonan Blanko Belum di Approve');</script>";
 		}
-		redirect('admin/list_selesai_penetapan', 'refresh');
+		redirect('Admin/list_selesai_penetapan', 'refresh');
 	}
 
 	public function izin_final_siki_portal($id_izin)
@@ -2982,7 +2982,7 @@ class Admin extends MY_Controller
 
 		// if ($responseBody["code"]="ERR"){
 		// 	echo '<script>alert("Izin Final ke BNSP Gagal silahkan kontak Admin IT")</script>';
-		// 	redirect('admin/list_selesai_penetapan','refresh');
+		// 	redirect('Admin/list_selesai_penetapan','refresh');
 		// }else{
 		// 	// Berhasil	
 		// }
@@ -2997,7 +2997,7 @@ class Admin extends MY_Controller
 		$data_tinjau['username'] = $this->session->userdata('username');
 		$this->admin_model->insert_log_history_permohonan($data_tinjau);
 
-		redirect('admin/list_selesai_penetapan', 'refresh');
+		redirect('Admin/list_selesai_penetapan', 'refresh');
 
 	}
 
@@ -3049,7 +3049,7 @@ class Admin extends MY_Controller
 		$get_status_terkahir = $this->master_model->get_status_terkahir($this->input->post('id_izin', TRUE));
 		if ($get_status_terkahir->kode_status == "50") {
 			$this->session->set_flashdata('failed', 'Sertifikat Sudah Terbit Silahkan menggunakan Metode Pencabutan');
-			header("location:" . base_url('admin/tolak_permohonan/'));
+			header("location:" . base_url('Admin/tolak_permohonan/'));
 		} else {
 			//API Url
 			$token = $this->api_model->get_token($this->session->userdata('id_lsp'));
@@ -3090,7 +3090,7 @@ class Admin extends MY_Controller
 				$this->admin_model->insert_log_history_permohonan($status);
 
 				$this->session->set_flashdata('success', 'Tolak Permohonan Berhasil Dilakukan');
-				header("location:" . base_url('admin/tolak_permohonan/'));
+				header("location:" . base_url('Admin/tolak_permohonan/'));
 			}
 		}
 	}
@@ -3442,7 +3442,7 @@ class Admin extends MY_Controller
 
 		if (!$data_komtek) {
 			$this->session->set_flashdata('error', 'Data komite teknis tidak ditemukan.');
-			redirect('admin/penunjukan_komite/' . $id_izin);
+			redirect('Admin/penunjukan_komite/' . $id_izin);
 			return;
 		}
 
