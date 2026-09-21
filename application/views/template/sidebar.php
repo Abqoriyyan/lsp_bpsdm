@@ -204,8 +204,8 @@
             <div id="pra" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                 <div class="py-2 collapse-inner">
                     <h6 class="collapse-header">Pra-Asesmen:</h6>
-                    <a class="collapse-item" href="<?= base_url('Admin/list_pra_asesmen'); ?>">Absensi Pra Asesmen</a>
-                    <a class="collapse-item" href="<?= base_url('Admin/list_verifikasi_tuk'); ?>">Verifikasi TUK</a>
+                    <a class="collapse-item" href="<?= base_url('admin/list_pra_asesmen'); ?>">Absensi Pra Asesmen</a>
+                    <a class="collapse-item" href="<?= base_url('admin/list_verifikasi_tuk'); ?>">Verifikasi TUK</a>
                 </div>
             </div>
         </li>
@@ -237,10 +237,10 @@
             <div id="pasca" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                 <div class="py-2 collapse-inner">
                     <h6 class="collapse-header">Pasca-Asesmen:</h6>
-                    <a class="collapse-item" href="<?= base_url('Admin/list_penunjukan_komite'); ?>">Penunjukan Komite</a>
+                    <a class="collapse-item" href="<?= base_url('admin/list_penunjukan_komite'); ?>">Penunjukan Komite</a>
                     <a class="collapse-item" href="<?= base_url('admin/list_selesai_penetapan'); ?>">Selesai Penetapan</a>
                     <a class="collapse-item" href="<?= base_url('admin/terbit_sertifikat'); ?>">Sertifikat Terbit</a>
-                    <a class="collapse-item" href="<?= base_url('Admin/list_pernyataan_asesi'); ?>">Surat Pemegang</a>
+                    <a class="collapse-item" href="<?= base_url('admin/list_pernyataan_asesi'); ?>">Surat Pemegang</a>
                 </div>
             </div>
         </li>
@@ -257,10 +257,6 @@
                     <a class="collapse-item" href="<?= base_url('admin/master_tuk'); ?>">TUK</a>
                     <a class="collapse-item" href="<?= base_url('admin/master_asesor'); ?>">Asesor</a>
                     <a class="collapse-item" href="<?= base_url('admin/jadwal_asesmen'); ?>">Jadwal Asesmen</a>
-                    <a class="collapse-item" href="<?= base_url('admin/galeri'); ?>">Galeri</a>
-                    <a class="collapse-item" href="<?= base_url('admin/pengumuman'); ?>">Pengumuman</a>
-                    <a class="collapse-item" href="<?= base_url('admin/berita'); ?>">Berita</a>
-                    <a class="collapse-item" href="<?= base_url('admin/kontak'); ?>">Kontak</a>
                 </div>
             </div>
         </li>

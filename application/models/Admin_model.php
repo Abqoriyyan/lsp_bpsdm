@@ -252,36 +252,42 @@ class Admin_model extends CI_Model
     #################### Penunjukkan Asesor #####################
     public function get_list_penunjukan_asesor()
     {
-        $sql = "SELECT a.id_izin, 
-                   ANY_VALUE(a.nama) as nama, 
-                   ANY_VALUE(d.kualifikasi) as kualifikasi, 
-                   ANY_VALUE(c.created) as created, 
-                   ANY_VALUE(c.klasifikasi) as klasifikasi, 
-                   ANY_VALUE(c.subklasifikasi) as subklasifikasi, 
-                   ANY_VALUE(i.jabatan_kerja) as jabatan_kerja, 
-                   ANY_VALUE(c.asosiasi) asasosiasi, 
-                   ANY_VALUE(b.kode_status) as kode_status, 
-                   ANY_VALUE(e.id_asesor) as id_asesor, 
-                   ANY_VALUE(f.nama) as nama_asesor, 
-                   ANY_VALUE(e.kode_jadwal_asesmen) as kode_jadwal_asesmen, 
-                   ANY_VALUE(h.nama_tuk) as nama_tuk
-            FROM data_personal_permohonan a 
-            JOIN ( 
-                SELECT * FROM history_permohonan 
-                WHERE LOG IN (SELECT MAX(LOG) FROM history_permohonan GROUP BY id_izin)
-            ) b ON b.id_izin = a.id_izin 
-            JOIN data_klasifikasi_kualifikasi_permohonan c ON c.id_izin = a.id_izin 
-            JOIN master_kualifikasi d ON c.kualifikasi = d.id 
-            LEFT JOIN data_penunjukan_asesor e ON e.id_izin = a.id_izin
-            LEFT JOIN master_asesor f ON f.id_asesor = e.id_asesor
-            LEFT JOIN data_jadwal_asesmen g ON g.kode_jadwal = e.kode_jadwal_asesmen
-            LEFT JOIN master_tuk h ON h.id = g.id_tuk
-            LEFT JOIN master_jabatan_kerja i ON i.id_jabatan_kerja = c.jabatan_kerja
-            WHERE b.kode_status = '31' 
-            GROUP BY a.id_izin";
+        $subquery = $this->db->select('id_izin, MAX(log) as max_log')
+            ->from('history_permohonan')
+            ->group_by('id_izin')
+            ->get_compiled_select();
 
-        $query = $this->db->query($sql);
-        return $query->result_array();
+        $this->db->select('
+        a.id_izin, 
+        ANY_VALUE(a.nama) as nama, 
+        ANY_VALUE(d.kualifikasi) as kualifikasi, 
+        ANY_VALUE(c.created) as created, 
+        ANY_VALUE(c.klasifikasi) as klasifikasi, 
+        ANY_VALUE(c.subklasifikasi) as subklasifikasi, 
+        ANY_VALUE(i.jabatan_kerja) as jabatan_kerja, 
+        ANY_VALUE(c.asosiasi) as asosiasi, 
+        ANY_VALUE(b.kode_status) as kode_status, 
+        ANY_VALUE(e.id_asesor) as id_asesor, 
+        ANY_VALUE(f.nama) as nama_asesor, 
+        ANY_VALUE(e.kode_jadwal_asesmen) as kode_jadwal_asesmen, 
+        ANY_VALUE(h.nama_tuk) as nama_tuk
+    ', FALSE);
+
+        $this->db->from('data_personal_permohonan a');
+        $this->db->join("($subquery) latest_hist", 'latest_hist.id_izin = a.id_izin', 'inner');
+        $this->db->join('history_permohonan b', 'b.id_izin = latest_hist.id_izin AND b.log = latest_hist.max_log', 'inner');
+        $this->db->join('data_klasifikasi_kualifikasi_permohonan c', 'c.id_izin = a.id_izin', 'inner');
+        $this->db->join('master_kualifikasi d', 'c.kualifikasi = d.id', 'inner');
+        $this->db->join('data_penunjukan_asesor e', 'e.id_izin = a.id_izin', 'left');
+        $this->db->join('master_asesor f', 'f.id_asesor = e.id_asesor', 'left');
+        $this->db->join('data_jadwal_asesmen g', 'g.kode_jadwal = e.kode_jadwal_asesmen', 'left');
+        $this->db->join('master_tuk h', 'h.id = g.id_tuk', 'left');
+        $this->db->join('master_jabatan_kerja i', 'i.id_jabatan_kerja = c.jabatan_kerja', 'left');
+
+        $this->db->where('b.kode_status', '31');
+        $this->db->group_by('a.id_izin');
+
+        return $this->db->get()->result_array();
     }
 
     public function get_data_bast_terakhir()
@@ -521,13 +527,19 @@ class Admin_model extends CI_Model
 
     public function get_list_penunjukan_komite()
     {
-        $sql = "SELECT a.*, b.kode_status, c.nama AS nama
-            FROM list_permohonan a 
-            LEFT JOIN (SELECT * FROM history_permohonan WHERE LOG IN (SELECT MAX(LOG) FROM history_permohonan GROUP BY id_izin)) b ON b.id_izin = a.id_izin
-            LEFT JOIN data_personal_permohonan c ON a.id_izin = c.id_izin
-            WHERE b.kode_status IN ('31', '50')";
+        $subquery = $this->db->select('id_izin, MAX(log) as max_log')
+            ->from('history_permohonan')
+            ->group_by('id_izin')
+            ->get_compiled_select();
 
-        $query = $this->db->query($sql);
+        $this->db->select('a.*, b.kode_status, c.nama AS nama_personal');
+        $this->db->from('list_permohonan a');
+        $this->db->join("($subquery) latest_hist", 'latest_hist.id_izin = a.id_izin', 'left');
+        $this->db->join('history_permohonan b', 'b.id_izin = latest_hist.id_izin AND b.log = latest_hist.max_log', 'left');
+        $this->db->join('data_personal_permohonan c', 'c.id_izin = a.id_izin', 'left');
+        $this->db->where_in('b.kode_status', ['31', '50']);
+
+        $query = $this->db->get();
         return $query->result_array();
     }
 
