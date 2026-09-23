@@ -146,14 +146,14 @@ class Komite extends MY_Controller
 			$config['white'] = array(70, 130, 180); // array, default is array(0,0,0)
 			$this->ciqrcode->initialize($config);
 
-			header("Content-Type: image/png");
+			//header("Content-Type: image/png");
 			$image_name = 'qr_signature-' . base64_encode($id_izin) . '.png'; //buat name dari qr code sesuai dengan nim
 			$params['data'] = base_url('/sertifikat/validasi_signature/') . base64_encode($id_izin); //data yang akan di jadikan QR CODE
 			$params['level'] = 'H'; //H=High
 			$params['size'] = 10;
 			$params['savename'] = $config['imagedir'] . $image_name; //simpan image QR CODE ke folder assets/images/
 			$this->ciqrcode->generate($params); // fungsi untuk generate QR CODE
-			die('Sukses lewati QR Code');
+			//die('Sukses lewati QR Code');
 
 			///////////// Create Blanko ke BNSP  /////////////////
 			$token_bnsp = $this->api_model->get_token_bnsp();
@@ -222,10 +222,10 @@ class Komite extends MY_Controller
 
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 			$responseBody = json_decode(curl_exec($ch), true);
-			echo "<pre>";
-			print_r($responseBody);
-			echo "</pre>";
-			die('Stop di API BNSP');
+			// echo "<pre>";
+			// print_r($responseBody);
+			// echo "</pre>";
+			// die('Stop di API BNSP');
 
 			//Execute the request
 			if ($responseBody["code"] = "ERR") {
