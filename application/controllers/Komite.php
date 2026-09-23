@@ -315,10 +315,10 @@ class Komite extends MY_Controller
 				'log' => $log,
 			);
 			$this->db->replace('data_pencatatan_sertifikasi', $rekomendasi_hasil_asesmen);
-			echo "<pre>";
-			print_r($rekomendasi_hasil_asesmen);
-			echo "</pre>";
-			die('Cek data sebelum masuk DB');
+			// echo "<pre>";
+			// print_r($rekomendasi_hasil_asesmen);
+			// echo "</pre>";
+			// die('Cek data sebelum masuk DB');
 
 			echo '<script>alert("Data Permohonan Berhasil Di Tetapkan")</script>';
 
