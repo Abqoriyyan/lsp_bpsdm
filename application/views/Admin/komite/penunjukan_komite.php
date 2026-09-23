@@ -318,7 +318,7 @@
                                             </button>
 
                                             <?php if (isset($get_ba->id_izin)): ?>
-                                                <a href="<?= base_url('Admin/cetak_ba_komite/' . base64_encode($id_izin)); ?>"
+                                                <a href="<?= base_url('komite/cetak_berita_acara_pleno_komite/') .base64_encode($id_izin) ?>"
                                                     class="btn btn-danger" target="_blank">
                                                     <i class="fas fa-file-pdf mr-1"></i> Cetak BA Pleno (PDF)
                                                 </a>

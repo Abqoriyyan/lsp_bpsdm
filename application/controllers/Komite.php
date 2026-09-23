@@ -20,7 +20,7 @@ class Komite extends MY_Controller
 		$this->load->model('asesor_model');
 		$this->load->model('api_model');
 		$this->load->model('komite_model');
-		$this->load->model('admin_model');
+		$this->load->model('Admin_model');
 		## GET Model Admin Model
 		date_default_timezone_set('Asia/Jakarta');
 	}
@@ -76,7 +76,7 @@ class Komite extends MY_Controller
 
 		# Get Data Detail Pemohon
 		$get_list_penetapan = $this->komite_model->get_list_penetapan();
-		$info_data_permohonan = $this->admin_model->info_data_permohonan($id_izin);
+		$info_data_permohonan = $this->Admin_model->info_data_permohonan($id_izin);
 		$get_data_personal_permohonan = $this->komite_model->get_data_personal_permohonan($id_izin);
 		$get_data_pendidikan_permohonan = $this->komite_model->get_data_pendidikan_permohonan($id_izin);
 		$get_data_proyek_permohonan = $this->komite_model->get_data_proyek_permohonan($id_izin);
@@ -180,7 +180,7 @@ class Komite extends MY_Controller
 					"nama" => "Berita Acara Pleno Komite Teknis",
 					"nomor" => $nomor_sertifikat,
 					"tanggal" => date("Y-m-d"),
-					"file_dokumen" => base_url('Admin/cetak_ba_pleno_komite/') . base64_encode($id_izin)
+					"file_dokumen" => base_url('komite/cetak_berita_acara_pleno_komite/') . base64_encode($id_izin)
 				);
 
 				$data_sk_hasil_sertifikasi = array(
@@ -263,14 +263,14 @@ class Komite extends MY_Controller
 		} elseif ($this->input->post('penetapan') == 'Belum Kompeten') {
 
 			///////////// Pemenuhan Rekomendasi Asesor ke LPJK V2
-			$get_data_rekomendasi_asesor_lpjk = $this->admin_model->get_data_rekomendasi_asesor_lpjk($id_izin);
+			$get_data_rekomendasi_asesor_lpjk = $this->Admin_model->get_data_rekomendasi_asesor_lpjk($id_izin);
 			$get_bukti_dokumentasi_asesmen = $this->asesor_model->get_bukti_dokumentasi_asesmen($id_izin);
-			$get_data_pelaporan_asesor = $this->admin_model->get_data_pelaporan_asesor($id_izin);
-			$detail_jadwal = $this->admin_model->get_detail_jadwal_asesmen_per_permohonan($id_izin);
+			$get_data_pelaporan_asesor = $this->Admin_model->get_data_pelaporan_asesor($id_izin);
+			$detail_jadwal = $this->Admin_model->get_detail_jadwal_asesmen_per_permohonan($id_izin);
 			$kode_jadwal = isset($detail_jadwal->kode_jadwal) ? $detail_jadwal->kode_jadwal : (isset($detail_jadwal->id_jadwal_asesmen) ? $detail_jadwal->id_jadwal_asesmen : '');
-			$get_verifikasi_tuk = $this->admin_model->get_verifikasi_tuk($kode_jadwal);
-			$get_absensi_pra_asesmen = $this->admin_model->get_absensi_pra_asesmen($kode_jadwal);
-			$get_absensi_asesmen = $this->admin_model->get_absensi_asesmen($kode_jadwal);
+			$get_verifikasi_tuk = $this->Admin_model->get_verifikasi_tuk($kode_jadwal);
+			$get_absensi_pra_asesmen = $this->Admin_model->get_absensi_pra_asesmen($kode_jadwal);
+			$get_absensi_asesmen = $this->Admin_model->get_absensi_asesmen($kode_jadwal);
 			$token = $this->api_model->get_token();
 
 			$rekomendasi = (isset($get_data_rekomendasi_asesor_lpjk->rekomendasi_asesor) && $get_data_rekomendasi_asesor_lpjk->rekomendasi_asesor == "Kompeten") ? "K" : "BK";
@@ -406,7 +406,7 @@ class Komite extends MY_Controller
 				redirect('komite/penetapan/' . base64_encode($id_izin), 'refresh');
 			}
 
-			$get_data_penetapan_komite_lpjk = $this->admin_model->get_data_penetapan_komite_lpjk($id_izin);
+			$get_data_penetapan_komite_lpjk = $this->Admin_model->get_data_penetapan_komite_lpjk($id_izin);
 
 			$hasil_penetapan = (isset($get_data_penetapan_komite_lpjk->hasil_penetapan) && $get_data_penetapan_komite_lpjk->hasil_penetapan == "Kompeten") ? "K" : "BK";
 			$catatan_penetapan = !empty($get_data_penetapan_komite_lpjk->catatan) ? $get_data_penetapan_komite_lpjk->catatan : (isset($get_data_penetapan_komite_lpjk->hasil_penetapan) ? $get_data_penetapan_komite_lpjk->hasil_penetapan : "");
@@ -420,7 +420,7 @@ class Komite extends MY_Controller
 				"no_surat_tugas" => isset($get_data_penetapan_komite_lpjk->no_surat_tugas) ? $get_data_penetapan_komite_lpjk->no_surat_tugas : "",
 				"tgl_penetapan" => isset($get_data_penetapan_komite_lpjk->tgl_penetapan) ? $get_data_penetapan_komite_lpjk->tgl_penetapan : "",
 				"url_surat_tugas" => base_url("Admin/cetak_st_komite/") . base64_encode($id_izin),
-				"url_ba_penetapan" => base_url("Admin/cetak_ba_komite/") . base64_encode($id_izin),
+				"url_ba_penetapan" => base_url("komite/cetak_berita_acara_pleno_komite/") . base64_encode($id_izin),
 				"met_komtek_1" => isset($get_data_penetapan_komite_lpjk->no_reg) ? $get_data_penetapan_komite_lpjk->no_reg : "",
 				"met_komtek_2" => "",
 				"met_komtek_3" => "",
@@ -448,7 +448,7 @@ class Komite extends MY_Controller
 			$data_tinjau['log'] = date("Y-m-d H:i:s");
 			$data_tinjau['username'] = $this->session->userdata('username');
 
-			$this->admin_model->insert_log_history_permohonan(array_map($to_scalar, $data_tinjau));
+			$this->Admin_model->insert_log_history_permohonan(array_map($to_scalar, $data_tinjau));
 
 			// API Status 90 Belum Kompeten
 			if (isset($token->host)) {
@@ -634,7 +634,7 @@ class Komite extends MY_Controller
 		$id_izin = base64_decode($id_izin);
 		$get_data_hasil_penetapan_komite_teknis = $this->komite_model->get_data_hasil_penetapan_komite_teknis($id_izin);
 		$get_data_pencatatan = $this->komite_model->get_data_pencatatan($id_izin);
-		$get_data_penetapan_komite_lpjk = $this->admin_model->get_data_penetapan_komite_lpjk($id_izin);
+		$get_data_penetapan_komite_lpjk = $this->Admin_model->get_data_penetapan_komite_lpjk($id_izin);
 		$get_data_lsp = $this->api_model->get_token();
 
 		$data = array(
@@ -688,8 +688,10 @@ class Komite extends MY_Controller
 	{
 		$id_izin = base64_decode($id_izin);
 
+		$get_penunjukan = $this->Admin_model->get_penunjukan_komite($id_izin);
+		$get_master_komite = $this->Admin_model->get_master_komite();
 		$get_data_pencatatan = $this->komite_model->get_data_pencatatan($id_izin);
-		$get_data_hasil_penetapan_komite_teknis = $this->komite_model->get_data_penetapan_perorangan($id_izin);
+		$get_data_hasil_penetapan_komite_teknis = $this->komite_model->get_data_hasil_penetapan_komite_teknis($id_izin);
 		$get_data_komite_teknis = $this->komite_model->get_data_komite_teknis();
 
 		$data = array(
@@ -697,9 +699,11 @@ class Komite extends MY_Controller
 			'get_data_pencatatan' => $get_data_pencatatan,
 			'get_data_hasil_penetapan_komite_teknis' => $get_data_hasil_penetapan_komite_teknis,
 			'get_data_komite_teknis' => $get_data_komite_teknis,
+			'get_penunjukan' => $get_penunjukan,
+			'get_master_komite' => $get_master_komite,
 		);
 
-		$file_pdf = 'BA Pleno Komtek (' . $id_izin . ')';
+		$file_pdf = 'BA Komtek (' . $id_izin . ')';
 		$paper = 'A4';
 		$orientation = "potrait";
 		$page = 'Komite/penetapan/cetak_berita_acara_pleno_komite';

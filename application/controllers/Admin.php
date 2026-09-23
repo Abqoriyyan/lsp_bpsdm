@@ -2749,7 +2749,7 @@ class Admin extends MY_Controller
 							"no_surat_tugas" => $get_data_penetapan_komite_lpjk->no_surat_tugas,
 							"tgl_penetapan" => $get_data_penetapan_komite_lpjk->tgl_penetapan,
 							"url_surat_tugas" => base_url("Admin/cetak_st_komite/") . base64_encode($id_izin),
-							"url_ba_penetapan" => base_url("Admin/cetak_ba_komite/") . base64_encode($id_izin),
+							"url_ba_penetapan" => base_url("komite/cetak_berita_acara_pleno_komite/") . base64_encode($id_izin),
 
 							// item baru
 							"met_komtek_1" => isset($get_komite[0]['no_reg']) ? $get_komite[0]['no_reg'] : "",
@@ -3393,47 +3393,47 @@ class Admin extends MY_Controller
 		redirect($_SERVER['HTTP_REFERER']);
 	}
 
-	public function cetak_ba_komite($id_izin)
-	{
-		if (!$this->ion_auth->ceklogin()) {
-			redirect('login', 'refresh');
-		} else if ($this->session->userdata('level') !== 'Admin') {
-			redirect('login/keluar', 'refresh');
-		}
+	// public function cetak_ba_komite($id_izin)
+	// {
+	// 	if (!$this->ion_auth->ceklogin()) {
+	// 		redirect('login', 'refresh');
+	// 	} else if ($this->session->userdata('level') !== 'Admin') {
+	// 		redirect('login/keluar', 'refresh');
+	// 	}
 
-		$id_izin_raw = base64_decode($id_izin);
-		$id_izin_clean = $this->security->xss_clean($id_izin_raw);
-		$id_izin = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
+	// 	$id_izin_raw = base64_decode($id_izin);
+	// 	$id_izin_clean = $this->security->xss_clean($id_izin_raw);
+	// 	$id_izin = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
 
-		$this->load->library('pdfgenerator');
+	// 	$this->load->library('pdfgenerator');
 
-		$get_penunjukan = $this->Admin_model->get_penunjukan_komite($id_izin);
-		$get_ba = $this->Admin_model->get_ba_komite_by_izin($id_izin);
-		$get_data_klasifikasi = $this->Asesor_model->get_data_klasifikasi_kualifikasi($id_izin);
-		$get_data_personal = $this->Asesor_model->get_data_personal_permohonan($id_izin);
-		$get_master_komite = $this->Admin_model->get_master_komite();
-		$token = $this->Api_model->get_token();
+	// 	$get_penunjukan = $this->Admin_model->get_penunjukan_komite($id_izin);
+	// 	$get_ba = $this->Admin_model->get_ba_komite_by_izin($id_izin);
+	// 	$get_data_klasifikasi = $this->Asesor_model->get_data_klasifikasi_kualifikasi($id_izin);
+	// 	$get_data_personal = $this->Asesor_model->get_data_personal_permohonan($id_izin);
+	// 	$get_master_komite = $this->Admin_model->get_master_komite();
+	// 	$token = $this->Api_model->get_token();
 
-		$data = array(
-			'id_izin' => $id_izin,
-			'get_ba' => $get_ba,
-			'get_penunjukan' => $get_penunjukan,
-			'get_data_klasifikasi' => $get_data_klasifikasi,
-			'get_data_personal' => $get_data_personal,
-			'get_master_komite' => $get_master_komite,
-			'token' => $token
-		);
+	// 	$data = array(
+	// 		'id_izin' => $id_izin,
+	// 		'get_ba' => $get_ba,
+	// 		'get_penunjukan' => $get_penunjukan,
+	// 		'get_data_klasifikasi' => $get_data_klasifikasi,
+	// 		'get_data_personal' => $get_data_personal,
+	// 		'get_master_komite' => $get_master_komite,
+	// 		'token' => $token
+	// 	);
 
-		$file_pdf = 'BA_Pleno_Komite_' . $id_izin;
-		$paper = 'A4';
-		$orientation = "portrait";
-		$page = 'Admin/komite/cetak_ba_komite';
+	// 	$file_pdf = 'BA_Pleno_Komite_' . $id_izin;
+	// 	$paper = 'A4';
+	// 	$orientation = "portrait";
+	// 	$page = 'Admin/komite/cetak_ba_komite';
 
-		$html = $this->load->view($page, $data, true);
-		ob_clean();
-		error_reporting(0);
-		$this->pdfgenerator->generate($html, $file_pdf, $paper, $orientation);
-	}
+	// 	$html = $this->load->view($page, $data, true);
+	// 	ob_clean();
+	// 	error_reporting(0);
+	// 	$this->pdfgenerator->generate($html, $file_pdf, $paper, $orientation);
+	// }
 
 	public function post_siki_komtek($id_izin)
 	{

@@ -39,8 +39,88 @@ function tanggal_indo_full($tanggal)
     $split = explode('-', $tanggal);
     return $split[2] . ' ' . $bulan[(int) $split[1]] . ' ' . $split[0];
 }
-?>
 
+// Data Klasifikasi
+$jabatan_kerja = '-';
+if (!empty($get_data_klasifikasi)) {
+    if (is_object($get_data_klasifikasi)) {
+        $jabatan_kerja = $get_data_klasifikasi->deskripsi_jabatan_kerja
+            ?? $get_data_klasifikasi->jabatan_kerja
+            ?? '-';
+    } elseif (is_array($get_data_klasifikasi)) {
+        $jabatan_kerja = $get_data_klasifikasi['deskripsi_jabatan_kerja']
+            ?? $get_data_klasifikasi['jabatan_kerja']
+            ?? '-';
+    }
+}
+
+// Data BA Pleno
+$tgl_pleno = date('Y-m-d');
+$hasil_rekomendasi = '-';
+$catatan_pleno = '-';
+if (!empty($get_ba)) {
+    if (is_object($get_ba)) {
+        $tgl_pleno = !empty($get_ba->tgl_pleno) ? $get_ba->tgl_pleno : date('Y-m-d');
+        $hasil_rekomendasi = $get_ba->hasil_rekomendasi ?? '-';
+        $catatan_pleno = $get_ba->catatan ?? '-';
+    } elseif (is_array($get_ba)) {
+        $tgl_pleno = !empty($get_ba['tgl_pleno']) ? $get_ba['tgl_pleno'] : date('Y-m-d');
+        $hasil_rekomendasi = $get_ba['hasil_rekomendasi'] ?? '-';
+        $catatan_pleno = $get_ba['catatan'] ?? '-';
+    }
+}
+
+// Data Penunjukan Komite
+$ketua_komite = '-';
+$anggota_1 = '-';
+$anggota_2 = '-';
+$no_surat = '-';
+if (!empty($get_penunjukan)) {
+    if (is_object($get_penunjukan)) {
+        $ketua_komite = $get_penunjukan->ketua_komite ?? '-';
+        $anggota_1 = $get_penunjukan->anggota_1 ?? '-';
+        $anggota_2 = $get_penunjukan->anggota_2 ?? '-';
+        $no_surat = $get_penunjukan->no_surat ?? '-';
+    } elseif (is_array($get_penunjukan)) {
+        $ketua_komite = $get_penunjukan['ketua_komite'] ?? '-';
+        $anggota_1 = $get_penunjukan['anggota_1'] ?? '-';
+        $anggota_2 = $get_penunjukan['anggota_2'] ?? '-';
+        $no_surat = $get_penunjukan['no_surat'] ?? '-';
+    }
+}
+
+$base64_ttd_ketua = '';
+$base64_ttd_anggota1 = '';
+$base64_ttd_anggota2 = '';
+
+if (!empty($get_master_komite)) {
+    foreach ($get_master_komite as $komite) {
+        $nama_m = is_array($komite) ? ($komite['nama'] ?? $komite['nama_komite'] ?? '') : ($komite->nama ?? $komite->nama_komite ?? '');
+        $file_m = is_array($komite) ? ($komite['file_ttd'] ?? '') : ($komite->file_ttd ?? '');
+
+        if (!empty($file_m)) {
+            $path_ttd = FCPATH . 'assets/lsp/ttd_komite/' . $file_m;
+
+            if (file_exists($path_ttd)) {
+                $type_ttd = pathinfo($path_ttd, PATHINFO_EXTENSION);
+                $data_ttd = file_get_contents($path_ttd);
+                $img_base64 = 'data:image/' . $type_ttd . ';base64,' . base64_encode($data_ttd);
+
+                if ($ketua_komite != '-' && trim($ketua_komite) == trim($nama_m)) {
+                    $base64_ttd_ketua = $img_base64;
+                }
+                if ($anggota_1 != '-' && trim($anggota_1) == trim($nama_m)) {
+                    $base64_ttd_anggota1 = $img_base64;
+                }
+                if ($anggota_2 != '-' && trim($anggota_2) == trim($nama_m)) {
+                    $base64_ttd_anggota2 = $img_base64;
+                }
+            }
+        }
+    }
+}
+
+?>
 <?php
 $path = base_url('assets/lsp/kop-lsp.png');
 $type = pathinfo($path, PATHINFO_EXTENSION);
@@ -50,22 +130,8 @@ $arrContextOptions = array(
         "verify_peer_name" => false,
     ),
 );
-$data = file_get_contents($path, false, stream_context_create($arrContextOptions));
-$base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
-?>
-
-<?php
-if (!function_exists('gambar_ke_base64')) {
-    function gambar_ke_base64($path_file)
-    {
-        if (file_exists($path_file) && !is_dir($path_file)) {
-            $tipe = pathinfo($path_file, PATHINFO_EXTENSION);
-            $data = file_get_contents($path_file);
-            return 'data:image/' . $tipe . ';base64,' . base64_encode($data);
-        }
-        return false;
-    }
-}
+$data_kop = @file_get_contents($path, false, stream_context_create($arrContextOptions));
+$base64 = $data_kop ? 'data:image/' . $type . ';base64,' . base64_encode($data_kop) : '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -74,7 +140,7 @@ if (!function_exists('gambar_ke_base64')) {
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BA Komtek <?= $get_data_hasil_penetapan_komite_teknis['nama']; ?></title>
+    <title>BA Komtek </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 </head>
@@ -86,8 +152,8 @@ if (!function_exists('gambar_ke_base64')) {
     }
 
     body {
-        padding: 0;
-        margin: 0;
+        padding: 5px;
+        margin: 5px;
         font-style: normal;
         font-variant: normal;
     }
@@ -106,9 +172,9 @@ if (!function_exists('gambar_ke_base64')) {
 </style>
 
 <body>
-    <!-- KOP Surat -->
-    <img src="<?= $base64; ?>" style="margin-top:25px; margin-left:50px; max-height:400px; max-width:700px;">
-    <!-- /KOP Surat -->
+    <?php if ($base64): ?>
+        <img src="<?= $base64; ?>" style="margin-top:25px; margin-left:50px; max-height:400px; max-width:700px;">
+    <?php endif; ?>
 
     <div style="margin:30px; ">
         <h4 style="text-align:center;"><b>BERITA ACARA</b><br />
@@ -129,8 +195,7 @@ if (!function_exists('gambar_ke_base64')) {
         $hari = $hari_array[$hr];
         ?>
         <p style="text-align:justify;">Pada hari ini, <?= $hari; ?> tanggal
-            <?= tanggal_indo(date('d-m-Y', strtotime($get_data_hasil_penetapan_komite_teknis['tanggal_penetapan']))); ?>
-            tahun <?= date('Y', strtotime($get_data_hasil_penetapan_komite_teknis['tanggal_penetapan'])); ?>,
+            <?= tanggal_indo(date('d-m-Y', strtotime($tgl_pleno))); ?> Tahun <?= date('Y', strtotime($tgl_pleno)); ?>,
             bertempat di Gedung LSP BPSDM Kementerian PU telah dilaksanakan sidang pleno hasil uji kompetensi dengan
             anggota sidang sebagai berikut:
         </p><br>
@@ -140,27 +205,25 @@ if (!function_exists('gambar_ke_base64')) {
                 <tr>
                     <th width="5%" style="text-align:center;">No.</th>
                     <th width="50%">Nama</th>
-                    <th width="45%">No Reg</th>
-                    <!-- <th width="30%">Jabatan</th> -->
+                    <th width="45%">Jabatan Tim Komite</th>
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($get_data_komite_teknis as $no => $data): ?>
-                    <tr>
-                        <td style="text-align:center;">
-                            <?= $no + 1 ?>
-                        </td>
-                        <td>
-                            <?= $data['nama'] ?>
-                        </td>
-                        <td style="text-align:center;">
-                            <?= $data['no_reg'] ?>
-                        </td>
-                        <!-- <td class="text-center">
-                            <?= isset($data['jabatan_komite_teknis']) ? $data['jabatan_komite_teknis'] : '-' ?>
-                        </td> -->
-                    </tr>
-                <?php endforeach; ?>
+                <tr>
+                    <td style="text-align:center;">1</td>
+                    <td><?= $ketua_komite; ?></td>
+                    <td>Ketua Komite Teknis</td>
+                </tr>
+                <tr>
+                    <td style="text-align:center;">2</td>
+                    <td><?= $anggota_1; ?></td>
+                    <td>Anggota Komite Teknis 1</td>
+                </tr>
+                <tr>
+                    <td style="text-align:center;">3</td>
+                    <td><?= $anggota_2; ?></td>
+                    <td>Anggota Komite Teknis 2</td>
+                </tr>
             </tbody>
         </table><br>
 
@@ -168,43 +231,47 @@ if (!function_exists('gambar_ke_base64')) {
             sebagai berikut:
         </p>
 
-        <table style="width:100%; text-align:justify; font-size:16px; border:none; border-spacing: 0 15px;">
-            <tr style="border:none;">
-                <td style="width:20%; vertical-align: baseline; border:none;">Nama</td>
-                <td style="width:5%; vertical-align: baseline; border:none;"> : </td>
-                <td style="width:75%; vertical-align: baseline; border:none;">
-                    <?= $get_data_hasil_penetapan_komite_teknis['nama']; ?>
-                </td>
-            </tr>
-            <tr style="border:none;">
-                <td style="width:20%; vertical-align: baseline; border:none;">Jabatan Kerja</td>
-                <td style="width:5%; vertical-align: baseline; border:none;"> : </td>
-                <td style="width:75%; vertical-align: baseline; border:none;">
-                    <?= $get_data_hasil_penetapan_komite_teknis['jabatan_kerja']; ?>
-                </td>
-            </tr>
-            <tr style="border:none;">
-                <td style="width:20%; vertical-align: baseline; border:none;">NIK</td>
-                <td style="width:5%; vertical-align: baseline; border:none;"> : </td>
-                <td style="width:75%; vertical-align: baseline; border:none;">
-                    <?= isset($get_data_hasil_penetapan_komite_teknis['nik']) ? $get_data_hasil_penetapan_komite_teknis['nik'] : '-'; ?>
-                </td>
-            </tr>
-            <tr style="border:none;">
-                <td style="width:20%; vertical-align: baseline; border:none;">Rekomendasi</td>
-                <td style="width:5%; vertical-align: baseline; border:none;"> : </td>
-                <td style="width:75%; vertical-align: baseline; border:none;">
-                    <?php
-                    if (isset($get_data_hasil_penetapan_komite_teknis['hasil_penetapan'])) {
-                        if ($get_data_hasil_penetapan_komite_teknis['hasil_penetapan'] == "Kompeten") {
-                            echo "Kompeten";
-                        } elseif ($get_data_hasil_penetapan_komite_teknis['hasil_penetapan'] == "Belum Kompeten") {
-                            echo "Belum Kompeten";
-                        }
-                    }
+        <div class="div"></div>
+        <table width="100%">
+            <thead>
+                <tr>
+                    <th width="5%" style="text-align:center; ">No.</th>
+                    <th width="30%">Nama</th>
+                    <th width="35%">Jabatan Kerja</th>
+                    <th width="20%">NIK</th>
+                    <th width="10%">K/BK</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                $no = 1;
+                foreach ($get_data_hasil_penetapan_komite_teknis as $data) {
                     ?>
-                </td>
-            </tr>
+                    <tr>
+                        <td style="text-align:center;">
+                            <?= $no++ ?>
+                        </td>
+                        <td>
+                            <?= $data['nama']; ?>
+                        </td>
+                        <td>
+                            <?= $data['jabatan_kerja']; ?>
+                        </td>
+                        <td style="text-align:center;">
+                            <?= $data['nik']; ?>
+                        </td>
+                        <td style="text-align:center;">
+                            <?php
+                            if ($data['hasil_penetapan'] == "Kompeten") {
+                                echo "K";
+                            } elseif ($data['hasil_penetapan'] == "Belum Kompeten") {
+                                echo "BK";
+                            }
+                            ?>
+                        </td>
+                    </tr>
+                <?php } ?>
+            </tbody>
         </table>
 
         <p style="text-align:justify;">
@@ -214,7 +281,7 @@ if (!function_exists('gambar_ke_base64')) {
 
         <p style="text-align:center;">
             Bandung,
-            <?= Tanggal_indo_full(date("Y-m-d", strtotime($get_data_hasil_penetapan_komite_teknis['tanggal_penetapan']))) ?><br />
+            <?= tanggal_indo_full(date("Y-m-d", strtotime($tgl_pleno))); ?><br />
         </p>
         <br>
 
@@ -222,53 +289,47 @@ if (!function_exists('gambar_ke_base64')) {
             style="text-align: center; border: none; border-collapse: collapse;">
             <thead style="border: none;">
                 <tr style="border: none;">
-                    <th style="border: none; width: 33%;">Komite Teknis 1</th>
-                    <th style="border: none; width: 33%;">Komite Teknis 2</th>
-                    <th style="border: none; width: 33%;">Komite Teknis 3</th>
+                    <td style="border: none; width: 33%;">Ketua Komite Teknis</td>
+                    <td style="border: none; width: 33%;">Anggota Komite 1</td>
+                    <td style="border: none; width: 33%;">Anggota Komite 2</td>
                 </tr>
             </thead>
             <tbody style="border: none;">
                 <tr style="height: 90px; border: none;">
-                    <!-- Komite 1 -->
+                    <!-- Ketua Komite -->
                     <td style="border: none; vertical-align: bottom; text-align: center;">
-                        <?php
-                        $path0 = FCPATH . 'assets/lsp/ttd_komite/' . trim($get_data_komite_teknis[0]['file_ttd']);
-                        $base64_0 = gambar_ke_base64($path0);
-                        if ($base64_0):
-                            ?>
-                            <img src="<?= $base64_0 ?>" alt="TTD 1"
+                        <?php if (!empty($base64_ttd_ketua)): ?>
+                            <img src="<?= $base64_ttd_ketua; ?>" alt="TTD Ketua"
                                 style="height: 85px; width: auto; display: inline-block;">
+                        <?php else: ?>
+                            <br><br><br>
                         <?php endif; ?>
                     </td>
 
-                    <!-- Komite 2 -->
+                    <!-- Anggota Komite 1 -->
                     <td style="border: none; vertical-align: bottom; text-align: center;">
-                        <?php
-                        $path1 = FCPATH . 'assets/lsp/ttd_komite/' . trim($get_data_komite_teknis[1]['file_ttd']);
-                        $base64_1 = gambar_ke_base64($path1);
-                        if ($base64_1):
-                            ?>
-                            <img src="<?= $base64_1 ?>" alt="TTD 2"
+                        <?php if (!empty($base64_ttd_anggota1)): ?>
+                            <img src="<?= $base64_ttd_anggota1; ?>" alt="TTD Anggota 1"
                                 style="height: 85px; width: auto; display: inline-block;">
+                        <?php else: ?>
+                            <br><br><br>
                         <?php endif; ?>
                     </td>
 
-                    <!-- Komite 3 -->
+                    <!-- Anggota Komite 2 -->
                     <td style="border: none; vertical-align: bottom; text-align: center;">
-                        <?php
-                        $path2 = FCPATH . 'assets/lsp/ttd_komite/' . trim($get_data_komite_teknis[2]['file_ttd']);
-                        $base64_2 = gambar_ke_base64($path2);
-                        if ($base64_2):
-                            ?>
-                            <img src="<?= $base64_2 ?>" alt="TTD 3"
+                        <?php if (!empty($base64_ttd_anggota2)): ?>
+                            <img src="<?= $base64_ttd_anggota2; ?>" alt="TTD Anggota 2"
                                 style="height: 85px; width: auto; display: inline-block;">
+                        <?php else: ?>
+                            <br><br><br>
                         <?php endif; ?>
                     </td>
                 </tr>
                 <tr style="border: none;">
-                    <td style="border: none;"><?= $get_data_komite_teknis[0]['nama'] ?? '' ?></td>
-                    <td style="border: none;"><?= $get_data_komite_teknis[1]['nama'] ?? '' ?></td>
-                    <td style="border: none;"><?= $get_data_komite_teknis[2]['nama'] ?? '' ?></td>
+                    <td style="border: none;"><b><?= $ketua_komite; ?></b></td>
+                    <td style="border: none;"><b><?= $anggota_1; ?></b></td>
+                    <td style="border: none;"><b><?= $anggota_2; ?></b></td>
                 </tr>
             </tbody>
         </table>

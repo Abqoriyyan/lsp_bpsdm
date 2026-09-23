@@ -611,21 +611,22 @@ class Asesor extends MY_Controller
 
     public function rekomendasi_hasil_asesmen($id_izin)
     {
-        ##/Cek Session Login##
+        ## Cek Session Login ##
         if (!$this->ion_auth->ceklogin()) {
             redirect('login', 'refresh');
         } else if ($this->session->userdata('level') !== 'Asesor') {
             redirect('login/keluar', 'refresh');
         }
-        ##/Cek Session Login##
+
         $id_izin = base64_decode($id_izin);
         $username_login = $this->session->userdata('username');
         $cek_tugas = $this->asesor_model->cek_tugas_asesor($id_izin, $username_login);
 
         if (!$cek_tugas) {
-            show_error('Akses Ditolak. Anda tidak ditugaskan untuk manguji peserta ini.', 403, 'Forbidden');
+            show_error('Akses Ditolak. Anda tidak ditugaskan untuk menguji peserta ini.', 403, 'Forbidden');
             return;
         }
+
         $log = date("Y-m-d H:i:s");
 
         $rekomendasi_hasil_asesmen = array(
@@ -638,7 +639,6 @@ class Asesor extends MY_Controller
         );
         $this->db->replace('data_rekomendasi_asesor', $rekomendasi_hasil_asesmen);
 
-
         /////////////// Rekomendasi Asesor ke BNSP ///////////////
         $token_bnsp = $this->api_model->get_token_bnsp();
         $get_detail_jadwal_asesmen = $this->asesor_model->get_detail_jadwal_asesmen($id_izin);
@@ -647,43 +647,37 @@ class Asesor extends MY_Controller
         $get_data_rekomendasi_asesor_lpjk = $this->admin_model->get_data_rekomendasi_asesor_lpjk($id_izin);
         $get_bukti_dokumentasi_asesmen = $this->asesor_model->get_bukti_dokumentasi_asesmen($id_izin);
 
-        if ($get_data_rekomendasi_asesor_lpjk->metode_uji == "1") {
+        $metode_uji = 'observasi';
+        $uji_praktek_atau_observasi_lapangan = '0';
+        $uji_tulis = '0';
+        $uji_lisan = '0';
+        $wawancara = '0';
+
+        $input_metode = isset($get_data_rekomendasi_asesor_lpjk->metode_uji) ? $get_data_rekomendasi_asesor_lpjk->metode_uji : '';
+
+        if ($input_metode == "1" || $input_metode == "2") {
             $metode_uji = 'observasi';
             $uji_praktek_atau_observasi_lapangan = '1';
             $uji_tulis = '1';
-            $uji_lisan = '0';
-            $wawancara = '0';
-        } elseif ($get_data_rekomendasi_asesor_lpjk->metode_uji == "2") {
-            $metode_uji = 'observasi';
-            $uji_praktek_atau_observasi_lapangan = '1';
-            $uji_tulis = '1';
-            $uji_lisan = '0';
-            $wawancara = '0';
-        } elseif ($get_data_rekomendasi_asesor_lpjk->metode_uji == "3") {
+        } elseif ($input_metode == "3") {
             $metode_uji = 'portofolio';
-            $uji_praktek_atau_observasi_lapangan = '0';
-            $uji_tulis = '0';
-            $uji_lisan = '0';
             $wawancara = '1';
         }
 
-        if ($get_ttd_asesor->asesor == '1') {
-            //API Url
-            $url = $token_bnsp->host . "jadwal/peserta/hasil-uji";
+        // Cek kelengkapan TTD Asesor
+        if (isset($get_ttd_asesor->asesor) && $get_ttd_asesor->asesor == '1') {
 
-            //Initiate cURL.
-            $ch = curl_init($url);
+            $host = isset($token_bnsp->host) ? rtrim($token_bnsp->host, '/') . '/' : '';
+            $url = $host . "jadwal/peserta/hasil-uji";
 
-            if ($this->input->post('rekomendasi_asesor') == "Kompeten") {
-                $rekomendasi_asesor = "1";
-            } elseif ($this->input->post('rekomendasi_asesor') == "Belum Kompeten") {
-                $rekomendasi_asesor = "2";
-            }
+            $rekomendasi_input = $this->input->post('rekomendasi_asesor');
+            $rekomendasi_asesor = ($rekomendasi_input == "Kompeten") ? "1" : "2";
 
-            //The JSON data.
+            $file_dokumentasi = isset($get_bukti_dokumentasi_asesmen->file) ? $get_bukti_dokumentasi_asesmen->file : '';
+
             $jsonData = array(
-                "jadwal_id" => $get_detail_jadwal_asesmen->id_jadwal_asesmen,
-                "nik_peserta" => $get_data_personal_pemohon->nik,
+                "jadwal_id" => isset($get_detail_jadwal_asesmen->id_jadwal_asesmen) ? $get_detail_jadwal_asesmen->id_jadwal_asesmen : "",
+                "nik_peserta" => isset($get_data_personal_pemohon->nik) ? $get_data_personal_pemohon->nik : "",
                 "kompeten" => $rekomendasi_asesor,
                 "metode_uji" => $metode_uji,
                 "uji_praktek_atau_observasi_lapangan" => $uji_praktek_atau_observasi_lapangan,
@@ -693,31 +687,42 @@ class Asesor extends MY_Controller
                 "penyelenggara" => 1,
                 "apl_01" => base_url("asesor/form_apl01/") . base64_encode($id_izin),
                 "apl_02" => base_url("asesor/form_apl02/") . base64_encode($id_izin),
-                "url_dokumentasi_asesmen" => base_url("uploads/file_asesmen/bukti_dokumentasi_asesmen/") . $get_bukti_dokumentasi_asesmen->file
+                "url_dokumentasi_asesmen" => base_url("uploads/file_asesmen/bukti_dokumentasi_asesmen/") . $file_dokumentasi
             );
 
-            //Encode the array into JSON.
             $jsonDataEncoded = json_encode($jsonData);
+            $token_auth = isset($token_bnsp->x_authorization) ? $token_bnsp->x_authorization : '';
 
-            //Tell cURL that we want to send a POST request.
+            $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_POST, 1);
-
-            //Attach our encoded JSON string to the POST fields.
             curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonDataEncoded);
-
-            //Set the content type to application/json
             curl_setopt($ch, CURLOPT_HTTPHEADER, array(
                 'Content-Type: application/json',
-                'x-authorization:' . $token_bnsp->x_authorization,
-                'token:' . $token_bnsp->x_authorization
+                'x-authorization:' . $token_auth,
+                'token:' . $token_auth
             ));
-
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
 
-            //Execute the request
             $result = curl_exec($ch);
-            ///////////// / Rekomendasi Asesor ke BNSP ////////////
-            // print_r($result);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($ch);
+            curl_close($ch);
+
+            $resApi = json_decode($result, true);
+
+            if ($curlError) {
+                $this->session->set_flashdata('error', 'cURL Error: ' . $curlError);
+            } elseif ($httpCode == 200 || (isset($resApi['status']) && $resApi['status'] == true)) {
+                $this->session->set_flashdata('message', 'Rekomendasi Hasil Asesmen Berhasil Dikirim ke BNSP');
+            } else {
+                $msg = isset($resApi['message']) ? $resApi['message'] : 'Gagal terhubung ke API BNSP (HTTP Code ' . $httpCode . ')';
+                $this->session->set_flashdata('error', 'API BNSP Error: ' . $msg);
+            }
+
+        } else {
+            $this->session->set_flashdata('error', 'Rekomendasi tersimpan, tetapi API BNSP tidak dikirim karena TTD Asesor belum tervalidasi.');
         }
 
         redirect("asesor/list_tugas_asesmen", "refresh");

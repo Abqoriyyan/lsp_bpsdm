@@ -471,19 +471,20 @@ class Admin_model extends CI_Model
     ################### Selesai Penetapan Komite Teknis ############################
     public function get_data_selesai_penetapan()
     {
-        $sql = "SELECT main.*, e.id AS id_jadwal_asesmen, b.username, b.log, b.kode_status
-                FROM data_pencatatan_sertifikasi main
-                JOIN (
-                    SELECT id_izin, MAX(kode_status) AS kode_status, MAX(username) as username, MAX(log) as log
-                    FROM history_permohonan
-                    WHERE LOG IN (SELECT MAX(LOG) FROM history_permohonan GROUP BY id_izin)
-                    GROUP BY id_izin
-                    HAVING kode_status = '31'
-                ) b ON b.id_izin = main.id_izin
-                JOIN data_hasil_penetapan_komite_teknis c ON c.id_izin = main.id_izin
-                JOIN data_penunjukan_asesor d ON d.id_izin = main.id_izin
-                JOIN data_jadwal_asesmen e ON e.kode_jadwal = d.kode_jadwal_asesmen
-                WHERE c.hasil_penetapan = 'Kompeten'";
+        $sql = "SELECT main.*, MAX(e.id) AS id_jadwal_asesmen, b.username, b.log, b.kode_status
+            FROM data_pencatatan_sertifikasi main
+            JOIN (
+                SELECT id_izin, MAX(kode_status) AS kode_status, MAX(username) as username, MAX(log) as log
+                FROM history_permohonan
+                WHERE LOG IN (SELECT MAX(LOG) FROM history_permohonan GROUP BY id_izin)
+                GROUP BY id_izin
+                HAVING kode_status = '31'
+            ) b ON b.id_izin = main.id_izin
+            JOIN data_hasil_penetapan_komite_teknis c ON c.id_izin = main.id_izin
+            JOIN data_penunjukan_asesor d ON d.id_izin = main.id_izin
+            JOIN data_jadwal_asesmen e ON e.kode_jadwal = d.kode_jadwal_asesmen
+            WHERE c.hasil_penetapan = 'Kompeten'
+            GROUP BY main.id_izin";
 
         $query = $this->db->query($sql);
         return $query->result_array();
