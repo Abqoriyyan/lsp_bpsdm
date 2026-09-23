@@ -606,6 +606,8 @@
         <center>
             <form action="<?= base_url("Komite/insert_penetapan/") . base64_encode($id_izin); ?>" method="POST"
                 enctype="multipart/form-data">
+                <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>"
+                    value="<?= $this->security->get_csrf_hash(); ?>" style="display: none">
                 <div class="col-sm-4 text-center">
                     <h3><b>Penetapan Komite Teknis</b></h3>
                     <select class="form-control text-center" style="border:1px solid #111; box-shadow: 2px 4px #9999;"

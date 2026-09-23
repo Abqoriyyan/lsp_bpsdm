@@ -153,7 +153,7 @@ class Komite extends MY_Controller
 			$params['size'] = 10;
 			$params['savename'] = $config['imagedir'] . $image_name; //simpan image QR CODE ke folder assets/images/
 			$this->ciqrcode->generate($params); // fungsi untuk generate QR CODE
-
+			die('Sukses lewati QR Code');
 
 			///////////// Create Blanko ke BNSP  /////////////////
 			$token_bnsp = $this->api_model->get_token_bnsp();
@@ -222,6 +222,10 @@ class Komite extends MY_Controller
 
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 			$responseBody = json_decode(curl_exec($ch), true);
+			echo "<pre>";
+			print_r($responseBody);
+			echo "</pre>";
+			die('Stop di API BNSP');
 
 			//Execute the request
 			if ($responseBody["code"] = "ERR") {
@@ -311,6 +315,10 @@ class Komite extends MY_Controller
 				'log' => $log,
 			);
 			$this->db->replace('data_pencatatan_sertifikasi', $rekomendasi_hasil_asesmen);
+			echo "<pre>";
+			print_r($rekomendasi_hasil_asesmen);
+			echo "</pre>";
+			die('Cek data sebelum masuk DB');
 
 			echo '<script>alert("Data Permohonan Berhasil Di Tetapkan")</script>';
 
