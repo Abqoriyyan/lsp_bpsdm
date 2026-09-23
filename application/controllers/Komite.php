@@ -180,7 +180,7 @@ class Komite extends MY_Controller
 				"nama" => "Nomor Permohonan",
 				"nomor" => "",
 				"tanggal" => date("Y-m-d"),
-				"file_dokumen" => base_url('+asesor/cetak_berita_acara_rekomendasi_asesor') . base64_encode($id_izin)
+				"file_dokumen" => base_url('asesor/cetak_berita_acara_rekomendasi_asesor') . base64_encode($id_izin)
 			);
 
 			$data_ba_pleno = array(

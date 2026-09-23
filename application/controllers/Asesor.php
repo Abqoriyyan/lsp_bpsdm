@@ -438,17 +438,25 @@ class Asesor extends MY_Controller
         if ($this->upload->do_upload('file_asesmen')) {
             $file_asesmen = $this->upload->data();
 
-            $data_file_asesmen = array();
+            $this->db->where('id_izin', $id_izin_asli);
+            $this->db->where('kode_form', $form_kode);
+            $cek_exist = $this->db->get('data_file_asesmen')->num_rows();
 
-            $data_file_asesmen['id_izin'] = $id_izin_asli;
-            $data_file_asesmen['kode_form'] = $form_kode;
-            $data_file_asesmen['file'] = $file_asesmen['file_name'];
-            $data_file_asesmen['user_pengunggah'] = $username_login;
-            $data_file_asesmen['log'] = $log;
+            if ($cek_exist > 0) {
+                @unlink($upload_path . '/' . $file_asesmen['file_name']);
+                $this->session->set_flashdata('gagal', 'File untuk form ini sudah pernah diupload.');
+            } else {
+                $data_file_asesmen = array(
+                    'id_izin' => $id_izin_asli,
+                    'kode_form' => $form_kode,
+                    'file' => $file_asesmen['file_name'],
+                    'user_pengunggah' => $username_login,
+                    'log' => $log
+                );
 
-            $this->db->insert('data_file_asesmen', $data_file_asesmen);
-
-            $this->session->set_flashdata('success', 'Berhasil Menambahkan File');
+                $this->db->insert('data_file_asesmen', $data_file_asesmen);
+                $this->session->set_flashdata('success', 'Berhasil Menambahkan File');
+            }
         } else {
             $this->session->set_flashdata('gagal', 'Gagal Upload: ' . $this->upload->display_errors('', ''));
         }
