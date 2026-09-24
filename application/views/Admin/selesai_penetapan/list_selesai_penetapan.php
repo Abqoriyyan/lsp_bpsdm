@@ -122,22 +122,27 @@
                                         <i class="fas fa-eye"></i> Preview
                                     </a>
                                 </td>
+                                <td class="text-center">
+                                    <?php
+                                    $blangko = trim($data_selesai_penetapan['nomor_blangko_bnsp'] ?? '');
 
-                                <?php
-                                if ($data_selesai_penetapan['nomor_blangko_bnsp'] == "Menunggu Approve BNSP" || $data_selesai_penetapan['nomor_registrasi_lpjk'] == "Menunggu Approve BNSP" || $data_selesai_penetapan['nomor_registrasi_lpjk'] == NULL) {
-                                    echo "<td class='text-center'><button class='btn btn-secondary btn-xs text-nowrap-custom' disabled><i class='fas fa-clock'></i> Menunggu</button></td>";
-                                } else {
-                                    ?>
-                                    <td class="text-center">
+                                    if (empty($blangko) || $blangko == "Menunggu Approve BNSP") {
+                                        ?>
+                                        <button class="btn btn-secondary btn-xs text-nowrap-custom" disabled>
+                                            <i class="fas fa-clock"></i> Menunggu
+                                        </button>
+                                        <?php
+                                    } else {
+                                        ?>
                                         <a href="<?= base_url('admin/izin_final_siki_portal/') . base64_encode($data_selesai_penetapan['id_izin']); ?>"
                                             class="btn btn-success btn-xs text-nowrap-custom"
                                             onclick="return confirm('QC Sudah Lengkap - Permohonan Sertifikasi dan Sertifikat Sudah Sesuai ?')">
                                             <i class="fas fa-check"></i> Final
                                         </a>
-                                    </td>
-                                    <?php
-                                }
-                                ?>
+                                        <?php
+                                    }
+                                    ?>
+                                </td>
                             </tr>
                             <?php
                         }

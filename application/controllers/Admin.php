@@ -2517,6 +2517,8 @@ class Admin extends MY_Controller
 		}
 		##/Cek Session Login##
 
+		$is_local_mock = FALSE;
+
 		$id_izin_raw = base64_decode($id_izin);
 		$id_izin_clean = $this->security->xss_clean($id_izin_raw);
 		$id_izin = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
@@ -2534,25 +2536,32 @@ class Admin extends MY_Controller
 		$get_absensi_asesmen = $this->Admin_model->get_absensi_asesmen($id_jadwal);
 		$token = $this->Api_model->get_token();
 
-		## Set Configuration Header.
-		$headers = array(
-			'Content-Type: application/json',
-			'x-authorization:' . $token_bnsp->x_authorization
-		);
+		if ($is_local_mock) {
+			$responseBody = json_encode([
+				'code' => 'SUCCESS',
+				'data' => [
+					[
+						'nik' => isset($get_data_pencatatan->nik) ? $get_data_pencatatan->nik : '3201000000000000',
+						'nomor_blanko' => 'BNSP-LOCAL-MOCK-' . rand(1000, 9999)
+					]
+				]
+			]);
+		} else {
+			$headers = array(
+				'Content-Type: application/json',
+				'x-authorization:' . $token_bnsp->x_authorization
+			);
+			$baseUrl = $token_bnsp->host . "jadwal/blanko?jadwal_id=" . $id_jadwal;
 
-		## Set URL Source Data ##
-		$baseUrl = $token_bnsp->host . "jadwal/blanko?jadwal_id=" . $id_jadwal;
+			$ch = curl_init();
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+			curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch, CURLOPT_URL, "$baseUrl");
 
-		// Set the headers that we want our cURL client to use.
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-		curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_URL, "$baseUrl");
-
-		$responseBody = curl_exec($ch);
-		$responseInfo = curl_getinfo($ch);
-		curl_close($ch);
+			$responseBody = curl_exec($ch);
+			curl_close($ch);
+		}
 
 		$array = json_decode($responseBody, True);
 
@@ -2564,8 +2573,6 @@ class Admin extends MY_Controller
 						echo "<script>alert('Permohonan Blanko Belum di Approve');</script>";
 					} else {
 						///////////// Pemenuhan Rekomendasi Asesor ke LPJK V2
-						$curl = curl_init();
-
 						$rekomendasi = ($get_data_rekomendasi_asesor_lpjk->rekomendasi_asesor == "Kompeten") ? "K" : "BK";
 
 						// Metode Uji
@@ -2699,25 +2706,33 @@ class Admin extends MY_Controller
 
 						$jsonData_rekom_asesor_encode = json_encode($jsonData_rekom_asesor);
 
-						curl_setopt_array($curl, array(
-							CURLOPT_URL => $token->host . '/siki-api/v3/asesor-lsp-penugasan/' . $id_izin,
-							CURLOPT_RETURNTRANSFER => true,
-							CURLOPT_ENCODING => '',
-							CURLOPT_MAXREDIRS => 10,
-							CURLOPT_TIMEOUT => 0,
-							CURLOPT_FOLLOWLOCATION => true,
-							CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-							CURLOPT_CUSTOMREQUEST => 'POST',
-							CURLOPT_POSTFIELDS => $jsonData_rekom_asesor_encode,
-							CURLOPT_HTTPHEADER => array(
-								'token: ' . $token->token,
-								'Content-Type: application/json'
-							),
-						));
+						if ($is_local_mock) {
+							$response_asesor = json_encode([
+								'status' => 'success',
+								'message' => 'Data penugasan asesor berhasil diterima (MOCK)'
+							]);
+						} else {
+							$curl = curl_init();
+							curl_setopt_array($curl, array(
+								CURLOPT_URL => $token->host . '/siki-api/v2/asesor-lsp-penugasan/' . $id_izin,
+								CURLOPT_RETURNTRANSFER => true,
+								CURLOPT_ENCODING => '',
+								CURLOPT_MAXREDIRS => 10,
+								CURLOPT_TIMEOUT => 30,
+								CURLOPT_FOLLOWLOCATION => true,
+								CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+								CURLOPT_CUSTOMREQUEST => 'POST',
+								CURLOPT_POSTFIELDS => $jsonData_rekom_asesor_encode,
+								CURLOPT_HTTPHEADER => array(
+									'token: ' . $token->token,
+									'Content-Type: application/json'
+								),
+							));
+							$response_asesor = curl_exec($curl);
+							curl_close($curl);
+						}
 
-						$response = curl_exec($curl);
-						$arr = json_decode($response, true);
-						curl_close($curl);
+						$arr = json_decode($response_asesor, true);
 
 						## Cek Asesor jika tidak terdaftar
 						if (isset($arr['message']) && substr($arr['message'], -15) == 'tidak terdaftar') {
@@ -2728,7 +2743,6 @@ class Admin extends MY_Controller
 						// Pemenuhan Penetapan Komite ke LPJK
 						$get_data_penetapan_komite_lpjk = $this->Admin_model->get_data_penetapan_komite_lpjk($id_izin);
 						$get_komite = $this->Admin_model->get_data_penetapan_komite_lpjk($id_izin);
-						$curl = curl_init();
 
 						$hasil_penetapan = ($get_data_penetapan_komite_lpjk->hasil_penetapan == "Kompeten") ? "K" : "BK";
 
@@ -2756,24 +2770,31 @@ class Admin extends MY_Controller
 
 						$jsonData_penetapan_komite_encode = json_encode($jsonData_penetapan_komite);
 
-						curl_setopt_array($curl, array(
-							CURLOPT_URL => $token->host . '/siki-api/v1/komtek-lsp-penugasan/' . $id_izin,
-							CURLOPT_RETURNTRANSFER => true,
-							CURLOPT_ENCODING => '',
-							CURLOPT_MAXREDIRS => 10,
-							CURLOPT_TIMEOUT => 0,
-							CURLOPT_FOLLOWLOCATION => true,
-							CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-							CURLOPT_CUSTOMREQUEST => 'POST',
-							CURLOPT_POSTFIELDS => $jsonData_penetapan_komite_encode,
-							CURLOPT_HTTPHEADER => array(
-								'token: ' . $token->token,
-								'Content-Type: application/json'
-							),
-						));
-
-						$response = curl_exec($curl);
-						curl_close($curl);
+						if ($is_local_mock) {
+							$response_komtek = json_encode([
+								'status' => 'success',
+								'message' => 'Data komite teknis berhasil diterima (MOCK)'
+							]);
+						} else {
+							$curl = curl_init();
+							curl_setopt_array($curl, array(
+								CURLOPT_URL => $token->host . '/siki-api/v1/komtek-lsp-penugasan/' . $id_izin,
+								CURLOPT_RETURNTRANSFER => true,
+								CURLOPT_ENCODING => '',
+								CURLOPT_MAXREDIRS => 10,
+								CURLOPT_TIMEOUT => 30,
+								CURLOPT_FOLLOWLOCATION => true,
+								CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+								CURLOPT_CUSTOMREQUEST => 'POST',
+								CURLOPT_POSTFIELDS => $jsonData_penetapan_komite_encode,
+								CURLOPT_HTTPHEADER => array(
+									'token: ' . $token->token,
+									'Content-Type: application/json'
+								),
+							));
+							$response_komtek = curl_exec($curl);
+							curl_close($curl);
+						}
 
 						// Update data ke Pencatatan Lokal LSP
 						$data = array(
@@ -2785,24 +2806,33 @@ class Admin extends MY_Controller
 						$where = array('id_izin' => $id_izin);
 						$this->Admin_model->update_data($where, $data, 'data_pencatatan_sertifikasi');
 
-						// Update data Pencatatan ke SIKI
-						$url = $token->host . '/siki-api/v1/pencatatan-skk/' . $id_izin;
-						$ch = curl_init($url);
-
 						$jsonData = array(
 							"nomor_registrasi_lsp" => $get_data_pencatatan->nomor_registrasi_lsp,
 							"nomor_sertifikasi_lsp" => $get_data_pencatatan->nomor_sertifikat_lengkap,
 							"nomor_blangko_bnsp" => $array['data'][$i]['nomor_blanko'],
 						);
-
 						$jsonDataEncoded = json_encode($jsonData);
 
-						curl_setopt($ch, CURLOPT_POST, 1);
-						curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonDataEncoded);
-						curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'token: ' . $token->token));
-						curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-						$arr = json_decode(curl_exec($ch), true);
-						curl_close($ch);
+						if ($is_local_mock) {
+							$response_pencatatan = json_encode([
+								'status' => 'success',
+								'nomor_registrasi' => 'REG-MOCK-LOCAL-999',
+								'qr' => 'https://api.qrserver.com/v1/create-qr-code/?data=REG-MOCK-LOCAL-999',
+								'message' => 'Pencatatan SKK Berhasil (MOCK)'
+							]);
+						} else {
+							$url = $token->host . '/siki-api/v1/pencatatan-skk/' . $id_izin;
+							$ch = curl_init($url);
+							curl_setopt($ch, CURLOPT_POST, 1);
+							curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonDataEncoded);
+							curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'token: ' . $token->token));
+							curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+							curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+							$response_pencatatan = curl_exec($ch);
+							curl_close($ch);
+						}
+
+						$arr = json_decode($response_pencatatan, true);
 
 						// Menyesuaikan Status ke LPJK
 						if (isset($arr['message'])) {
@@ -2850,7 +2880,7 @@ class Admin extends MY_Controller
 						$where = array('id_izin' => $id_izin);
 						$this->Admin_model->update_data($where, $data, 'data_pencatatan_sertifikasi');
 
-						echo "<script>alert('Data Blanko Berhasil di GET');</script>";
+						echo "<script>alert('Data Blanko Berhasil Diperbarui');</script>";
 					}
 				}
 			}
@@ -2869,106 +2899,115 @@ class Admin extends MY_Controller
 			redirect('login/keluar', 'refresh');
 		}
 		##/Cek Session Login##
+
 		$id_izin_raw = base64_decode($id_izin);
 		$id_izin_clean = $this->security->xss_clean($id_izin_raw);
 		$id_izin = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
 		$log = date("Y-m-d H:i:s");
 
-		///////////////////////{ Pencatatan SKK } //////////////////////////
-		//API Url
+		// Persiapan payload data untuk SIKI
 		$token = $this->Api_model->get_token();
-		$url = $token->host . '/siki-api/v1/izin-final-skk/' . $id_izin;
-
-		//Initiate cURL.
-		$ch = curl_init($url);
-
-		//The JSON data.
-		$jsonData = array(
-			"file_lampiran" => array("link_e_sertifikat" => base_url('sertifikat/') . base64_encode($id_izin)),
+		$url_siki = $token->host . '/siki-api/v1/izin-final-skk/' . $id_izin;
+		$jsonData_siki = array(
+			"file_lampiran" => array(
+				"link_e_sertifikat" => base_url('sertifikat/') . base64_encode($id_izin),
+				"url_surat_pernyataan_pemegang_sertifikat" => base_url('Admin/cetak_pernyataan_asesi/') . base64_encode($id_izin)
+			)
 		);
 
-		//Encode the array into JSON.
-		$jsonDataEncoded = json_encode($jsonData);
-
-		//Tell cURL that we want to send a POST request.
-		curl_setopt($ch, CURLOPT_POST, 1);
-		//Attach our encoded JSON string to the POST fields.
-		curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonDataEncoded);
-		//Set the content type to application/json
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'token: ' . $token->token));
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-		//Execute the request to array
-		$responseBody = json_decode(curl_exec($ch), true);
-
-		if ($responseBody["status"] = "errors") {
-			echo '<script>alert("Izin Final ke SIKI Gagal silahkan kontak Admin IT")</script>';
-		} else {
-			// Berhasil	
-		}
-
-
-		///////////// Pencatatan ke BNSP ///////////////////
+		// Persiapan payload data untuk BNSP
 		$token_bnsp = $this->Api_model->get_token_bnsp();
 		$get_detail_jadwal_asesmen_per_permohonan = $this->Admin_model->get_detail_jadwal_asesmen_per_permohonan($id_izin);
 		$get_data_pencatatan = $this->Admin_model->get_data_pencatatan($id_izin);
+		$url_bnsp = $token_bnsp->host . "jadwal/peserta/sertifikat";
 
-		//API Url
-		$url = $token_bnsp->host . "jadwal/peserta/sertifikat";
-
-		//Initiate cURL.
-		$ch = curl_init($url);
-
-		//The JSON data.
-		$jsonData = array(
-			"jadwal_id" => $get_detail_jadwal_asesmen_per_permohonan->id_jadwal_asesmen,
-			"nik_peserta" => "$get_data_pencatatan->nik",
-			"nomor_sertifikat" => "$get_data_pencatatan->nomor_sertifikat_lengkap",
-			"nomor_reg" => "$get_data_pencatatan->nomor_registrasi_lsp",
-			"nomor_reg_lpjk" => "$get_data_pencatatan->nomor_registrasi_lpjk",
+		$jsonData_bnsp = array(
+			"jadwal_id" => isset($get_detail_jadwal_asesmen_per_permohonan->id_jadwal_asesmen) ? $get_detail_jadwal_asesmen_per_permohonan->id_jadwal_asesmen : null,
+			"nik_peserta" => isset($get_data_pencatatan->nik) ? (string) $get_data_pencatatan->nik : "",
+			"nomor_sertifikat" => isset($get_data_pencatatan->nomor_sertifikat_lengkap) ? (string) $get_data_pencatatan->nomor_sertifikat_lengkap : "",
+			"nomor_reg" => isset($get_data_pencatatan->nomor_registrasi_lsp) ? (string) $get_data_pencatatan->nomor_registrasi_lsp : "",
+			"nomor_reg_lpjk" => isset($get_data_pencatatan->nomor_registrasi_lpjk) ? (string) $get_data_pencatatan->nomor_registrasi_lpjk : "",
 			"link_sertifikat" => base_url("sertifikat/") . base64_encode($id_izin),
-			"tgl_srtf" => $get_data_pencatatan->tanggal_ditetapkan,
-			"tgl_srtf_end" => $get_data_pencatatan->tanggal_masa_berlaku,
+			"tgl_srtf" => isset($get_data_pencatatan->tanggal_ditetapkan) ? $get_data_pencatatan->tanggal_ditetapkan : "",
+			"tgl_srtf_end" => isset($get_data_pencatatan->tanggal_masa_berlaku) ? $get_data_pencatatan->tanggal_masa_berlaku : "",
 		);
 
-		//Encode the array into JSON.
-		$jsonDataEncoded = json_encode($jsonData);
+		// =========================================================================
+		// Testing Tampilan & Struktur Payload Tanpa Eksekusi API
+		// =========================================================================
+		if ($_SERVER['SERVER_NAME'] == 'localhost' || $_SERVER['REMOTE_ADDR'] == '127.0.0.1' || $_SERVER['REMOTE_ADDR'] == '::1') {
+			echo "<div style='font-family: monospace; background: #1e1e1e; color: #00ff00; padding: 20px; border-radius: 8px;'>";
+			echo "<h2 style='color: #ff9900; margin-top:0;'>[MODE SIMULASI LOCALHOST]</h2>";
+			echo "<p style='color: #fff;'>Proses berhasil di-intersept. <b>TIDAK ADA DATA</b> yang dikirim ke cURL SIKI/BNSP dan DB lokal belum di-update.</p>";
+			echo "<hr style='border-color: #444;'>";
+			echo "<b>ID Izin:</b> " . $id_izin . "<br><br>";
 
-		//Tell cURL that we want to send a POST request.
-		curl_setopt($ch, CURLOPT_POST, 1);
+			echo "<b style='color: #00bfff;'>1. TARGET ENDPOINT & PAYLOAD SIKI:</b><br>";
+			echo "URL: " . $url_siki . "<br>";
+			echo "<pre style='color: #fff; background: #2d2d2d; padding: 10px;'>" . json_encode($jsonData_siki, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "</pre>";
 
-		//Attach our encoded JSON string to the POST fields.
-		curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonDataEncoded);
+			echo "<b style='color: #00bfff;'>2. TARGET ENDPOINT & PAYLOAD BNSP:</b><br>";
+			echo "URL: " . $url_bnsp . "<br>";
+			echo "<pre style='color: #fff; background: #2d2d2d; padding: 10px;'>" . json_encode($jsonData_bnsp, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "</pre>";
 
-		//Set the content type to application/json
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+			echo "<hr style='border-color: #444;'>";
+			echo "<a href='" . base_url('admin/list_selesai_penetapan') . "' style='background: #28a745; color: white; padding: 8px 15px; text-decoration: none; border-radius: 4px;'>&laquo; Kembali ke List</a>";
+			echo "</div>";
+
+			exit();
+		}
+		// =========================================================================
+
+		///////////////////////{ Exec cURL SIKI } //////////////////////////
+		$ch_siki = curl_init($url_siki);
+		$jsonDataEncodedSiki = json_encode($jsonData_siki);
+
+		curl_setopt($ch_siki, CURLOPT_POST, 1);
+		curl_setopt($ch_siki, CURLOPT_POSTFIELDS, $jsonDataEncodedSiki);
+		curl_setopt($ch_siki, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'token: ' . $token->token));
+		curl_setopt($ch_siki, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($ch_siki, CURLOPT_TIMEOUT, 30);
+
+		$execSiki = curl_exec($ch_siki);
+		curl_close($ch_siki);
+
+		$responseBodySiki = json_decode($execSiki, true);
+
+		if (isset($responseBodySiki["status"]) && $responseBodySiki["status"] == "errors") {
+			$msg_siki = isset($responseBodySiki["message"]) ? $responseBodySiki["message"] : "Gagal kirim Izin Final ke SIKI";
+			$this->session->set_flashdata('message_siki', 'Warning: ' . $msg_siki);
+		}
+
+		///////////// Exec cURL BNSP ///////////////////
+		$ch_bnsp = curl_init($url_bnsp);
+		$jsonDataEncodedBnsp = json_encode($jsonData_bnsp);
+
+		curl_setopt($ch_bnsp, CURLOPT_POST, 1);
+		curl_setopt($ch_bnsp, CURLOPT_POSTFIELDS, $jsonDataEncodedBnsp);
+		curl_setopt($ch_bnsp, CURLOPT_HTTPHEADER, array(
 			'Content-Type: application/json',
 			'x-authorization:' . $token_bnsp->x_authorization,
 			'token:' . $token_bnsp->x_authorization
 		));
+		curl_setopt($ch_bnsp, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($ch_bnsp, CURLOPT_TIMEOUT, 30);
 
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-		$responseBody = json_decode(curl_exec($ch), true);
+		$execBnsp = curl_exec($ch_bnsp);
+		curl_close($ch_bnsp);
 
-		// if ($responseBody["code"]="ERR"){
-		// 	echo '<script>alert("Izin Final ke BNSP Gagal silahkan kontak Admin IT")</script>';
-		// 	redirect('admin/list_selesai_penetapan','refresh');
-		// }else{
-		// 	// Berhasil	
-		// }
+		$responseBodyBnsp = json_decode($execBnsp, true);
 
-		echo '<script>alert("Izin Final ke SIKI & BNSP Berhasil")</script>';
-
-		//////////// /Pencatatan ke BNSP ///////////////////
-		// Insert Log History Permohonan Permohonan Status 50 Kompeten ke History Lokal
+		// Insert Log History Permohonan Status 50
 		$data_tinjau['id_izin'] = $id_izin;
 		$data_tinjau['kode_status'] = "50";
 		$data_tinjau['log'] = date("Y-m-d H:i:s");
 		$data_tinjau['username'] = $this->session->userdata('username');
 		$this->Admin_model->insert_log_history_permohonan($data_tinjau);
 
+		$this->session->set_flashdata('success', 'Izin Final ke SIKI & BNSP Berhasil Diproses.');
 		redirect('admin/list_selesai_penetapan', 'refresh');
-
 	}
+
 
 	public function terbit_sertifikat()
 	{
