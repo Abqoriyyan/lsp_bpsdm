@@ -460,7 +460,7 @@ if (file_exists($stamp_path)) {
                         <td class="text-left"><?= !empty($data['nama']) ? $data['nama'] : '-' ?></td>
                         <td><?= !empty($data['id_izin']) ? $data['id_izin'] : '-' ?></td>
                         <td>
-                            <?= (isset($data['hasil_penetapan']) && $data['hasil_penetapan'] == "Kompeten") ? "K" : "BK" ?>
+                            <?= (isset($data['hasil_penetapan_komite']) && $data['hasil_penetapan_komite'] == "Kompeten") ? "K" : "BK" ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>

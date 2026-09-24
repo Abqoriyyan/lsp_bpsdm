@@ -222,19 +222,38 @@ class Komite_model extends CI_Model
     {
         $this->db->query("SET sql_mode = (SELECT REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY', ''))");
 
-        $this->db->select('e.*, a.log AS tanggal_penetapan, f.nama AS nama_komite, f.file_ttd, g.*, h.jenjang, i.jabatan_kerja');
-        $this->db->from('data_hasil_penetapan_komite_teknis a');
-        $this->db->join('data_penunjukan_asesor b', 'b.id_izin = a.id_izin', 'left');
-        $this->db->join('data_jadwal_asesmen c', 'c.kode_jadwal = b.kode_jadwal_asesmen', 'left');
-        $this->db->join('data_penunjukan_asesor d', 'd.kode_jadwal_asesmen = c.kode_jadwal', 'left');
-        $this->db->join('data_hasil_penetapan_komite_teknis e', 'e.id_izin = d.id_izin', 'left');
-        $this->db->join('master_komite f', 'f.user_komite = e.user_penetap', 'left');
-        $this->db->join('data_personal_permohonan g', 'g.id_izin = e.id_izin', 'left');
-        $this->db->join('data_klasifikasi_kualifikasi_permohonan h', 'h.id_izin = e.id_izin', 'left');
-        $this->db->join('master_jabatan_kerja i', 'i.id_jabatan_kerja = h.jabatan_kerja', 'left');
+        $get_jadwal = $this->db->select('kode_jadwal_asesmen')
+            ->from('data_penunjukan_asesor')
+            ->where('id_izin', $id_izin)
+            ->limit(1)
+            ->get()
+            ->row_array();
 
-        $this->db->where('a.id_izin', $id_izin);
-        $this->db->group_by('d.id_izin');
+        $kode_jadwal = $get_jadwal['kode_jadwal_asesmen'] ?? '';
+
+        if (empty($kode_jadwal)) {
+            return array();
+        }
+        $this->db->select('
+        a.id_izin,
+        e.hasil_penetapan AS hasil_penetapan_komite,
+        e.log AS tanggal_penetapan,
+        f.nama AS nama_komite,
+        f.file_ttd,
+        g.nama,
+        g.nik,
+        h.jenjang,
+        i.jabatan_kerja
+    ');
+
+        $this->db->from('data_penunjukan_asesor a');
+        $this->db->join('data_hasil_penetapan_komite_teknis e', 'e.id_izin = a.id_izin', 'left');
+        $this->db->join('master_komite f', 'f.user_komite = e.user_penetap', 'left');
+        $this->db->join('data_personal_permohonan g', 'g.id_izin = a.id_izin', 'left');
+        $this->db->join('data_klasifikasi_kualifikasi_permohonan h', 'h.id_izin = a.id_izin', 'left');
+        $this->db->join('master_jabatan_kerja i', 'i.id_jabatan_kerja = h.jabatan_kerja', 'left');
+        $this->db->where('a.kode_jadwal_asesmen', $kode_jadwal);
+        $this->db->group_by('a.id_izin');
 
         $query = $this->db->get();
         return $query->result_array();

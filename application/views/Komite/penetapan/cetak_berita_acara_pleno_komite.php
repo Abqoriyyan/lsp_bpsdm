@@ -262,9 +262,9 @@ $base64 = $data_kop ? 'data:image/' . $type . ';base64,' . base64_encode($data_k
                         </td>
                         <td style="text-align:center;">
                             <?php
-                            if ($data['hasil_penetapan'] == "Kompeten") {
+                            if ($data['hasil_penetapan_komite'] == "Kompeten") {
                                 echo "K";
-                            } elseif ($data['hasil_penetapan'] == "Belum Kompeten") {
+                            } elseif ($data['hasil_penetapan_komite'] == "Belum Kompeten") {
                                 echo "BK";
                             }
                             ?>

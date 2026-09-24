@@ -448,7 +448,6 @@ class Admin_model extends CI_Model
 
         $query = $this->db->query($sql, array($id_izin));
 
-        // Gunakan result_array() jika penetapan komite bisa lebih dari 1 orang
         return $query->result_array();
     }
 
@@ -546,7 +545,7 @@ class Admin_model extends CI_Model
         $this->db->join("($subquery) latest_hist", 'latest_hist.id_izin = a.id_izin', 'left');
         $this->db->join('history_permohonan b', 'b.id_izin = latest_hist.id_izin AND b.log = latest_hist.max_log', 'left');
         $this->db->join('data_personal_permohonan c', 'c.id_izin = a.id_izin', 'left');
-        $this->db->where_in('b.kode_status', ['31', '50']);
+        $this->db->where_in('b.kode_status', ['31', '50', '90']);
 
         return $this->db->get()->result_array();
     }
