@@ -2516,20 +2516,22 @@ class Admin extends MY_Controller
 			redirect('login/keluar', 'refresh');
 		}
 		##/Cek Session Login##
+
 		$id_izin_raw = base64_decode($id_izin);
 		$id_izin_clean = $this->security->xss_clean($id_izin_raw);
 		$id_izin = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
 		$log = date("Y-m-d H:i:s");
+
 		$token_bnsp = $this->Api_model->get_token_bnsp();
 		$get_data_pencatatan = $this->Admin_model->get_data_pencatatan($id_izin);
 		$get_detail_jadwal_asesmen_per_permohonan = $this->Admin_model->get_detail_jadwal_asesmen_per_permohonan($id_izin);
 		$get_data_rekomendasi_asesor_lpjk = $this->Admin_model->get_data_rekomendasi_asesor_lpjk($id_izin);
 		$get_bukti_dokumentasi_asesmen = $this->Asesor_model->get_bukti_dokumentasi_asesmen($id_izin);
 		$get_data_pelaporan_asesor = $this->Admin_model->get_data_pelaporan_asesor($id_izin);
-		$kode_jadwal = $this->Admin_model->get_detail_jadwal_asesmen_per_permohonan($id_izin);
-		$get_verifikasi_tuk = $this->Admin_model->get_verifikasi_tuk($kode_jadwal);
-		$get_absensi_pra_asesmen = $this->Admin_model->get_absensi_pra_asesmen($kode_jadwal);
-		$get_absensi_asesmen = $this->Admin_model->get_absensi_asesmen($kode_jadwal);
+		$id_jadwal = isset($get_detail_jadwal_asesmen_per_permohonan->id_jadwal_asesmen) ? $get_detail_jadwal_asesmen_per_permohonan->id_jadwal_asesmen : '';
+		$get_verifikasi_tuk = $this->Admin_model->get_verifikasi_tuk($id_jadwal);
+		$get_absensi_pra_asesmen = $this->Admin_model->get_absensi_pra_asesmen($id_jadwal);
+		$get_absensi_asesmen = $this->Admin_model->get_absensi_asesmen($id_jadwal);
 		$token = $this->Api_model->get_token();
 
 		## Set Configuration Header.
@@ -2537,14 +2539,12 @@ class Admin extends MY_Controller
 			'Content-Type: application/json',
 			'x-authorization:' . $token_bnsp->x_authorization
 		);
-		## Set Variable From POST Kategori
 
 		## Set URL Source Data ##
-		$baseUrl = $token_bnsp->host . "jadwal/blanko?jadwal_id=" . $get_detail_jadwal_asesmen_per_permohonan->id_jadwal_asesmen;
+		$baseUrl = $token_bnsp->host . "jadwal/blanko?jadwal_id=" . $id_jadwal;
 
-		//Set the headers that we want our cURL client to use.
+		// Set the headers that we want our cURL client to use.
 		$ch = curl_init();
-		//Set the headers that we want our cURL client to use.
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 		curl_setopt($ch, CURLOPT_TIMEOUT, 10);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -2555,8 +2555,9 @@ class Admin extends MY_Controller
 		curl_close($ch);
 
 		$array = json_decode($responseBody, True);
+
 		// Update Data Blanko
-		if ($array['code'] !== 'ERR') {
+		if (isset($array['code']) && $array['code'] !== 'ERR' && !empty($array['data'])) {
 			for ($i = 0; $i < count($array['data']); $i++) {
 				if ($array['data'][$i]['nik'] == $get_data_pencatatan->nik) {
 					if ($array['data'][$i]['nomor_blanko'] == null) {
@@ -2565,11 +2566,7 @@ class Admin extends MY_Controller
 						///////////// Pemenuhan Rekomendasi Asesor ke LPJK V2
 						$curl = curl_init();
 
-						if ($get_data_rekomendasi_asesor_lpjk->rekomendasi_asesor == "Kompeten") {
-							$rekomendasi = "K";
-						} elseif ($get_data_rekomendasi_asesor_lpjk->rekomendasi_asesor == "Belum Kompeten") {
-							$rekomendasi = "BK";
-						}
+						$rekomendasi = ($get_data_rekomendasi_asesor_lpjk->rekomendasi_asesor == "Kompeten") ? "K" : "BK";
 
 						// Metode Uji
 						if ($get_data_rekomendasi_asesor_lpjk->metode_uji == "1") {
@@ -2595,7 +2592,7 @@ class Admin extends MY_Controller
 						if ($uji_tulis == "1") {
 							$url_form_uji_tulis = base_url("berkas/asesmen/") . base64_encode($id_izin);
 							$tgl_pelaksaaan_form_uji_tulis = $get_data_rekomendasi_asesor_lpjk->tgl_uji;
-						} elseif ($uji_tulis == "0") {
+						} else {
 							$url_form_uji_tulis = "";
 							$tgl_pelaksaaan_form_uji_tulis = "";
 						}
@@ -2603,7 +2600,7 @@ class Admin extends MY_Controller
 						if ($uji_lisan == "1") {
 							$url_form_uji_lisan = base_url("berkas/asesmen/") . base64_encode($id_izin);
 							$tgl_pelaksaaan_form_uji_lisan = $get_data_rekomendasi_asesor_lpjk->tgl_uji;
-						} elseif ($uji_lisan == "0") {
+						} else {
 							$url_form_uji_lisan = "";
 							$tgl_pelaksaaan_form_uji_lisan = "";
 						}
@@ -2611,7 +2608,7 @@ class Admin extends MY_Controller
 						if ($wawancara == "1") {
 							$url_form_wawancara = base_url("berkas/asesmen/") . base64_encode($id_izin);
 							$tgl_pelaksaaan_form_wawancara = $get_data_rekomendasi_asesor_lpjk->tgl_uji;
-						} elseif ($wawancara == "0") {
+						} else {
 							$url_form_wawancara = "";
 							$tgl_pelaksaaan_form_wawancara = "";
 						}
@@ -2626,7 +2623,7 @@ class Admin extends MY_Controller
 
 						$jsonData_rekom_asesor = array(
 							"id_asesor" => $get_data_rekomendasi_asesor_lpjk->id_asesor,
-							"id_asesor_2" => !empty($get_data_rekomendasi_asesor_lpjk->id_asesor_2) ? $get_data_rekomendasi_asesor_lpjk->id_asesor_2 : "", // Opsional (jika ada asesor 2)
+							"id_asesor_2" => !empty($get_data_rekomendasi_asesor_lpjk->id_asesor_2) ? $get_data_rekomendasi_asesor_lpjk->id_asesor_2 : "",
 							"rekomendasi" => $rekomendasi,
 							"catatan" => $get_data_rekomendasi_asesor_lpjk->catatan,
 							"tgl_surat_tugas" => $get_data_rekomendasi_asesor_lpjk->tgl_surat_tugas,
@@ -2645,7 +2642,7 @@ class Admin extends MY_Controller
 							"url_surat_rekomendasi_akhir" => base_url("asesor/cetak_berita_acara_rekomendasi_asesor/") . base64_encode($id_izin),
 							"url_apl01" => base_url("cetak_form_asesmen/apl01/") . base64_encode($id_izin),
 							"url_apl02" => base_url("cetak_form_asesmen/apl02/") . base64_encode($id_izin),
-							"url_dokumentasi_asesmen" => base_url("uploads/file_asesmen/bukti_dokumentasi_asesmen/") . $get_bukti_dokumentasi_asesmen->file,
+							"url_dokumentasi_asesmen" => base_url("uploads/file_asesmen/bukti_dokumentasi_asesmen/") . (isset($get_bukti_dokumentasi_asesmen->file) ? $get_bukti_dokumentasi_asesmen->file : ''),
 							"url_form_uji_tulis" => $url_form_uji_tulis,
 							"tgl_pelaksaaan_form_uji_tulis" => $tgl_pelaksaaan_form_uji_tulis,
 							"url_form_uji_lisan" => $url_form_uji_lisan,
@@ -2662,7 +2659,7 @@ class Admin extends MY_Controller
 							"nama_admin_lsp" => $get_data_pelaporan_asesor->user_penunjuk,
 							"tgl_periksa_admin_lsp" => date('Y-m-d', strtotime($get_data_pelaporan_asesor->log)),
 							"url_surat_verifikasi_tuk" => !empty($get_verifikasi_tuk->file_verifikasi) ? base_url("uploads/file_verifikasi/" . $get_verifikasi_tuk->file_verifikasi) : "",
-							"tgl_kegiatan_pra_asesmen" => date('Y-m-d', strtotime($get_absensi_pra_asesmen->log)),
+							"tgl_kegiatan_pra_asesmen" => !empty($get_absensi_pra_asesmen->log) ? date('Y-m-d', strtotime($get_absensi_pra_asesmen->log)) : "",
 							"url_absensi_kegiatan_pra_asesmen" => !empty($get_absensi_pra_asesmen->file_absen) ? base_url("uploads/absensi_pra_asesmen/" . $get_absensi_pra_asesmen->file_absen) : "",
 							"url_absensi_kegiatan_asesmen" => !empty($get_absensi_asesmen->file_absen) ? base_url("uploads/absensi_asesmen/" . $get_absensi_asesmen->file_absen) : "",
 
@@ -2692,8 +2689,8 @@ class Admin extends MY_Controller
 							"url_ia11" => base_url("uploads/file_asesmen/fr-ia11/") . base64_encode($id_izin),
 
 							// Detail Verifikasi & Absensi
-							"nama_ttd_surat_verifikasi_tuk" => $get_verifikasi_tuk->nama_verifikator,
-							"tgl_ttd_surat_verifikasi_tuk" => date('Y-m-d', strtotime($get_verifikasi_tuk->log)),
+							"nama_ttd_surat_verifikasi_tuk" => isset($get_verifikasi_tuk->nama_verifikator) ? $get_verifikasi_tuk->nama_verifikator : "",
+							"tgl_ttd_surat_verifikasi_tuk" => !empty($get_verifikasi_tuk->log) ? date('Y-m-d', strtotime($get_verifikasi_tuk->log)) : "",
 							"url_absensi_asesor_kegiatan_pra_asesmen" => !empty($get_absensi_pra_asesmen->file_absen) ? base_url("uploads/absensi_pra_asesmen/" . $get_absensi_pra_asesmen->file_absen) : "",
 							"url_absensi_asesi_kegiatan_pra_asesmen" => !empty($get_absensi_pra_asesmen->file_absen) ? base_url("uploads/absensi_pra_asesmen/" . $get_absensi_pra_asesmen->file_absen) : "",
 							"url_absensi_asesor_kegiatan_asesmen" => !empty($get_absensi_asesmen->file_absen) ? base_url("uploads/absensi_asesmen/" . $get_absensi_asesmen->file_absen) : "",
@@ -2717,28 +2714,27 @@ class Admin extends MY_Controller
 								'Content-Type: application/json'
 							),
 						));
-						$response = curl_exec($curl);
-						$arr = json_decode(curl_exec($curl), true);
 
+						$response = curl_exec($curl);
+						$arr = json_decode($response, true);
 						curl_close($curl);
-						print_r($arr);
+
 						## Cek Asesor jika tidak terdaftar
-						if (substr($arr['message'], -15) == 'tidak terdaftar') {
-							if (substr($arr['message'], -15) == 'tidak terdaftar') {
-								$this->session->set_flashdata('message_pelaporan_asesor', $arr['message'] . ' Pastikan Asesor tersebut telah tercatat di Lisensi LPJK');
-								redirect('admin/list_selesai_penetapan', 'refresh');
-							}
+						if (isset($arr['message']) && substr($arr['message'], -15) == 'tidak terdaftar') {
+							$this->session->set_flashdata('message_pelaporan_asesor', $arr['message'] . ' Pastikan Asesor tersebut telah tercatat di Lisensi LPJK');
+							redirect('admin/list_selesai_penetapan', 'refresh');
 						}
+
 						// Pemenuhan Penetapan Komite ke LPJK
 						$get_data_penetapan_komite_lpjk = $this->Admin_model->get_data_penetapan_komite_lpjk($id_izin);
 						$get_komite = $this->Admin_model->get_data_penetapan_komite_lpjk($id_izin);
 						$curl = curl_init();
 
-						if ($get_data_penetapan_komite_lpjk->hasil_penetapan == "Kompeten") {
-							$hasil_penetapan = "K";
-						} elseif ($get_data_penetapan_komite_lpjk->hasil_penetapan == "Belum Kompeten") {
-							$hasil_penetapan = "BK";
-						}
+						$hasil_penetapan = ($get_data_penetapan_komite_lpjk->hasil_penetapan == "Kompeten") ? "K" : "BK";
+
+						$met_komtek_1 = is_array($get_komite) ? (isset($get_komite[0]['no_reg']) ? $get_komite[0]['no_reg'] : (isset($get_komite[0]->no_reg) ? $get_komite[0]->no_reg : "")) : "";
+						$met_komtek_2 = is_array($get_komite) ? (isset($get_komite[1]['no_reg']) ? $get_komite[1]['no_reg'] : (isset($get_komite[1]->no_reg) ? $get_komite[1]->no_reg : "")) : "";
+						$met_komtek_3 = is_array($get_komite) ? (isset($get_komite[2]['no_reg']) ? $get_komite[2]['no_reg'] : (isset($get_komite[2]->no_reg) ? $get_komite[2]->no_reg : "")) : "";
 
 						$jsonData_penetapan_komite = array(
 							"nama_komite_teknis" => $get_data_penetapan_komite_lpjk->nama_komite_teknis,
@@ -2751,10 +2747,10 @@ class Admin extends MY_Controller
 							"url_surat_tugas" => base_url("Admin/cetak_st_komite/") . base64_encode($id_izin),
 							"url_ba_penetapan" => base_url("komite/cetak_berita_acara_pleno_komite/") . base64_encode($id_izin),
 
-							// item baru
-							"met_komtek_1" => isset($get_komite[0]['no_reg']) ? $get_komite[0]['no_reg'] : "",
-							"met_komtek_2" => isset($get_komite[1]['no_reg']) ? $get_komite[1]['no_reg'] : "",
-							"met_komtek_3" => isset($get_komite[2]['no_reg']) ? $get_komite[2]['no_reg'] : "",
+							// Item baru
+							"met_komtek_1" => $met_komtek_1,
+							"met_komtek_2" => $met_komtek_2,
+							"met_komtek_3" => $met_komtek_3,
 							"url_absensi_tim_komtek" => base_url("Admin/cetak_absensi_komite/") . base64_encode($id_izin),
 						);
 
@@ -2777,10 +2773,7 @@ class Admin extends MY_Controller
 						));
 
 						$response = curl_exec($curl);
-
 						curl_close($curl);
-						print_r($response);
-
 
 						// Update data ke Pencatatan Lokal LSP
 						$data = array(
@@ -2789,95 +2782,72 @@ class Admin extends MY_Controller
 							'tanggal_masa_berlaku' => date('Y-m-d', strtotime('+5 years')),
 							'log' => $log,
 						);
-						$where = array(
-							'id_izin' => $id_izin
-						);
+						$where = array('id_izin' => $id_izin);
 						$this->Admin_model->update_data($where, $data, 'data_pencatatan_sertifikasi');
 
 						// Update data Pencatatan ke SIKI
-						//API Url
 						$url = $token->host . '/siki-api/v1/pencatatan-skk/' . $id_izin;
-
-						//Initiate cURL.
 						$ch = curl_init($url);
 
-						//The JSON data.
 						$jsonData = array(
 							"nomor_registrasi_lsp" => $get_data_pencatatan->nomor_registrasi_lsp,
 							"nomor_sertifikasi_lsp" => $get_data_pencatatan->nomor_sertifikat_lengkap,
 							"nomor_blangko_bnsp" => $array['data'][$i]['nomor_blanko'],
 						);
 
-						//Encode the array into JSON.
 						$jsonDataEncoded = json_encode($jsonData);
 
-						//Tell cURL that we want to send a POST request.
 						curl_setopt($ch, CURLOPT_POST, 1);
-						//Attach our encoded JSON string to the POST fields.
 						curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonDataEncoded);
-						//Set the content type to application/json
 						curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'token: ' . $token->token));
 						curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-						//Execute the request to array
 						$arr = json_decode(curl_exec($ch), true);
-
+						curl_close($ch);
 
 						// Menyesuaikan Status ke LPJK
-						if (substr($arr['message'], -16) == "belum ada status") {
-							$this->hit_status_ulang(base64_encode($id_izin), '20');
-							$this->hit_status_ulang(base64_encode($id_izin), '10');
-							$this->hit_status_ulang(base64_encode($id_izin), '30');
-							$this->hit_status_ulang(base64_encode($id_izin), '31');
-							redirect('admin/get_blanko_bnsp/' . base64_encode($id_izin), 'refresh');
-
-						} elseif (substr($arr['message'], -2) == "20") {
-							$this->hit_status_ulang(base64_encode($id_izin), '10');
-							$this->hit_status_ulang(base64_encode($id_izin), '30');
-							$this->hit_status_ulang(base64_encode($id_izin), '31');
-							redirect('admin/get_blanko_bnsp/' . base64_encode($id_izin), 'refresh');
-
-						} elseif (substr($arr['message'], -2) == "10") {
-							$this->hit_status_ulang(base64_encode($id_izin), '30');
-							$this->hit_status_ulang(base64_encode($id_izin), '31');
-							redirect('admin/get_blanko_bnsp/' . base64_encode($id_izin), 'refresh');
-
-						} elseif (substr($arr['message'], -2) == "30") {
-							$this->hit_status_ulang(base64_encode($id_izin), '31');
-							redirect('admin/get_blanko_bnsp/' . base64_encode($id_izin), 'refresh');
-
-						}
-
-						if ($arr['status'] == 'errors') {
-							$this->session->set_flashdata('message_pencatatan_siki', $arr['message']);
-							redirect('admin/list_selesai_penetapan', 'refresh');
-						}
-
-						// Ketika gagal generate blanko
-						if ($arr['status'] == 'errors') {
-							$this->session->set_flashdata('message_pencatatan_siki', $arr['message']);
-
-							// Penyesuaian Status ke siki
-							if (substr($arr['message'], -2) == '32') {
-								$this->kirim_ba_ujikom_balai(base64_encode($id_izin));
-								$this->konfirm_pembayaran_balai(base64_encode($id_izin));
-
-								// redirect('admin/get_blanko_bnsp/'.base64_encode($id_izin),'refresh');
-							} elseif (substr($arr['message'], -2) == '33') {
-								$this->konfirm_pembayaran_balai(base64_encode($id_izin));
-								// redirect('admin/get_blanko_bnsp/'.base64_encode($id_izin),'refresh');
+						if (isset($arr['message'])) {
+							if (substr($arr['message'], -16) == "belum ada status") {
+								$this->hit_status_ulang(base64_encode($id_izin), '20');
+								$this->hit_status_ulang(base64_encode($id_izin), '10');
+								$this->hit_status_ulang(base64_encode($id_izin), '30');
+								$this->hit_status_ulang(base64_encode($id_izin), '31');
+								redirect('admin/get_blanko_bnsp/' . base64_encode($id_izin), 'refresh');
+							} elseif (substr($arr['message'], -2) == "20") {
+								$this->hit_status_ulang(base64_encode($id_izin), '10');
+								$this->hit_status_ulang(base64_encode($id_izin), '30');
+								$this->hit_status_ulang(base64_encode($id_izin), '31');
+								redirect('admin/get_blanko_bnsp/' . base64_encode($id_izin), 'refresh');
+							} elseif (substr($arr['message'], -2) == "10") {
+								$this->hit_status_ulang(base64_encode($id_izin), '30');
+								$this->hit_status_ulang(base64_encode($id_izin), '31');
+								redirect('admin/get_blanko_bnsp/' . base64_encode($id_izin), 'refresh');
+							} elseif (substr($arr['message'], -2) == "30") {
+								$this->hit_status_ulang(base64_encode($id_izin), '31');
+								redirect('admin/get_blanko_bnsp/' . base64_encode($id_izin), 'refresh');
 							}
 						}
 
-						// Update Data Pencatatan dari siki ke lsp
+						// Penyesuaian Status ke siki jika gagal
+						if (isset($arr['status']) && $arr['status'] == 'errors') {
+							$this->session->set_flashdata('message_pencatatan_siki', $arr['message']);
+
+							if (substr($arr['message'], -2) == '32') {
+								$this->kirim_ba_ujikom_balai(base64_encode($id_izin));
+								$this->konfirm_pembayaran_balai(base64_encode($id_izin));
+							} elseif (substr($arr['message'], -2) == '33') {
+								$this->konfirm_pembayaran_balai(base64_encode($id_izin));
+							}
+							redirect('admin/list_selesai_penetapan', 'refresh');
+						}
+
+						// Update Data Pencatatan dari SIKI ke LSP
 						$data = array(
-							'nomor_registrasi_lpjk' => $arr['nomor_registrasi'],
-							'qr' => $arr['qr'],
+							'nomor_registrasi_lpjk' => isset($arr['nomor_registrasi']) ? $arr['nomor_registrasi'] : '',
+							'qr' => isset($arr['qr']) ? $arr['qr'] : '',
 							'tanggal_ditetapkan' => date("Y-m-d H:i:s"),
 							'tanggal_masa_berlaku' => date('Y-m-d', strtotime('+5 years')),
 						);
-						$where = array(
-							'id_izin' => $id_izin
-						);
+						$where = array('id_izin' => $id_izin);
 						$this->Admin_model->update_data($where, $data, 'data_pencatatan_sertifikasi');
 
 						echo "<script>alert('Data Blanko Berhasil di GET');</script>";
