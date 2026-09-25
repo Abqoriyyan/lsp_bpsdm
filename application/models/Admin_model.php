@@ -422,13 +422,28 @@ class Admin_model extends CI_Model
 
     public function get_data_rekomendasi_asesor_lpjk($id_izin)
     {
-        $sql = "SELECT a.id_izin,b.no_reg_bnsp AS id_asesor,c.rekomendasi_asesor,c.catatan,DATE(a.log) AS tgl_surat_tugas, a.no_surat_tugas ,e.kode AS kode_tuk,e.nama_tuk,d.tanggal_mulai AS tgl_uji, d.tanggal_selesai AS tgl_uji_selesai,c.metode_uji,'' AS penyelenggaraan_uji
-        FROM data_penunjukan_asesor a 
-        JOIN master_asesor b ON b.id_asesor = a.id_asesor
-        JOIN data_rekomendasi_asesor c ON c.id_izin = a.id_izin
-        JOIN data_jadwal_asesmen d ON d.kode_jadwal = a.kode_jadwal_asesmen
-        JOIN master_tuk e ON e.id = d.id_tuk
-        WHERE a.id_izin = ?;";
+        $sql = "SELECT 
+                a1.id_izin,
+                b1.no_reg_bnsp AS id_asesor,
+                b2.no_reg_bnsp AS id_asesor_2,
+                c.rekomendasi_asesor,
+                c.catatan,
+                DATE(a1.log) AS tgl_surat_tugas, 
+                a1.no_surat_tugas, 
+                e.kode AS kode_tuk,
+                e.nama_tuk,
+                d.tanggal_mulai AS tgl_uji, 
+                d.tanggal_selesai AS tgl_uji_selesai,
+                c.metode_uji,
+                '' AS penyelenggaraan_uji
+            FROM data_penunjukan_asesor a1
+            LEFT JOIN master_asesor b1 ON b1.id_asesor = a1.id_asesor
+            LEFT JOIN data_penunjukan_asesor a2 ON a2.id_izin = a1.id_izin AND a2.asesor = '2'
+            LEFT JOIN master_asesor b2 ON b2.id_asesor = a2.id_asesor
+            LEFT JOIN data_rekomendasi_asesor c ON c.id_izin = a1.id_izin
+            LEFT JOIN data_jadwal_asesmen d ON d.kode_jadwal = a1.kode_jadwal_asesmen
+            LEFT JOIN master_tuk e ON e.id = d.id_tuk
+            WHERE a1.id_izin = ? AND a1.asesor = '1';";
 
         $query = $this->db->query($sql, array($id_izin));
         return $query->row();
@@ -436,19 +451,29 @@ class Admin_model extends CI_Model
 
     public function get_data_penetapan_komite_lpjk($id_izin)
     {
-        $sql = "SELECT a.id_izin, b.nama AS nama_komite_teknis, b.no_reg, b.jabatan_komite_teknis, 
-                   a.hasil_penetapan, a.catatan, DATE(c.log) AS tgl_surat_tugas, 
-                   c.no_surat_tugas, DATE(a.log) AS tgl_penetapan, e.jabatan_kerja AS skema
-            FROM data_hasil_penetapan_komite_teknis a
-            JOIN master_komite b ON b.user_komite = a.user_penetap
-            JOIN data_penunjukan_asesor c ON c.id_izin = a.id_izin
-            JOIN data_klasifikasi_kualifikasi_permohonan d ON d.id_izin = a.id_izin
-            JOIN master_jabatan_kerja e ON e.id_jabatan_kerja = d.jabatan_kerja
+        $sql = "SELECT 
+                a.id_izin,
+                a.no_surat AS no_surat_tugas,
+                DATE(a.log) AS tgl_surat_tugas,
+                DATE(a.log) AS tgl_penetapan,
+                
+                -- Ketua Komite
+                COALESCE(m_ketua.nama, a.ketua_komite, '') AS nama_komite_teknis,
+                'Ketua Komite Teknis' AS jabatan_komite_teknis,
+
+                COALESCE(m_ketua.no_reg, '') AS met_komtek_1,
+                COALESCE(m_ang1.no_reg, '')  AS met_komtek_2,
+                COALESCE(m_ang2.no_reg, '')  AS met_komtek_3
+
+            FROM data_penunjukan_komite a
+            LEFT JOIN master_komite m_ketua ON m_ketua.nama = a.ketua_komite
+            LEFT JOIN master_komite m_ang1  ON m_ang1.nama  = a.anggota_1
+            LEFT JOIN master_komite m_ang2  ON m_ang2.nama  = a.anggota_2
+
             WHERE a.id_izin = ?;";
 
         $query = $this->db->query($sql, array($id_izin));
-
-        return $query->result_array();
+        return $query->row();
     }
 
     #################### /Keperluan Email ########################
@@ -456,12 +481,22 @@ class Admin_model extends CI_Model
     ####### Keperluan Pelaporan Asesor ke LPJK ##############
     public function get_data_pelaporan_asesor($id_izin)
     {
-        $sql = "SELECT a.id_izin,DATE(b.log) AS tgl_verifikasi_apl01,(d.tanggal_mulai  - INTERVAL 1 DAY) AS tgl_verifikasi_apl02
-                FROM list_permohonan a
-                LEFT JOIN (SELECT * FROM history_permohonan WHERE kode_status = '10' AND id_izin = ? ORDER BY LOG DESC LIMIT 1) b ON b.id_izin = a.id_izin
-                JOIN (SELECT * FROM data_penunjukan_asesor) c ON c.id_izin = a.id_izin
-                JOIN data_jadwal_asesmen d ON d.kode_jadwal = c.kode_jadwal_asesmen
-                WHERE a.id_izin = ?;";
+        $sql = "SELECT 
+                a.id_izin,
+                DATE(b.log) AS tgl_verifikasi_apl01,
+                (d.tanggal_mulai - INTERVAL 1 DAY) AS tgl_verifikasi_apl02,
+                COALESCE(u.nama, c.user_penunjuk) AS user_penunjuk,
+                c.log
+            FROM list_permohonan a
+            LEFT JOIN (
+                SELECT * FROM history_permohonan 
+                WHERE kode_status = '10' AND id_izin = ? 
+                ORDER BY log DESC LIMIT 1
+            ) b ON b.id_izin = a.id_izin
+            LEFT JOIN data_penunjukan_asesor c ON c.id_izin = a.id_izin AND c.asesor = '1'
+            LEFT JOIN master_admin u ON u.username = c.user_penunjuk 
+            LEFT JOIN data_jadwal_asesmen d ON d.kode_jadwal = c.kode_jadwal_asesmen
+            WHERE a.id_izin = ?;";
 
         $query = $this->db->query($sql, array($id_izin, $id_izin));
         return $query->row();
@@ -646,7 +681,7 @@ class Admin_model extends CI_Model
             $id_izin_b64 = base64_encode($id_izin);
 
             $row->url_surat_tugas = site_url('Admin/cetak_st_komite/' . $id_izin_b64);
-            $row->url_ba_penetapan = site_url('Admin/cetak_ba_komite/' . $id_izin_b64);
+            $row->url_ba_penetapan = site_url('komite/cetak_berita_acara_komite/' . $id_izin_b64);
             $row->url_absensi_tim_komtek = site_url('Admin/cetak_absensi_komite/' . $id_izin_b64);
         }
 
@@ -753,8 +788,8 @@ class Admin_model extends CI_Model
 
     public function get_absensi_pra_asesmen($kode_jadwal)
     {
-        $this->db->where('kode_jadwal', $kode_jadwal);
-        return $this->db->get('data_absensi_pra_asesmen')->result_array();
+        $this->db->where('TRIM(kode_jadwal) =', trim($kode_jadwal));
+        return $this->db->get('data_absensi_pra_asesmen')->row();
     }
 
     public function simpan_absensi_asesmen($data)
@@ -772,7 +807,7 @@ class Admin_model extends CI_Model
 
     public function get_absensi_asesmen($kode_jadwal)
     {
-        $this->db->where('kode_jadwal', $kode_jadwal);
-        return $this->db->get('data_absensi_asesmen')->result_array();
+        $this->db->where('TRIM(kode_jadwal) =', trim($kode_jadwal));
+        return $this->db->get('data_absensi_asesmen')->row();
     }
 }

@@ -27,4 +27,3 @@ class Api_model extends CI_Model
         $this->db->update($table, $data);
     }
 }
-?>
