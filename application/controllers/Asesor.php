@@ -725,7 +725,7 @@ class Asesor extends MY_Controller
             $this->session->set_flashdata('error', 'Rekomendasi tersimpan, tetapi API BNSP tidak dikirim karena TTD Asesor belum tervalidasi.');
         }
 
-        redirect("asesor/list_tugas_asesmen", "refresh");
+        redirect("Asesor/list_tugas_asesmen", "refresh");
     }
 
     public function cetak_berita_acara_rekomendasi_asesor($id_izin)

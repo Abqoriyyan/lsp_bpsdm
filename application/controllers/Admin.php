@@ -2509,552 +2509,402 @@ class Admin extends MY_Controller
 
 	public function get_blanko_bnsp($id_izin)
 	{
-		$debug_mode = false;
-
 		##/Cek Session Login##
 		if (!$this->ion_auth->ceklogin()) {
 			redirect('login', 'refresh');
+			return;
 		} else if ($this->session->userdata('level') !== 'Admin') {
 			redirect('login/keluar', 'refresh');
+			return;
 		}
 		##/Cek Session Login##
 
+		$log = date("Y-m-d H:i:s");
+		$token_bnsp = $this->Api_model->get_token_bnsp();
+		$token = $this->Api_model->get_token();
+
+		// Sanitasi ID Izin
 		$id_izin_raw = base64_decode($id_izin);
 		$id_izin_clean = $this->security->xss_clean($id_izin_raw);
-		$id_izin = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
+		$id_izin_clean = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
 
-		// Fetch Data Model Utama
-		$get_data_pencatatan = $this->Admin_model->get_data_pencatatan($id_izin);
-		$get_detail_jadwal_asesmen_per_permohonan = $this->Admin_model->get_detail_jadwal_asesmen_per_permohonan($id_izin);
-		$get_data_rekomendasi_asesor_lpjk = $this->Admin_model->get_data_rekomendasi_asesor_lpjk($id_izin);
-		$get_bukti_dokumentasi_asesmen = $this->Asesor_model->get_bukti_dokumentasi_asesmen($id_izin);
-		$get_data_pelaporan_asesor = $this->Admin_model->get_data_pelaporan_asesor($id_izin);
+		// Ambil Data Master
+		$get_data_pencatatan = $this->Admin_model->get_data_pencatatan($id_izin_clean);
+		$get_detail_jadwal_asesmen_per_permohonan = $this->Admin_model->get_detail_jadwal_asesmen_per_permohonan($id_izin_clean);
+		$get_data_rekomendasi_asesor_lpjk = $this->Admin_model->get_data_rekomendasi_asesor_lpjk($id_izin_clean);
+		$get_bukti_dokumentasi_asesmen = $this->Asesor_model->get_bukti_dokumentasi_asesmen($id_izin_clean);
+		$get_data_pelaporan_asesor = $this->Admin_model->get_data_pelaporan_asesor($id_izin_clean);
 
-		$kode_jadwal = isset($get_detail_jadwal_asesmen_per_permohonan->kode_jadwal_asesmen)
-			? $get_detail_jadwal_asesmen_per_permohonan->kode_jadwal_asesmen
-			: '';
+		$kode_jadwal = isset($get_detail_jadwal_asesmen_per_permohonan->kode_jadwal_asesmen) ? $get_detail_jadwal_asesmen_per_permohonan->kode_jadwal_asesmen : '';
 
-		$id_jadwal_bnsp = isset($get_detail_jadwal_asesmen_per_permohonan->id_jadwal_asesmen)
-			? $get_detail_jadwal_asesmen_per_permohonan->id_jadwal_asesmen
-			: '';
-
-		$get_auth_bnsp = $this->Api_model->get_token_bnsp();
-
-		$x_authorization_token = isset($get_auth_bnsp->x_authorization)
-			? $get_auth_bnsp->x_authorization
-			: $this->config->item('token_bnsp');
-
-		// Setup Request Info untuk BNSP
-		$bnsp_endpoint = 'https://konstruksi.bnsp.go.id/api/v1/jadwal/blanko';
-		$bnsp_query_params = array('jadwal_id' => $id_jadwal_bnsp);
-		$bnsp_full_url = $bnsp_endpoint . '?' . http_build_query($bnsp_query_params);
-		$bnsp_headers = array(
-			'x-authorization: ' . $x_authorization_token,
-			'Content-Type: application/json'
-		);
-
-		// =========================================================================
-		// STEP 1: API BNSP (Cek ketersediaan & kelulusan Blangko)
-		// =========================================================================
-		if ($debug_mode) {
-			$res_bnsp = [
-				'status' => 'success',
-				'data' => [
-					'nomor_blanko' => 'BLANKO-BNSP-TEST-99999'
-				]
-			];
-			$curl_err = null;
-		} else {
-			// ACTUAL API HIT BNSP
-			$curl_bnsp = curl_init();
-			curl_setopt_array($curl_bnsp, array(
-				CURLOPT_URL => $bnsp_full_url,
-				CURLOPT_RETURNTRANSFER => true,
-				CURLOPT_ENCODING => '',
-				CURLOPT_MAXREDIRS => 10,
-				CURLOPT_TIMEOUT => 30,
-				CURLOPT_FOLLOWLOCATION => true,
-				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-				CURLOPT_CUSTOMREQUEST => 'GET',
-				CURLOPT_HTTPHEADER => $bnsp_headers,
-			));
-
-			$response_bnsp_raw = curl_exec($curl_bnsp);
-			$curl_err = curl_error($curl_bnsp);
-			curl_close($curl_bnsp);
-			$res_bnsp = json_decode($response_bnsp_raw, true);
-		}
-
-		if ($curl_err) {
-			$this->session->set_flashdata('error', 'Gagal terhubung ke API BNSP: ' . $curl_err);
-			redirect('Admin/list_penetapan', 'refresh');
-			return;
-		}
-
-		$nomor_blanko_bnsp = isset($res_bnsp['data']['nomor_blanko']) ? $res_bnsp['data']['nomor_blanko'] : null;
-
-		if (empty($nomor_blanko_bnsp)) {
-			$this->session->set_flashdata('warning', 'Blangko BNSP belum diterbitkan atau status masih diproses BNSP.');
-			redirect('Admin/list_penetapan', 'refresh');
-			return;
-		}
-
-		if (!$debug_mode) {
-			$this->Admin_model->update_nomor_blanko($id_izin, $nomor_blanko_bnsp);
-		}
-
-		// =========================================================================
-		// STEP 2: PENYUSUNAN PAYLOAD SIKI
-		// =========================================================================
 		$get_verifikasi_tuk = $this->Admin_model->get_verifikasi_tuk($kode_jadwal);
 		$get_absensi_pra_asesmen = $this->Admin_model->get_absensi_pra_asesmen($kode_jadwal);
 		$get_absensi_asesmen = $this->Admin_model->get_absensi_asesmen($kode_jadwal);
 
-		// 1. Payload Penugasan Asesor
-		// $jsonData_penugasan_asesor = array(
-		// 	"id_asesor" => isset($get_data_rekomendasi_asesor_lpjk->id_asesor) ? $get_data_rekomendasi_asesor_lpjk->id_asesor : "",
-		// 	"id_asesor_2" => !empty($get_data_rekomendasi_asesor_lpjk->id_asesor_2) ? $get_data_rekomendasi_asesor_lpjk->id_asesor_2 : "",
-		// 	"tgl_surat_tugas" => isset($get_data_rekomendasi_asesor_lpjk->tgl_surat_tugas) ? $get_data_rekomendasi_asesor_lpjk->tgl_surat_tugas : "",
-		// 	"no_surat_tugas" => isset($get_data_rekomendasi_asesor_lpjk->no_surat_tugas) ? $get_data_rekomendasi_asesor_lpjk->no_surat_tugas : "",
-		// 	"url_surat_tugas" => base_url("asesor/cetak_surat_tugas/") . base64_encode($id_izin),
-		// 	"kode_tuk" => isset($get_data_rekomendasi_asesor_lpjk->kode_tuk) ? $get_data_rekomendasi_asesor_lpjk->kode_tuk : "",
-		// 	"nama_tuk" => isset($get_data_rekomendasi_asesor_lpjk->nama_tuk) ? $get_data_rekomendasi_asesor_lpjk->nama_tuk : "",
-		// 	"tgl_uji" => isset($get_data_rekomendasi_asesor_lpjk->tgl_uji) ? $get_data_rekomendasi_asesor_lpjk->tgl_uji : "",
-		// 	"tgl_selesai_uji" => isset($get_data_rekomendasi_asesor_lpjk->tgl_uji_selesai) ? $get_data_rekomendasi_asesor_lpjk->tgl_uji_selesai : "",
-		// );
+		## Request API Blanko BNSP ##
+		$headers = array(
+			'Content-Type: application/json',
+			'x-authorization:' . $token_bnsp->x_authorization
+		);
+		$baseUrl = $token_bnsp->host . "jadwal/blanko?jadwal_id=" . $get_detail_jadwal_asesmen_per_permohonan->id_jadwal_asesmen;
 
-		// 2. Payload Rekomendasi Asesor
-		$rekomendasi = (isset($get_data_rekomendasi_asesor_lpjk->rekomendasi_asesor) && $get_data_rekomendasi_asesor_lpjk->rekomendasi_asesor == "Kompeten") ? "K" : "BK";
-		$metode_uji_val = isset($get_data_rekomendasi_asesor_lpjk->metode_uji) ? $get_data_rekomendasi_asesor_lpjk->metode_uji : "";
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_URL, $baseUrl);
 
-		if ($metode_uji_val == "1") {
-			$metode_uji = 'observasi';
-			$uji_praktek_atau_observasi_lapangan = '1';
-			$uji_tulis = '1';
-			$uji_lisan = '0';
-			$wawancara = '0';
-		} elseif ($metode_uji_val == "2") {
-			$metode_uji = 'observasi';
-			$uji_praktek_atau_observasi_lapangan = '1';
-			$uji_tulis = '1';
-			$uji_lisan = '1';
-			$wawancara = '0';
-		} elseif ($metode_uji_val == "3") {
-			$metode_uji = 'portofolio';
-			$uji_praktek_atau_observasi_lapangan = '0';
-			$uji_tulis = '0';
-			$uji_lisan = '0';
-			$wawancara = '1';
+		$responseBody = curl_exec($ch);
+		curl_close($ch);
+
+		$array = json_decode($responseBody, true);
+
+		if (isset($array['code']) && $array['code'] !== 'ERR' && !empty($array['data'])) {
+			foreach ($array['data'] as $item) {
+				if (isset($item['nik']) && $item['nik'] == $get_data_pencatatan->nik) {
+					if (empty($item['nomor_blanko'])) {
+						echo "<script>alert('Permohonan Blanko Belum di Approve');</script>";
+					} else {
+						// --- 1. Pemenuhan Rekomendasi Asesor ke LPJK V2 ---
+						$rekomendasi = ($get_data_rekomendasi_asesor_lpjk->rekomendasi_asesor == "Kompeten") ? "K" : "BK";
+
+						// Set Metode Uji
+						$metode_uji_code = isset($get_data_rekomendasi_asesor_lpjk->metode_uji) ? $get_data_rekomendasi_asesor_lpjk->metode_uji : "";
+						$metode_uji = 'observasi';
+						$uji_praktek = '0';
+						$uji_tulis = '0';
+						$uji_lisan = '0';
+						$wawancara = '0';
+
+						if ($metode_uji_code == "1") {
+							$uji_praktek = '1';
+							$uji_tulis = '1';
+						} elseif ($metode_uji_code == "2") {
+							$uji_praktek = '1';
+							$uji_tulis = '1';
+							$uji_lisan = '1';
+						} elseif ($metode_uji_code == "3") {
+							$metode_uji = 'portofolio';
+							$wawancara = '1';
+						}
+
+						$tgl_uji_ref = isset($get_data_rekomendasi_asesor_lpjk->tgl_uji) ? $get_data_rekomendasi_asesor_lpjk->tgl_uji : "";
+
+						$jsonData_rekom_asesor = array(
+							"id_asesor" => !empty($get_data_rekomendasi_asesor_lpjk->id_asesor) ? $get_data_rekomendasi_asesor_lpjk->id_asesor : "",
+							"id_asesor_2" => !empty($get_data_rekomendasi_asesor_lpjk->id_asesor_2) ? $get_data_rekomendasi_asesor_lpjk->id_asesor_2 : "",
+							"rekomendasi" => $rekomendasi,
+							"catatan" => isset($get_data_rekomendasi_asesor_lpjk->catatan) ? $get_data_rekomendasi_asesor_lpjk->catatan : "",
+							"metode_uji" => $metode_uji,
+							"uji_praktek_atau_observasi_lapangan" => $uji_praktek,
+							"uji_tulis" => $uji_tulis,
+							"uji_lisan" => $uji_lisan,
+							"wawancara" => $wawancara,
+							"penyelenggaraan_uji" => '1',
+							"url_surat_rekomendasi_akhir" => base_url("asesor/cetak_berita_acara_rekomendasi_asesor/" . base64_encode($id_izin_clean)),
+							"url_apl01" => base_url("cetak_form_asesmen/apl01/" . base64_encode($id_izin_clean)),
+							"url_apl02" => base_url("cetak_form_asesmen/apl02/" . base64_encode($id_izin_clean)),
+							"url_dokumentasi_asesmen" => base_url("uploads/file_asesmen/bukti_dokumentasi_asesmen/" . (isset($get_bukti_dokumentasi_asesmen->file) ? $get_bukti_dokumentasi_asesmen->file : '')),
+							"url_form_uji_tulis" => ($uji_tulis == "1") ? base_url("berkas/asesmen/" . base64_encode($id_izin_clean)) : "",
+							"tgl_pelaksaaan_form_uji_tulis" => ($uji_tulis == "1") ? $tgl_uji_ref : "",
+							"url_form_uji_lisan" => ($uji_lisan == "1") ? base_url("berkas/asesmen/" . base64_encode($id_izin_clean)) : "",
+							"tgl_pelaksaaan_form_uji_lisan" => ($uji_lisan == "1") ? $tgl_uji_ref : "",
+							"url_form_wawancara" => ($wawancara == "1") ? base_url("berkas/asesmen/" . base64_encode($id_izin_clean)) : "",
+							"tgl_pelaksaaan_form_wawancara" => ($wawancara == "1") ? $tgl_uji_ref : "",
+							"tgl_verifikasi_apl01" => isset($get_data_pelaporan_asesor->tgl_verifikasi_apl01) ? $get_data_pelaporan_asesor->tgl_verifikasi_apl01 : "",
+							"tgl_verifikasi_apl02" => isset($get_data_pelaporan_asesor->tgl_verifikasi_apl02) ? $get_data_pelaporan_asesor->tgl_verifikasi_apl02 : "",
+							"tgl_dokumentasi" => $tgl_uji_ref,
+							"url_form_uji_praktek_atau_observasi_lapangan" => ($uji_lisan == "1" || $uji_tulis == "1") ? base_url("berkas/asesmen/" . base64_encode($id_izin_clean)) : "",
+							"tgl_pelaksaaan_form_uji_praktek_atau_observasi_lapangan" => ($uji_lisan == "1" || $uji_tulis == "1") ? $tgl_uji_ref : "",
+							"nama_admin_lsp" => isset($get_data_pelaporan_asesor->user_penunjuk) ? $get_data_pelaporan_asesor->user_penunjuk : "",
+							"tgl_periksa_admin_lsp" => isset($get_data_pelaporan_asesor->log) ? date('Y-m-d', strtotime($get_data_pelaporan_asesor->log)) : "",
+							"url_surat_verifikasi_tuk" => !empty($get_verifikasi_tuk->file_verifikasi) ? base_url("uploads/file_verifikasi/" . $get_verifikasi_tuk->file_verifikasi) : "",
+							"tgl_kegiatan_pra_asesmen" => !empty($get_absensi_pra_asesmen->log) ? date('Y-m-d', strtotime($get_absensi_pra_asesmen->log)) : "",
+							"url_absensi_kegiatan_pra_asesmen" => !empty($get_absensi_pra_asesmen->file_absen) ? base_url("uploads/absensi_pra_asesmen/" . $get_absensi_pra_asesmen->file_absen) : "",
+							"url_absensi_kegiatan_asesmen" => !empty($get_absensi_asesmen->file_absen) ? base_url("uploads/absensi_asesmen/" . $get_absensi_asesmen->file_absen) : "",
+							"url_mapa01" => base_url("uploads/file_asesmen/mapa01/" . base64_encode($id_izin_clean)),
+							"url_mapa02" => base_url("uploads/file_asesmen/mapa02/" . base64_encode($id_izin_clean)),
+							"url_ak01" => base_url("uploads/file_asesmen/fr-ak01/" . base64_encode($id_izin_clean)),
+							"url_ak02" => base_url("uploads/file_asesmen/fr-ak02/" . base64_encode($id_izin_clean)),
+							"url_ak03" => base_url("uploads/file_asesmen/fr-ak03/" . base64_encode($id_izin_clean)),
+							"url_ak04" => base_url("uploads/file_asesmen/fr-ak04/" . base64_encode($id_izin_clean)),
+							"url_ak05" => base_url("uploads/file_asesmen/fr-ak05/" . base64_encode($id_izin_clean)),
+							"url_ak06" => base_url("uploads/file_asesmen/fr-ak06/" . base64_encode($id_izin_clean)),
+							"url_ak07" => base_url("uploads/file_asesmen/fr-ak07/" . base64_encode($id_izin_clean)),
+							"url_ia01" => base_url("uploads/file_asesmen/fr-ia01/" . base64_encode($id_izin_clean)),
+							"url_ia02" => base_url("uploads/file_asesmen/fr-ia02/" . base64_encode($id_izin_clean)),
+							"url_ia03" => base_url("uploads/file_asesmen/fr-ia03/" . base64_encode($id_izin_clean)),
+							"url_ia04a" => base_url("uploads/file_asesmen/fr-ia04a/" . base64_encode($id_izin_clean)),
+							"url_ia04b" => base_url("uploads/file_asesmen/fr-ia04b/" . base64_encode($id_izin_clean)),
+							"url_ia05" => base_url("uploads/file_asesmen/fr-ia05/" . base64_encode($id_izin_clean)),
+							"url_ia06" => base_url("uploads/file_asesmen/fr-ia06/" . base64_encode($id_izin_clean)),
+							"url_ia07" => base_url("uploads/file_asesmen/fr-ia07/" . base64_encode($id_izin_clean)),
+							"url_ia08" => base_url("uploads/file_asesmen/fr-ia08/" . base64_encode($id_izin_clean)),
+							"url_ia09" => base_url("uploads/file_asesmen/fr-ia09/" . base64_encode($id_izin_clean)),
+							"url_ia10" => base_url("uploads/file_asesmen/fr-ia10/" . base64_encode($id_izin_clean)),
+							"url_ia11" => base_url("uploads/file_asesmen/fr-ia11/" . base64_encode($id_izin_clean)),
+							"nama_ttd_surat_verifikasi_tuk" => isset($get_verifikasi_tuk->nama_verifikator) ? $get_verifikasi_tuk->nama_verifikator : "",
+							"tgl_ttd_surat_verifikasi_tuk" => !empty($get_verifikasi_tuk->log) ? date('Y-m-d', strtotime($get_verifikasi_tuk->log)) : "",
+							"url_absensi_asesor_kegiatan_pra_asesmen" => !empty($get_absensi_pra_asesmen->file_absen) ? base_url("uploads/absensi_pra_asesmen/" . $get_absensi_pra_asesmen->file_absen) : "",
+							"url_absensi_asesi_kegiatan_pra_asesmen" => !empty($get_absensi_pra_asesmen->file_absen) ? base_url("uploads/absensi_pra_asesmen/" . $get_absensi_pra_asesmen->file_absen) : "",
+							"url_absensi_asesor_kegiatan_asesmen" => !empty($get_absensi_asesmen->file_absen) ? base_url("uploads/absensi_asesmen/" . $get_absensi_asesmen->file_absen) : "",
+							"url_absensi_asesi_kegiatan_asesmen" => !empty($get_absensi_asesmen->file_absen) ? base_url("uploads/absensi_asesmen/" . $get_absensi_asesmen->file_absen) : "",
+							"tgl_surat_tugas" => isset($get_data_rekomendasi_asesor_lpjk->tgl_surat_tugas) ? $get_data_rekomendasi_asesor_lpjk->tgl_surat_tugas : "",
+							"no_surat_tugas" => isset($get_data_rekomendasi_asesor_lpjk->no_surat_tugas) ? $get_data_rekomendasi_asesor_lpjk->no_surat_tugas : "",
+							"url_surat_tugas" => base_url("asesor/cetak_surat_tugas/" . base64_encode($id_izin_clean)),
+							"kode_tuk" => isset($get_data_rekomendasi_asesor_lpjk->kode_tuk) ? $get_data_rekomendasi_asesor_lpjk->kode_tuk : "",
+							"nama_tuk" => isset($get_data_rekomendasi_asesor_lpjk->nama_tuk) ? $get_data_rekomendasi_asesor_lpjk->nama_tuk : "",
+							"tgl_uji" => isset($get_data_rekomendasi_asesor_lpjk->tgl_uji) ? $get_data_rekomendasi_asesor_lpjk->tgl_uji : "",
+							"tgl_selesai_uji" => isset($get_data_rekomendasi_asesor_lpjk->tgl_uji_selesai) ? $get_data_rekomendasi_asesor_lpjk->tgl_uji_selesai : "",
+						);
+
+						$curl = curl_init();
+						curl_setopt_array($curl, array(
+							CURLOPT_URL => $token->host . '/siki-api/v2/asesor-lsp-penugasan/' . $id_izin_clean,
+							CURLOPT_RETURNTRANSFER => true,
+							CURLOPT_TIMEOUT => 30,
+							CURLOPT_CUSTOMREQUEST => 'POST',
+							CURLOPT_POSTFIELDS => json_encode($jsonData_rekom_asesor),
+							CURLOPT_HTTPHEADER => array(
+								'token: ' . $token->token,
+								'Content-Type: application/json'
+							),
+						));
+						$res_asesor = curl_exec($curl);
+						curl_close($curl);
+
+						$arr_asesor = json_decode($res_asesor, true);
+
+						if (isset($arr_asesor['message']) && substr($arr_asesor['message'], -15) == 'tidak terdaftar') {
+							$this->session->set_flashdata('message_pelaporan_asesor', $arr_asesor['message'] . ' Pastikan Asesor tersebut telah tercatat di Lisensi LPJK');
+							redirect('admin/list_selesai_penetapan', 'refresh');
+							return;
+						}
+
+						// --- 2. Pemenuhan Penetapan Komite ke LPJK ---
+						$get_data_penetapan_komite_lpjk = $this->Admin_model->get_data_penetapan_komite_lpjk($id_izin_clean);
+						$hasil_penetapan = (isset($get_data_penetapan_komite_lpjk->hasil_penetapan) && $get_data_penetapan_komite_lpjk->hasil_penetapan == "Kompeten") ? "K" : "BK";
+
+						$jsonData_penetapan_komite = array(
+							"nama_komite_teknis" => !empty($get_data_penetapan_komite_lpjk->nama_komite_teknis) ? $get_data_penetapan_komite_lpjk->nama_komite_teknis : "",
+							"jabatan_komite_teknis" => !empty($get_data_penetapan_komite_lpjk->jabatan_komite_teknis) ? $get_data_penetapan_komite_lpjk->jabatan_komite_teknis : "Ketua Komite Teknis",
+							"hasil_penetapan" => $hasil_penetapan,
+							"catatan" => isset($get_data_penetapan_komite_lpjk->catatan) ? $get_data_penetapan_komite_lpjk->catatan : "",
+							"tgl_surat_tugas" => !empty($get_data_penetapan_komite_lpjk->tgl_surat_tugas) ? $get_data_penetapan_komite_lpjk->tgl_surat_tugas : "",
+							"no_surat_tugas" => !empty($get_data_penetapan_komite_lpjk->no_surat_tugas) ? $get_data_penetapan_komite_lpjk->no_surat_tugas : "",
+							"tgl_penetapan" => !empty($get_data_penetapan_komite_lpjk->tgl_penetapan) ? $get_data_penetapan_komite_lpjk->tgl_penetapan : "",
+							"url_surat_tugas" => base_url("Admin/cetak_st_komite/" . base64_encode($id_izin_clean)),
+							"url_ba_penetapan" => base_url("komite/cetak_berita_acara_pleno_komite/" . base64_encode($id_izin_clean)),
+							'met_komtek_1' => isset($get_data_penetapan_komite_lpjk->met_komtek_1) ? $get_data_penetapan_komite_lpjk->met_komtek_1 : '',
+							'met_komtek_2' => isset($get_data_penetapan_komite_lpjk->met_komtek_2) ? $get_data_penetapan_komite_lpjk->met_komtek_2 : '',
+							'met_komtek_3' => isset($get_data_penetapan_komite_lpjk->met_komtek_3) ? $get_data_penetapan_komite_lpjk->met_komtek_3 : '',
+							"url_absensi_tim_komtek" => base_url("Admin/cetak_absensi_komite/" . base64_encode($id_izin_clean)),
+						);
+
+						$curl = curl_init();
+						curl_setopt_array($curl, array(
+							CURLOPT_URL => $token->host . '/siki-api/v1/komtek-lsp-penugasan/' . $id_izin_clean,
+							CURLOPT_RETURNTRANSFER => true,
+							CURLOPT_TIMEOUT => 30,
+							CURLOPT_CUSTOMREQUEST => 'POST',
+							CURLOPT_POSTFIELDS => json_encode($jsonData_penetapan_komite),
+							CURLOPT_HTTPHEADER => array(
+								'token: ' . $token->token,
+								'Content-Type: application/json'
+							),
+						));
+						$res_komtek = curl_exec($curl);
+						curl_close($curl);
+
+						// --- 3. Update Data Lokal LSP ---
+						$data_lokal = array(
+							'nomor_blangko_bnsp' => $item['nomor_blanko'],
+							'tanggal_ditetapkan' => date("Y-m-d H:i:s"),
+							'tanggal_masa_berlaku' => date('Y-m-d', strtotime('+5 years')),
+							'log' => $log,
+						);
+						$this->Admin_model->update_data(array('id_izin' => $id_izin_clean), $data_lokal, 'data_pencatatan_sertifikasi');
+
+						// --- 4. Update Pencatatan ke SIKI ---
+						$ch = curl_init($token->host . '/siki-api/v1/pencatatan-skk/' . $id_izin_clean);
+						$jsonData = array(
+							"nomor_registrasi_lsp" => $get_data_pencatatan->nomor_registrasi_lsp,
+							"nomor_sertifikasi_lsp" => $get_data_pencatatan->nomor_sertifikat_lengkap,
+							"nomor_blangko_bnsp" => $item['nomor_blanko'],
+						);
+						curl_setopt($ch, CURLOPT_POST, 1);
+						curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($jsonData));
+						curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'token: ' . $token->token));
+						curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+						$res_siki = curl_exec($ch);
+						curl_close($ch);
+
+						$arr = json_decode($res_siki, true);
+
+						if (isset($arr['message'])) {
+							$msg = $arr['message'];
+							if (substr($msg, -16) == "belum ada status" || in_array(substr($msg, -2), ['20', '10', '30'])) {
+								$code_suffix = substr($msg, -2);
+								if (substr($msg, -16) == "belum ada status") {
+									$this->hit_status_ulang(base64_encode($id_izin_clean), '20');
+									$this->hit_status_ulang(base64_encode($id_izin_clean), '10');
+								} elseif ($code_suffix == '20') {
+									$this->hit_status_ulang(base64_encode($id_izin_clean), '10');
+								}
+								$this->hit_status_ulang(base64_encode($id_izin_clean), '30');
+								$this->hit_status_ulang(base64_encode($id_izin_clean), '31');
+
+								redirect('admin/get_blanko_bnsp/' . base64_encode($id_izin_clean), 'refresh');
+								return;
+							}
+
+							if (isset($arr['status']) && $arr['status'] == 'errors') {
+								$this->session->set_flashdata('message_pencatatan_siki', $msg);
+
+								if (substr($msg, -2) == '32') {
+									$this->kirim_ba_ujikom_balai(base64_encode($id_izin_clean));
+									$this->konfirm_pembayaran_balai(base64_encode($id_izin_clean));
+								} elseif (substr($msg, -2) == '33') {
+									$this->konfirm_pembayaran_balai(base64_encode($id_izin_clean));
+								}
+
+								redirect('admin/list_selesai_penetapan', 'refresh');
+								return;
+							}
+						}
+
+						// --- 5. Final Sync Nomor Registrasi ke DB ---
+						$no_reg = '';
+						if (!empty($arr['nomor_registrasi'])) {
+							$no_reg = $arr['nomor_registrasi'];
+						} elseif (!empty($arr['data']['nomor_registrasi'])) {
+							$no_reg = $arr['data']['nomor_registrasi'];
+						} elseif (!empty($arr['nomor_registrasi_lpjk'])) {
+							$no_reg = $arr['nomor_registrasi_lpjk'];
+						} elseif (!empty($arr['data']['nomor_registrasi_lpjk'])) {
+							$no_reg = $arr['data']['nomor_registrasi_lpjk'];
+						}
+
+						$qr_siki = '';
+						if (!empty($arr['qr'])) {
+							$qr_siki = $arr['qr'];
+						} elseif (!empty($arr['data']['qr'])) {
+							$qr_siki = $arr['data']['qr'];
+						}
+
+						$data_siki = array(
+							'nomor_registrasi_lpjk' => $no_reg,
+							'qr' => $qr_siki,
+							'tanggal_ditetapkan' => date("Y-m-d H:i:s"),
+							'tanggal_masa_berlaku' => date('Y-m-d', strtotime('+5 years')),
+						);
+						$this->Admin_model->update_data(array('id_izin' => $id_izin_clean), $data_siki, 'data_pencatatan_sertifikasi');
+
+						echo "<script>alert('Data Blanko Berhasil di GET');</script>";
+					}
+				}
+			}
 		} else {
-			$metode_uji = '';
-			$uji_praktek_atau_observasi_lapangan = '0';
-			$uji_tulis = '0';
-			$uji_lisan = '0';
-			$wawancara = '0';
+			echo "<script>alert('Permohonan Blanko Belum di Approve');</script>";
 		}
 
-		$tgl_uji_ref = isset($get_data_rekomendasi_asesor_lpjk->tgl_uji) ? $get_data_rekomendasi_asesor_lpjk->tgl_uji : "";
-
-		$jsonData_rekom_asesor = array(
-			"id_asesor" => !empty($get_data_rekomendasi_asesor_lpjk->id_asesor) ? $get_data_rekomendasi_asesor_lpjk->id_asesor : "",
-			"id_asesor_2" => !empty($get_data_rekomendasi_asesor_lpjk->id_asesor_2) ? $get_data_rekomendasi_asesor_lpjk->id_asesor_2 : "",
-			"rekomendasi" => $rekomendasi,
-			"catatan" => isset($get_data_rekomendasi_asesor_lpjk->catatan) ? $get_data_rekomendasi_asesor_lpjk->catatan : "",
-			"metode_uji" => $metode_uji,
-			"uji_praktek_atau_observasi_lapangan" => $uji_praktek_atau_observasi_lapangan,
-			"uji_tulis" => $uji_tulis,
-			"uji_lisan" => $uji_lisan,
-			"wawancara" => $wawancara,
-			"penyelenggaraan_uji" => '1',
-			"url_surat_rekomendasi_akhir" => base_url("asesor/cetak_berita_acara_rekomendasi_asesor/") . base64_encode($id_izin),
-			"url_apl01" => base_url("cetak_form_asesmen/apl01/") . base64_encode($id_izin),
-			"url_apl02" => base_url("cetak_form_asesmen/apl02/") . base64_encode($id_izin),
-			"url_dokumentasi_asesmen" => base_url("uploads/file_asesmen/bukti_dokumentasi_asesmen/") . (isset($get_bukti_dokumentasi_asesmen->file) ? $get_bukti_dokumentasi_asesmen->file : ''),
-			"url_form_uji_tulis" => ($uji_tulis == "1") ? base_url("berkas/asesmen/") . base64_encode($id_izin) : "",
-			"tgl_pelaksaaan_form_uji_tulis" => ($uji_tulis == "1") ? $tgl_uji_ref : "",
-			"url_form_uji_lisan" => ($uji_lisan == "1") ? base_url("berkas/asesmen/") . base64_encode($id_izin) : "",
-			"tgl_pelaksaaan_form_uji_lisan" => ($uji_lisan == "1") ? $tgl_uji_ref : "",
-			"url_form_wawancara" => ($wawancara == "1") ? base_url("berkas/asesmen/") . base64_encode($id_izin) : "",
-			"tgl_pelaksaaan_form_wawancara" => ($wawancara == "1") ? $tgl_uji_ref : "",
-			"tgl_verifikasi_apl01" => isset($get_data_pelaporan_asesor->tgl_verifikasi_apl01) ? $get_data_pelaporan_asesor->tgl_verifikasi_apl01 : "",
-			"tgl_verifikasi_apl02" => isset($get_data_pelaporan_asesor->tgl_verifikasi_apl02) ? $get_data_pelaporan_asesor->tgl_verifikasi_apl02 : "",
-			"tgl_dokumentasi" => $tgl_uji_ref,
-			"url_form_uji_praktek_atau_observasi_lapangan" => ($uji_lisan == "1" || $uji_tulis == "1") ? base_url("berkas/asesmen/") . base64_encode($id_izin) : "",
-			"tgl_pelaksaaan_form_uji_praktek_atau_observasi_lapangan" => ($uji_lisan == "1" || $uji_tulis == "1") ? $tgl_uji_ref : "",
-			"nama_admin_lsp" => isset($get_data_pelaporan_asesor->user_penunjuk) ? $get_data_pelaporan_asesor->user_penunjuk : "",
-			"tgl_periksa_admin_lsp" => isset($get_data_pelaporan_asesor->log) ? date('Y-m-d', strtotime($get_data_pelaporan_asesor->log)) : "",
-			"url_surat_verifikasi_tuk" => !empty($get_verifikasi_tuk->file_verifikasi) ? base_url("uploads/file_verifikasi/" . $get_verifikasi_tuk->file_verifikasi) : "",
-			"tgl_kegiatan_pra_asesmen" => !empty($get_absensi_pra_asesmen->log) ? date('Y-m-d', strtotime($get_absensi_pra_asesmen->log)) : "",
-			"url_absensi_kegiatan_pra_asesmen" => !empty($get_absensi_pra_asesmen->file_absen) ? base_url("uploads/absensi_pra_asesmen/" . $get_absensi_pra_asesmen->file_absen) : "",
-			"url_absensi_kegiatan_asesmen" => !empty($get_absensi_asesmen->file_absen) ? base_url("uploads/absensi_asesmen/" . $get_absensi_asesmen->file_absen) : "",
-			"url_mapa01" => base_url("uploads/file_asesmen/mapa01/") . base64_encode($id_izin),
-			"url_mapa02" => base_url("uploads/file_asesmen/mapa02/") . base64_encode($id_izin),
-			"url_ak01" => base_url("uploads/file_asesmen/fr-ak01/") . base64_encode($id_izin),
-			"url_ak02" => base_url("uploads/file_asesmen/fr-ak02/") . base64_encode($id_izin),
-			"url_ak03" => base_url("uploads/file_asesmen/fr-ak03/") . base64_encode($id_izin),
-			"url_ak04" => base_url("uploads/file_asesmen/fr-ak04/") . base64_encode($id_izin),
-			"url_ak05" => base_url("uploads/file_asesmen/fr-ak05/") . base64_encode($id_izin),
-			"url_ak06" => base_url("uploads/file_asesmen/fr-ak06/") . base64_encode($id_izin),
-			"url_ak07" => base_url("uploads/file_asesmen/fr-ak07/") . base64_encode($id_izin),
-			"url_ia01" => base_url("uploads/file_asesmen/fr-ia01/") . base64_encode($id_izin),
-			"url_ia02" => base_url("uploads/file_asesmen/fr-ia02/") . base64_encode($id_izin),
-			"url_ia03" => base_url("uploads/file_asesmen/fr-ia03/") . base64_encode($id_izin),
-			"url_ia04a" => base_url("uploads/file_asesmen/fr-ia04a/") . base64_encode($id_izin),
-			"url_ia04b" => base_url("uploads/file_asesmen/fr-ia04b/") . base64_encode($id_izin),
-			"url_ia05" => base_url("uploads/file_asesmen/fr-ia05/") . base64_encode($id_izin),
-			"url_ia06" => base_url("uploads/file_asesmen/fr-ia06/") . base64_encode($id_izin),
-			"url_ia07" => base_url("uploads/file_asesmen/fr-ia07/") . base64_encode($id_izin),
-			"url_ia08" => base_url("uploads/file_asesmen/fr-ia08/") . base64_encode($id_izin),
-			"url_ia09" => base_url("uploads/file_asesmen/fr-ia09/") . base64_encode($id_izin),
-			"url_ia10" => base_url("uploads/file_asesmen/fr-ia10/") . base64_encode($id_izin),
-			"url_ia11" => base_url("uploads/file_asesmen/fr-ia11/") . base64_encode($id_izin),
-			"nama_ttd_surat_verifikasi_tuk" => isset($get_verifikasi_tuk->nama_verifikator) ? $get_verifikasi_tuk->nama_verifikator : "",
-			"tgl_ttd_surat_verifikasi_tuk" => !empty($get_verifikasi_tuk->log) ? date('Y-m-d', strtotime($get_verifikasi_tuk->log)) : "",
-			"url_absensi_asesor_kegiatan_pra_asesmen" => !empty($get_absensi_pra_asesmen->file_absen) ? base_url("uploads/absensi_pra_asesmen/" . $get_absensi_pra_asesmen->file_absen) : "",
-			"url_absensi_asesi_kegiatan_pra_asesmen" => !empty($get_absensi_pra_asesmen->file_absen) ? base_url("uploads/absensi_pra_asesmen/" . $get_absensi_pra_asesmen->file_absen) : "",
-			"url_absensi_asesor_kegiatan_asesmen" => !empty($get_absensi_asesmen->file_absen) ? base_url("uploads/absensi_asesmen/" . $get_absensi_asesmen->file_absen) : "",
-			"url_absensi_asesi_kegiatan_asesmen" => !empty($get_absensi_asesmen->file_absen) ? base_url("uploads/absensi_asesmen/" . $get_absensi_asesmen->file_absen) : "",
-
-			"tgl_surat_tugas" => isset($get_data_rekomendasi_asesor_lpjk->tgl_surat_tugas) ? $get_data_rekomendasi_asesor_lpjk->tgl_surat_tugas : "",
-			"no_surat_tugas" => isset($get_data_rekomendasi_asesor_lpjk->no_surat_tugas) ? $get_data_rekomendasi_asesor_lpjk->no_surat_tugas : "",
-			"url_surat_tugas" => base_url("asesor/cetak_surat_tugas/") . base64_encode($id_izin),
-			"kode_tuk" => isset($get_data_rekomendasi_asesor_lpjk->kode_tuk) ? $get_data_rekomendasi_asesor_lpjk->kode_tuk : "",
-			"nama_tuk" => isset($get_data_rekomendasi_asesor_lpjk->nama_tuk) ? $get_data_rekomendasi_asesor_lpjk->nama_tuk : "",
-			"tgl_uji" => isset($get_data_rekomendasi_asesor_lpjk->tgl_uji) ? $get_data_rekomendasi_asesor_lpjk->tgl_uji : "",
-			"tgl_selesai_uji" => isset($get_data_rekomendasi_asesor_lpjk->tgl_uji_selesai) ? $get_data_rekomendasi_asesor_lpjk->tgl_uji_selesai : "",
-		);
-
-		// 3. Payload Penetapan Komite Teknis
-		$get_data_penetapan_komite_lpjk = $this->Admin_model->get_data_penetapan_komite_lpjk($id_izin);
-		$hasil_penetapan = (isset($get_data_penetapan_komite_lpjk->hasil_penetapan) && $get_data_penetapan_komite_lpjk->hasil_penetapan == "Kompeten") ? "K" : "BK";
-
-		$jsonData_penetapan_komite = array(
-			"nama_komite_teknis" => !empty($get_data_penetapan_komite_lpjk->nama_komite_teknis) ? $get_data_penetapan_komite_lpjk->nama_komite_teknis : "",
-			"jabatan_komite_teknis" => !empty($get_data_penetapan_komite_lpjk->jabatan_komite_teknis) ? $get_data_penetapan_komite_lpjk->jabatan_komite_teknis : "Ketua Komite Teknis",
-			"hasil_penetapan" => $hasil_penetapan,
-			"catatan" => isset($get_data_penetapan_komite_lpjk->catatan) ? $get_data_penetapan_komite_lpjk->catatan : "",
-			"tgl_surat_tugas" => !empty($get_data_penetapan_komite_lpjk->tgl_surat_tugas) ? $get_data_penetapan_komite_lpjk->tgl_surat_tugas : "",
-			"no_surat_tugas" => !empty($get_data_penetapan_komite_lpjk->no_surat_tugas) ? $get_data_penetapan_komite_lpjk->no_surat_tugas : "",
-			"tgl_penetapan" => !empty($get_data_penetapan_komite_lpjk->tgl_penetapan) ? $get_data_penetapan_komite_lpjk->tgl_penetapan : "",
-			"url_surat_tugas" => base_url("Admin/cetak_st_komite/") . base64_encode($id_izin),
-			"url_ba_penetapan" => base_url("komite/cetak_berita_acara_pleno_komite/") . base64_encode($id_izin),
-			'met_komtek_1' => isset($get_data_penetapan_komite_lpjk->met_komtek_1) ? $get_data_penetapan_komite_lpjk->met_komtek_1 : '',
-			'met_komtek_2' => isset($get_data_penetapan_komite_lpjk->met_komtek_2) ? $get_data_penetapan_komite_lpjk->met_komtek_2 : '',
-			'met_komtek_3' => isset($get_data_penetapan_komite_lpjk->met_komtek_3) ? $get_data_penetapan_komite_lpjk->met_komtek_3 : '',
-			"url_absensi_tim_komtek" => base_url("Admin/cetak_absensi_komite/") . base64_encode($id_izin),
-		);
-
-		// 4. Payload Pencatatan SKK
-		$jsonData_pencatatan_skk = array(
-			"nomor_registrasi_lsp" => isset($get_data_pencatatan->nomor_registrasi_lsp) ? $get_data_pencatatan->nomor_registrasi_lsp : "",
-			"nomor_sertifikasi_lsp" => isset($get_data_pencatatan->nomor_sertifikat_lengkap) ? $get_data_pencatatan->nomor_sertifikat_lengkap : "",
-			"nomor_blangko_bnsp" => $nomor_blanko_bnsp,
-		);
-
-		$siki_penugasan_asesor_endpoint = "https://siki.pu.go.id/siki-api/v3/asesor-lsp-penugasan/{$id_izin}";
-		$siki_rekom_asesor_endpoint = "https://siki.pu.go.id/siki-api/v2/asesor-lsp-penugasan/{$id_izin}";
-		$siki_komtek_endpoint = "https://siki.pu.go.id/siki-api/v1/komite-teknis/{$id_izin}";
-		$siki_pencatatan_endpoint = "https://siki.pu.go.id/siki-api/v1/pencatatan-skk/{$id_izin}";
-
-		// =========================================================================
-		// TAMPILAN DEBUG (Endpoint, Query & Payload JSON)
-		// =========================================================================
-		if ($debug_mode) {
-			echo "<!DOCTYPE html><html><head><title>DEBUG MODE - API INSPECTOR</title>";
-			echo "<style>
-            body{font-family:'Segoe UI', Tahoma, monospace;background:#1e1e1e;color:#d4d4d4;padding:25px;margin:0;}
-            .card{background:#252526;border:1px solid #3c3c3c;margin-bottom:20px;padding:18px;border-radius:8px;}
-            h3{color:#569cd6;margin-top:0;border-bottom:1px solid #3c3c3c;padding-bottom:8px;}
-            pre{color:#ce9178;white-space:pre-wrap;word-break:break-all;background:#1e1e1e;padding:12px;border-radius:5px;border:1px solid #333;}
-            .badge{background:#0e639c;color:#fff;padding:4px 8px;border-radius:4px;font-size:12px;font-weight:bold;}
-            .method{background:#4ec9b0;color:#000;padding:2px 6px;border-radius:3px;font-weight:bold;font-size:11px;}
-            .url{color:#dcdcaa;font-weight:bold;}
-            .param-table{width:100%;border-collapse:collapse;margin:10px 0;}
-            .param-table th, .param-table td{border:1px solid #3c3c3c;padding:6px 10px;text-align:left;}
-            .param-table th{background:#333;color:#4ec9b0;}
-        </style>";
-			echo "</head><body>";
-			echo "<h2>[DEBUG LOCAL] Full API Request Inspector</h2>";
-			echo "<p>Status Mode: <span class='badge'>DRY-RUN / DEBUG ACTIVE</span> | ID Izin Raw: <strong>{$id_izin_raw}</strong> | ID Izin Clean: <strong>{$id_izin}</strong></p>";
-
-			// 1. TAMPILAN GET BLANKO BNSP
-			echo "<div class='card'>";
-			echo "<h3>1. Request GET Blanko BNSP</h3>";
-			echo "<p><span class='method'>GET</span> <span class='url'>{$bnsp_full_url}</span></p>";
-			echo "<strong>Headers:</strong>";
-			echo "<pre>" . print_r($bnsp_headers, true) . "</pre>";
-			echo "<strong>Query Parameters:</strong>";
-			echo "<table class='param-table'><tr><th>Key</th><th>Value</th><th>Status Check</th></tr>";
-			echo "<tr><td>jadwal_id</td><td>" . htmlspecialchars($id_jadwal_bnsp) . "</td><td>" . (!empty($id_jadwal_bnsp) ? "<span style='color:#6a9955;'>OK (Valid)</span>" : "<span style='color:#f44747;'>WARNING: Kosong!</span>") . "</td></tr>";
-			echo "</table>";
-			echo "<strong>Mock Response Data BNSP:</strong>";
-			echo "<pre>" . json_encode($res_bnsp, JSON_PRETTY_PRINT) . "</pre>";
-			echo "</div>";
-
-			// 2. TAMPILAN SIKI - PENUGASAN ASESOR (v3)
-			// echo "<div class='card'>";
-			// echo "<h3>2. Request SIKI - Penugasan Asesor (v3)</h3>";
-			// echo "<p><span class='method'>POST</span> <span class='url'>{$siki_penugasan_asesor_endpoint}</span></p>";
-			// echo "<strong>Payload Body JSON:</strong>";
-			// echo "<pre>" . json_encode($jsonData_penugasan_asesor, JSON_PRETTY_PRINT) . "</pre>";
-			// echo "</div>";
-
-			// 3. TAMPILAN SIKI - REKOMENDASI ASESOR (v2)
-			echo "<div class='card'>";
-			echo "<h3>3. Request SIKI - Rekomendasi Asesor (v2)</h3>";
-			echo "<p><span class='method'>POST</span> <span class='url'>{$siki_rekom_asesor_endpoint}</span></p>";
-			echo "<strong>Payload Body JSON:</strong>";
-			echo "<pre>" . json_encode($jsonData_rekom_asesor, JSON_PRETTY_PRINT) . "</pre>";
-			echo "</div>";
-
-			// 4. TAMPILAN SIKI - KOMITE TEKNIS (v1)
-			echo "<div class='card'>";
-			echo "<h3>4. Request SIKI - Sync Komite Teknis (v1)</h3>";
-			echo "<p><span class='method'>POST</span> <span class='url'>{$siki_komtek_endpoint}</span></p>";
-			echo "<strong>Payload Body JSON:</strong>";
-			echo "<pre>" . json_encode($jsonData_penetapan_komite, JSON_PRETTY_PRINT) . "</pre>";
-			echo "</div>";
-
-			// 5. TAMPILAN SIKI - PENCATATAN SKK (v1)
-			echo "<div class='card'>";
-			echo "<h3>5. Request SIKI - Pencatatan SKK (v1)</h3>";
-			echo "<p><span class='method'>POST</span> <span class='url'>{$siki_pencatatan_endpoint}</span></p>";
-			echo "<strong>Payload Body JSON:</strong>";
-			echo "<pre>" . json_encode($jsonData_pencatatan_skk, JSON_PRETTY_PRINT) . "</pre>";
-			echo "</div>";
-
-			echo "</body></html>";
-			exit;
-		}
-
-		// =========================================================================
-		// HIT PELAPORAN API SIKI PU (PRODUCTION)
-		// =========================================================================
-
-		// 1. Penugasan Asesor (v3)
-		// $res_penugasan = $this->hit_api_siki('v3/asesor-lsp-penugasan/' . $id_izin, $jsonData_penugasan_asesor);
-		// if (!$res_penugasan['status']) {
-		// 	$this->session->set_flashdata('error', 'Gagal Penugasan Asesor ke SIKI: ' . $res_penugasan['message']);
-		// 	redirect('Admin/list_selesai_penetapan', 'refresh');
-		// 	return;
-		// }
-
-		// 2. Rekomendasi Asesor (v2)
-		$res_rekom = $this->hit_api_siki('v2/asesor-lsp-penugasan/' . $id_izin, $jsonData_rekom_asesor);
-		if (!$res_rekom['status']) {
-			$this->session->set_flashdata('error', 'Gagal Rekomendasi Asesor ke SIKI: ' . $res_rekom['message']);
-			redirect('Admin/list_selesai_penetapan', 'refresh');
-			return;
-		}
-
-		// 3. Komite Teknis (v1)
-		$res_komtek = $this->hit_api_siki('v1/komite-teknis/' . $id_izin, $jsonData_penetapan_komite);
-		if (!$res_komtek['status']) {
-			$this->session->set_flashdata('error', 'Gagal Sinkronasi Komite Teknis ke SIKI: ' . $res_komtek['message']);
-			redirect('Admin/list_selesai_penetapan', 'refresh');
-			return;
-		}
-
-		redirect('Admin/list_selesai_penetapan', 'refresh');
-	}
-
-	private function hit_api_siki($endpoint, $payload)
-	{
-		$curl = curl_init();
-		curl_setopt_array($curl, array(
-			CURLOPT_URL => $this->config->item('siki_api_url') . $endpoint,
-			CURLOPT_RETURNTRANSFER => true,
-			CURLOPT_ENCODING => '',
-			CURLOPT_MAXREDIRS => 10,
-			CURLOPT_TIMEOUT => 30,
-			CURLOPT_FOLLOWLOCATION => true,
-			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-			CURLOPT_CUSTOMREQUEST => 'POST',
-			CURLOPT_POSTFIELDS => json_encode($payload),
-			CURLOPT_HTTPHEADER => array(
-				'Token: ' . $this->config->item('siki_token'),
-				'Content-Type: application/json'
-			),
-		));
-
-		$response = curl_exec($curl);
-		$err = curl_error($curl);
-		curl_close($curl);
-
-		if ($err) {
-			return ['status' => false, 'message' => $err];
-		}
-
-		$arr = json_decode($response, true);
-
-		if (isset($arr['status']) && ($arr['status'] == '200' || $arr['status'] == 'success' || $arr['status'] == true)) {
-			return ['status' => true, 'data' => $arr, 'message' => isset($arr['message']) ? $arr['message'] : ''];
-		}
-
-		return ['status' => false, 'message' => isset($arr['message']) ? $arr['message'] : 'Unknown API Error', 'data' => $arr];
+		redirect('admin/list_selesai_penetapan', 'refresh');
 	}
 
 	public function izin_final_siki_portal($id_izin)
 	{
-		$debug_mode = true;
-
 		##/Cek Session Login##
 		if (!$this->ion_auth->ceklogin()) {
 			redirect('login', 'refresh');
+			return;
 		} else if ($this->session->userdata('level') !== 'Admin') {
 			redirect('login/keluar', 'refresh');
+			return;
 		}
 		##/Cek Session Login##
 
+		// Sanitasi dan Decode ID Izin
 		$id_izin_raw = base64_decode($id_izin);
 		$id_izin_clean = $this->security->xss_clean($id_izin_raw);
-		$id_izin = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
+		$id_izin_clean = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
+
 		$log = date("Y-m-d H:i:s");
 
-		// 1. Persiapan Payload & Endpoint SIKI
+		///////////////////////{ Pencatatan SKK } //////////////////////////
 		$token = $this->Api_model->get_token();
-		$host_siki = isset($token->host) ? rtrim($token->host, '/') : 'https://siki.pu.go.id';
-		$auth_token_siki = isset($token->token) ? $token->token : '';
+		$url = $token->host . '/siki-api/v1/izin-final-skk/' . $id_izin_clean;
 
-		$url_siki = $host_siki . '/siki-api/v1/izin-final-skk/' . $id_izin;
-		$jsonData_siki = array(
-			"file_lampiran" => array(
-				"link_e_sertifikat" => base_url('sertifikat/') . base64_encode($id_izin),
-				"url_surat_pernyataan_pemegang_sertifikat" => base_url('Admin/cetak_pernyataan_asesi/') . base64_encode($id_izin)
-			)
-		);
-		$headers_siki = array(
-			'Content-Type: application/json',
-			'token: ' . $auth_token_siki
+		$jsonData = array(
+			"file_lampiran" => array("link_e_sertifikat" => base_url('sertifikat/' . base64_encode($id_izin_clean))),
+			"url_surat_pernyataan_pemegang_sertifikat" => base_url('Admin/cetak_pernyataan_asesi/') . base64_encode($id_izin)
 		);
 
-		// 2. Persiapan Payload & Endpoint BNSP
-		$token_bnsp = $this->Api_model->get_token_bnsp();
-		$get_detail_jadwal_asesmen_per_permohonan = $this->Admin_model->get_detail_jadwal_asesmen_per_permohonan($id_izin);
-		$get_data_pencatatan = $this->Admin_model->get_data_pencatatan($id_izin);
+		$ch = curl_init($url);
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($jsonData));
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'token: ' . $token->token));
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 30);
 
-		$host_bnsp = isset($token_bnsp->host) ? rtrim($token_bnsp->host, '/') : 'https://konstruksi.bnsp.go.id/api/v1';
-		$x_auth_bnsp = isset($token_bnsp->x_authorization) ? $token_bnsp->x_authorization : '';
+		$responseExec = curl_exec($ch);
+		curl_close($ch);
 
-		$url_bnsp = $host_bnsp . "/jadwal/peserta/sertifikat";
+		$responseBody = json_decode($responseExec, true);
 
-		$id_jadwal_bnsp = isset($get_detail_jadwal_asesmen_per_permohonan->id_jadwal_asesmen)
-			? $get_detail_jadwal_asesmen_per_permohonan->id_jadwal_asesmen
-			: null;
+		if (isset($responseBody['status']) && $responseBody['status'] == "errors") {
+			$this->session->set_flashdata('message_siki', 'Izin Final ke SIKI Gagal, silahkan kontak Admin IT');
+		}
+
+		///////////// Pencatatan ke BNSP ///////////////////
+		$token_bnsp = $this->api_model->get_token_bnsp();
+		$get_detail_jadwal_asesmen_per_permohonan = $this->admin_model->get_detail_jadwal_asesmen_per_permohonan($id_izin_clean);
+		$get_data_pencatatan = $this->admin_model->get_data_pencatatan($id_izin_clean);
+
+		$url_bnsp = $token_bnsp->host . "jadwal/peserta/sertifikat";
 
 		$jsonData_bnsp = array(
-			"jadwal_id" => $id_jadwal_bnsp,
-			"nik_peserta" => isset($get_data_pencatatan->nik) ? (string) $get_data_pencatatan->nik : "",
-			"nomor_sertifikat" => isset($get_data_pencatatan->nomor_sertifikat_lengkap) ? (string) $get_data_pencatatan->nomor_sertifikat_lengkap : "",
-			"nomor_reg" => isset($get_data_pencatatan->nomor_registrasi_lsp) ? (string) $get_data_pencatatan->nomor_registrasi_lsp : "",
-			"nomor_reg_lpjk" => isset($get_data_pencatatan->nomor_registrasi_lpjk) ? (string) $get_data_pencatatan->nomor_registrasi_lpjk : "",
-			"link_sertifikat" => base_url("sertifikat/") . base64_encode($id_izin),
-			"tgl_srtf" => isset($get_data_pencatatan->tanggal_ditetapkan) ? $get_data_pencatatan->tanggal_ditetapkan : "",
-			"tgl_srtf_end" => isset($get_data_pencatatan->tanggal_masa_berlaku) ? $get_data_pencatatan->tanggal_masa_berlaku : "",
+			"jadwal_id" => isset($get_detail_jadwal_asesmen_per_permohonan->id_jadwal_asesmen) ? $get_detail_jadwal_asesmen_per_permohonan->id_jadwal_asesmen : '',
+			"nik_peserta" => isset($get_data_pencatatan->nik) ? $get_data_pencatatan->nik : '',
+			"nomor_sertifikat" => isset($get_data_pencatatan->nomor_sertifikat_lengkap) ? $get_data_pencatatan->nomor_sertifikat_lengkap : '',
+			"nomor_reg" => isset($get_data_pencatatan->nomor_registrasi_lsp) ? $get_data_pencatatan->nomor_registrasi_lsp : '',
+			"nomor_reg_lpjk" => isset($get_data_pencatatan->nomor_registrasi_lpjk) ? $get_data_pencatatan->nomor_registrasi_lpjk : '',
+			"link_sertifikat" => base_url("sertifikat/" . base64_encode($id_izin_clean)),
+			"tgl_srtf" => isset($get_data_pencatatan->tanggal_ditetapkan) ? $get_data_pencatatan->tanggal_ditetapkan : '',
+			"tgl_srtf_end" => isset($get_data_pencatatan->tanggal_masa_berlaku) ? $get_data_pencatatan->tanggal_masa_berlaku : '',
 		);
-		$headers_bnsp = array(
+
+		$ch2 = curl_init($url_bnsp);
+		curl_setopt($ch2, CURLOPT_POST, 1);
+		curl_setopt($ch2, CURLOPT_POSTFIELDS, json_encode($jsonData_bnsp));
+		curl_setopt($ch2, CURLOPT_HTTPHEADER, array(
 			'Content-Type: application/json',
-			'x-authorization: ' . $x_auth_bnsp
-		);
+			'x-authorization:' . $token_bnsp->x_authorization,
+			'token:' . $token_bnsp->x_authorization
+		));
+		curl_setopt($ch2, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($ch2, CURLOPT_TIMEOUT, 30);
 
-		// =========================================================================
-		// DEBUG VISUALIZER / ENDPOINT & PAYLOAD INSPECTOR
-		// =========================================================================
-		if ($debug_mode || $_SERVER['SERVER_NAME'] == 'localhost' || $_SERVER['REMOTE_ADDR'] == '127.0.0.1' || $_SERVER['REMOTE_ADDR'] == '::1') {
-			echo "<!DOCTYPE html><html><head><title>DEBUG - IZIN FINAL SIKI & BNSP</title>";
-			echo "<style>
-            body{font-family:'Segoe UI', Tahoma, monospace;background:#1e1e1e;color:#d4d4d4;padding:25px;margin:0;}
-            .card{background:#252526;border:1px solid #3c3c3c;margin-bottom:20px;padding:18px;border-radius:8px;}
-            h3{color:#569cd6;margin-top:0;border-bottom:1px solid #3c3c3c;padding-bottom:8px;}
-            pre{color:#ce9178;white-space:pre-wrap;word-break:break-all;background:#1e1e1e;padding:12px;border-radius:5px;border:1px solid #333;}
-            .badge-debug{background:#0e639c;color:#fff;padding:4px 8px;border-radius:4px;font-size:12px;font-weight:bold;}
-            .method{background:#4ec9b0;color:#000;padding:2px 6px;border-radius:3px;font-weight:bold;font-size:11px;}
-            .url{color:#dcdcaa;font-weight:bold;}
-            .param-table{width:100%;border-collapse:collapse;margin:10px 0;}
-            .param-table th, .param-table td{border:1px solid #3c3c3c;padding:6px 10px;text-align:left;}
-            .param-table th{background:#333;color:#4ec9b0;}
-            .btn-back{background:#28a745;color:white;padding:10px 18px;text-decoration:none;border-radius:5px;display:inline-block;font-weight:bold;}
-        </style>";
-			echo "</head><body>";
-			echo "<h2>[MODE SIMULASI] Endpoint & Payload Inspector</h2>";
-			echo "<p>Status Engine: <span class='badge-debug'>DRY-RUN / NO API EXECUTION</span> | Target ID Izin: <strong>{$id_izin}</strong></p>";
+		$responseExec2 = curl_exec($ch2);
+		curl_close($ch2);
 
-			// INSPECTOR SIKI
-			echo "<div class='card'>";
-			echo "<h3>1. Target Endpoint & Payload SIKI (Izin Final SKK)</h3>";
-			echo "<p><span class='method'>POST</span> <span class='url'>{$url_siki}</span></p>";
-			echo "<strong>Headers:</strong>";
-			echo "<pre>" . print_r($headers_siki, true) . "</pre>";
-			echo "<strong>Body JSON Payload:</strong>";
-			echo "<pre>" . json_encode($jsonData_siki, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "</pre>";
-			echo "</div>";
+		$responseBody2 = json_decode($responseExec2, true);
 
-			// INSPECTOR BNSP
-			echo "<div class='card'>";
-			echo "<h3>2. Target Endpoint & Payload BNSP (Sertifikat Peserta)</h3>";
-			echo "<p><span class='method'>POST</span> <span class='url'>{$url_bnsp}</span></p>";
-			echo "<strong>Headers:</strong>";
-			echo "<pre>" . print_r($headers_bnsp, true) . "</pre>";
-			echo "<strong>Check Field Penting:</strong>";
-			echo "<table class='param-table'>
-                <tr><th>Field Key</th><th>Value</th><th>Status Validation</th></tr>
-                <tr><td>jadwal_id</td><td>" . htmlspecialchars($id_jadwal_bnsp ?? 'NULL') . "</td><td>" . (!empty($id_jadwal_bnsp) ? "<span style='color:#4ec9b0;'>OK (Valid)</span>" : "<span style='color:#f44747;'>WARNING: Kosong!</span>") . "</td></tr>
-                <tr><td>nik_peserta</td><td>" . htmlspecialchars($jsonData_bnsp['nik_peserta']) . "</td><td>" . (!empty($jsonData_bnsp['nik_peserta']) ? "<span style='color:#4ec9b0;'>OK</span>" : "<span style='color:#f44747;'>Kosong</span>") . "</td></tr>
-                <tr><td>nomor_sertifikat</td><td>" . htmlspecialchars($jsonData_bnsp['nomor_sertifikat']) . "</td><td>" . (!empty($jsonData_bnsp['nomor_sertifikat']) ? "<span style='color:#4ec9b0;'>OK</span>" : "<span style='color:#f44747;'>Kosong</span>") . "</td></tr>
-              </table>";
-			echo "<strong>Body JSON Payload:</strong>";
-			echo "<pre>" . json_encode($jsonData_bnsp, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "</pre>";
-			echo "</div>";
-
-			echo "<br><a href='" . base_url('Admin/list_selesai_penetapan') . "' class='btn-back'>&laquo; Kembali ke List Selesai Penetapan</a>";
-			echo "</body></html>";
-
-			exit();
+		// Cek respon BNSP jika diaktifkan nanti
+		if (isset($responseBody2['code']) && $responseBody2['code'] == "ERR") {
+			$this->session->set_flashdata('message_bnsp', 'Izin Final ke BNSP Gagal, silahkan kontak Admin IT');
+		} else {
+			$this->session->set_flashdata('message_success', 'Izin Final ke SIKI & BNSP Berhasil');
 		}
 
-		// =========================================================================
-		// EXECUTION MODE (PRODUCTION RUN)
-		// =========================================================================
+		//////////// /Pencatatan ke BNSP ///////////////////
 
-		// 1. Exec cURL SIKI
-		$ch_siki = curl_init($url_siki);
-		curl_setopt($ch_siki, CURLOPT_POST, 1);
-		curl_setopt($ch_siki, CURLOPT_POSTFIELDS, json_encode($jsonData_siki));
-		curl_setopt($ch_siki, CURLOPT_HTTPHEADER, $headers_siki);
-		curl_setopt($ch_siki, CURLOPT_RETURNTRANSFER, TRUE);
-		curl_setopt($ch_siki, CURLOPT_TIMEOUT, 30);
-
-		$execSiki = curl_exec($ch_siki);
-		curl_close($ch_siki);
-
-		$responseBodySiki = json_decode($execSiki, true);
-
-		if (isset($responseBodySiki["status"]) && $responseBodySiki["status"] == "errors") {
-			$msg_siki = isset($responseBodySiki["message"]) ? $responseBodySiki["message"] : "Gagal kirim Izin Final ke SIKI";
-			$this->session->set_flashdata('message_siki', 'Warning: ' . $msg_siki);
-		}
-
-		// 2. Exec cURL BNSP
-		$ch_bnsp = curl_init($url_bnsp);
-		curl_setopt($ch_bnsp, CURLOPT_POST, 1);
-		curl_setopt($ch_bnsp, CURLOPT_POSTFIELDS, json_encode($jsonData_bnsp));
-		curl_setopt($ch_bnsp, CURLOPT_HTTPHEADER, $headers_bnsp);
-		curl_setopt($ch_bnsp, CURLOPT_RETURNTRANSFER, TRUE);
-		curl_setopt($ch_bnsp, CURLOPT_TIMEOUT, 30);
-
-		$execBnsp = curl_exec($ch_bnsp);
-		curl_close($ch_bnsp);
-
-		$responseBodyBnsp = json_decode($execBnsp, true);
-
-		// 3. Insert Log History Permohonan Status 50
-		$data_tinjau['id_izin'] = $id_izin;
+		// Insert Log History Permohonan
+		$data_tinjau['id_izin'] = $id_izin_clean;
 		$data_tinjau['kode_status'] = "50";
-		$data_tinjau['log'] = date("Y-m-d H:i:s");
+		$data_tinjau['log'] = $log;
 		$data_tinjau['username'] = $this->session->userdata('username');
-		$this->Admin_model->insert_log_history_permohonan($data_tinjau);
+		$this->admin_model->insert_log_history_permohonan($data_tinjau);
 
-		$this->session->set_flashdata('success', 'Izin Final ke SIKI & BNSP Berhasil Diproses.');
 		redirect('Admin/list_selesai_penetapan', 'refresh');
 	}
 
