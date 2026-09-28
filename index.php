@@ -1,5 +1,5 @@
 <?php
-
+date_default_timezone_set('Asia/Jakarta');
 if (file_exists(__DIR__ . '/.env')) {
 	$lines = file(__DIR__ . '/.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 	foreach ($lines as $line) {

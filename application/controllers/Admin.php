@@ -2557,7 +2557,6 @@ class Admin extends MY_Controller
 		// STEP 1: API BNSP (Cek ketersediaan & kelulusan Blangko)
 		// =========================================================================
 		if ($debug_mode) {
-			// MOCK RESPONSE BNSP (Dummy Data)
 			$res_bnsp = [
 				'status' => 'success',
 				'data' => [
@@ -2844,11 +2843,11 @@ class Admin extends MY_Controller
 		$res_komtek = $this->hit_api_siki('v1/komite-teknis/' . $id_izin, $jsonData_penetapan_komite);
 		if (!$res_komtek['status']) {
 			$this->session->set_flashdata('error', 'Gagal Sinkronasi Komite Teknis ke SIKI: ' . $res_komtek['message']);
-			redirect('admin/list_selesai_penetapan', 'refresh');
+			redirect('Admin/list_selesai_penetapan', 'refresh');
 			return;
 		}
 
-		redirect('admin/list_selesai_penetapan', 'refresh');
+		redirect('Admin/list_selesai_penetapan', 'refresh');
 	}
 
 	private function hit_api_siki($endpoint, $payload)
@@ -3002,7 +3001,7 @@ class Admin extends MY_Controller
 		$this->Admin_model->insert_log_history_permohonan($data_tinjau);
 
 		$this->session->set_flashdata('success', 'Izin Final ke SIKI & BNSP Berhasil Diproses.');
-		redirect('admin/list_selesai_penetapan', 'refresh');
+		redirect('Admin/list_selesai_penetapan', 'refresh');
 	}
 
 
