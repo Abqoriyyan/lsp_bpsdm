@@ -2611,17 +2611,17 @@ class Admin extends MY_Controller
 		$get_absensi_asesmen = $this->Admin_model->get_absensi_asesmen($kode_jadwal);
 
 		// 1. Payload Penugasan Asesor
-		$jsonData_penugasan_asesor = array(
-			"id_asesor" => isset($get_data_rekomendasi_asesor_lpjk->id_asesor) ? $get_data_rekomendasi_asesor_lpjk->id_asesor : "",
-			"id_asesor_2" => !empty($get_data_rekomendasi_asesor_lpjk->id_asesor_2) ? $get_data_rekomendasi_asesor_lpjk->id_asesor_2 : "",
-			"tgl_surat_tugas" => isset($get_data_rekomendasi_asesor_lpjk->tgl_surat_tugas) ? $get_data_rekomendasi_asesor_lpjk->tgl_surat_tugas : "",
-			"no_surat_tugas" => isset($get_data_rekomendasi_asesor_lpjk->no_surat_tugas) ? $get_data_rekomendasi_asesor_lpjk->no_surat_tugas : "",
-			"url_surat_tugas" => base_url("asesor/cetak_surat_tugas/") . base64_encode($id_izin),
-			"kode_tuk" => isset($get_data_rekomendasi_asesor_lpjk->kode_tuk) ? $get_data_rekomendasi_asesor_lpjk->kode_tuk : "",
-			"nama_tuk" => isset($get_data_rekomendasi_asesor_lpjk->nama_tuk) ? $get_data_rekomendasi_asesor_lpjk->nama_tuk : "",
-			"tgl_uji" => isset($get_data_rekomendasi_asesor_lpjk->tgl_uji) ? $get_data_rekomendasi_asesor_lpjk->tgl_uji : "",
-			"tgl_selesai_uji" => isset($get_data_rekomendasi_asesor_lpjk->tgl_uji_selesai) ? $get_data_rekomendasi_asesor_lpjk->tgl_uji_selesai : "",
-		);
+		// $jsonData_penugasan_asesor = array(
+		// 	"id_asesor" => isset($get_data_rekomendasi_asesor_lpjk->id_asesor) ? $get_data_rekomendasi_asesor_lpjk->id_asesor : "",
+		// 	"id_asesor_2" => !empty($get_data_rekomendasi_asesor_lpjk->id_asesor_2) ? $get_data_rekomendasi_asesor_lpjk->id_asesor_2 : "",
+		// 	"tgl_surat_tugas" => isset($get_data_rekomendasi_asesor_lpjk->tgl_surat_tugas) ? $get_data_rekomendasi_asesor_lpjk->tgl_surat_tugas : "",
+		// 	"no_surat_tugas" => isset($get_data_rekomendasi_asesor_lpjk->no_surat_tugas) ? $get_data_rekomendasi_asesor_lpjk->no_surat_tugas : "",
+		// 	"url_surat_tugas" => base_url("asesor/cetak_surat_tugas/") . base64_encode($id_izin),
+		// 	"kode_tuk" => isset($get_data_rekomendasi_asesor_lpjk->kode_tuk) ? $get_data_rekomendasi_asesor_lpjk->kode_tuk : "",
+		// 	"nama_tuk" => isset($get_data_rekomendasi_asesor_lpjk->nama_tuk) ? $get_data_rekomendasi_asesor_lpjk->nama_tuk : "",
+		// 	"tgl_uji" => isset($get_data_rekomendasi_asesor_lpjk->tgl_uji) ? $get_data_rekomendasi_asesor_lpjk->tgl_uji : "",
+		// 	"tgl_selesai_uji" => isset($get_data_rekomendasi_asesor_lpjk->tgl_uji_selesai) ? $get_data_rekomendasi_asesor_lpjk->tgl_uji_selesai : "",
+		// );
 
 		// 2. Payload Rekomendasi Asesor
 		$rekomendasi = (isset($get_data_rekomendasi_asesor_lpjk->rekomendasi_asesor) && $get_data_rekomendasi_asesor_lpjk->rekomendasi_asesor == "Kompeten") ? "K" : "BK";
@@ -2714,6 +2714,14 @@ class Admin extends MY_Controller
 			"url_absensi_asesi_kegiatan_pra_asesmen" => !empty($get_absensi_pra_asesmen->file_absen) ? base_url("uploads/absensi_pra_asesmen/" . $get_absensi_pra_asesmen->file_absen) : "",
 			"url_absensi_asesor_kegiatan_asesmen" => !empty($get_absensi_asesmen->file_absen) ? base_url("uploads/absensi_asesmen/" . $get_absensi_asesmen->file_absen) : "",
 			"url_absensi_asesi_kegiatan_asesmen" => !empty($get_absensi_asesmen->file_absen) ? base_url("uploads/absensi_asesmen/" . $get_absensi_asesmen->file_absen) : "",
+
+			"tgl_surat_tugas" => isset($get_data_rekomendasi_asesor_lpjk->tgl_surat_tugas) ? $get_data_rekomendasi_asesor_lpjk->tgl_surat_tugas : "",
+			"no_surat_tugas" => isset($get_data_rekomendasi_asesor_lpjk->no_surat_tugas) ? $get_data_rekomendasi_asesor_lpjk->no_surat_tugas : "",
+			"url_surat_tugas" => base_url("asesor/cetak_surat_tugas/") . base64_encode($id_izin),
+			"kode_tuk" => isset($get_data_rekomendasi_asesor_lpjk->kode_tuk) ? $get_data_rekomendasi_asesor_lpjk->kode_tuk : "",
+			"nama_tuk" => isset($get_data_rekomendasi_asesor_lpjk->nama_tuk) ? $get_data_rekomendasi_asesor_lpjk->nama_tuk : "",
+			"tgl_uji" => isset($get_data_rekomendasi_asesor_lpjk->tgl_uji) ? $get_data_rekomendasi_asesor_lpjk->tgl_uji : "",
+			"tgl_selesai_uji" => isset($get_data_rekomendasi_asesor_lpjk->tgl_uji_selesai) ? $get_data_rekomendasi_asesor_lpjk->tgl_uji_selesai : "",
 		);
 
 		// 3. Payload Penetapan Komite Teknis
@@ -2784,12 +2792,12 @@ class Admin extends MY_Controller
 			echo "</div>";
 
 			// 2. TAMPILAN SIKI - PENUGASAN ASESOR (v3)
-			echo "<div class='card'>";
-			echo "<h3>2. Request SIKI - Penugasan Asesor (v3)</h3>";
-			echo "<p><span class='method'>POST</span> <span class='url'>{$siki_penugasan_asesor_endpoint}</span></p>";
-			echo "<strong>Payload Body JSON:</strong>";
-			echo "<pre>" . json_encode($jsonData_penugasan_asesor, JSON_PRETTY_PRINT) . "</pre>";
-			echo "</div>";
+			// echo "<div class='card'>";
+			// echo "<h3>2. Request SIKI - Penugasan Asesor (v3)</h3>";
+			// echo "<p><span class='method'>POST</span> <span class='url'>{$siki_penugasan_asesor_endpoint}</span></p>";
+			// echo "<strong>Payload Body JSON:</strong>";
+			// echo "<pre>" . json_encode($jsonData_penugasan_asesor, JSON_PRETTY_PRINT) . "</pre>";
+			// echo "</div>";
 
 			// 3. TAMPILAN SIKI - REKOMENDASI ASESOR (v2)
 			echo "<div class='card'>";
@@ -2824,12 +2832,12 @@ class Admin extends MY_Controller
 		// =========================================================================
 
 		// 1. Penugasan Asesor (v3)
-		$res_penugasan = $this->hit_api_siki('v3/asesor-lsp-penugasan/' . $id_izin, $jsonData_penugasan_asesor);
-		if (!$res_penugasan['status']) {
-			$this->session->set_flashdata('error', 'Gagal Penugasan Asesor ke SIKI: ' . $res_penugasan['message']);
-			redirect('Admin/list_selesai_penetapan', 'refresh');
-			return;
-		}
+		// $res_penugasan = $this->hit_api_siki('v3/asesor-lsp-penugasan/' . $id_izin, $jsonData_penugasan_asesor);
+		// if (!$res_penugasan['status']) {
+		// 	$this->session->set_flashdata('error', 'Gagal Penugasan Asesor ke SIKI: ' . $res_penugasan['message']);
+		// 	redirect('Admin/list_selesai_penetapan', 'refresh');
+		// 	return;
+		// }
 
 		// 2. Rekomendasi Asesor (v2)
 		$res_rekom = $this->hit_api_siki('v2/asesor-lsp-penugasan/' . $id_izin, $jsonData_rekom_asesor);
@@ -2888,7 +2896,7 @@ class Admin extends MY_Controller
 
 	public function izin_final_siki_portal($id_izin)
 	{
-		$debug_mode = false;
+		$debug_mode = true;
 
 		##/Cek Session Login##
 		if (!$this->ion_auth->ceklogin()) {
