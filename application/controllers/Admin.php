@@ -2888,6 +2888,8 @@ class Admin extends MY_Controller
 
 	public function izin_final_siki_portal($id_izin)
 	{
+		$debug_mode = false;
+
 		##/Cek Session Login##
 		if (!$this->ion_auth->ceklogin()) {
 			redirect('login', 'refresh');
@@ -2901,24 +2903,39 @@ class Admin extends MY_Controller
 		$id_izin = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
 		$log = date("Y-m-d H:i:s");
 
-		// Persiapan payload data untuk SIKI
+		// 1. Persiapan Payload & Endpoint SIKI
 		$token = $this->Api_model->get_token();
-		$url_siki = $token->host . '/siki-api/v1/izin-final-skk/' . $id_izin;
+		$host_siki = isset($token->host) ? rtrim($token->host, '/') : 'https://siki.pu.go.id';
+		$auth_token_siki = isset($token->token) ? $token->token : '';
+
+		$url_siki = $host_siki . '/siki-api/v1/izin-final-skk/' . $id_izin;
 		$jsonData_siki = array(
 			"file_lampiran" => array(
 				"link_e_sertifikat" => base_url('sertifikat/') . base64_encode($id_izin),
 				"url_surat_pernyataan_pemegang_sertifikat" => base_url('Admin/cetak_pernyataan_asesi/') . base64_encode($id_izin)
 			)
 		);
+		$headers_siki = array(
+			'Content-Type: application/json',
+			'token: ' . $auth_token_siki
+		);
 
-		// Persiapan payload data untuk BNSP
+		// 2. Persiapan Payload & Endpoint BNSP
 		$token_bnsp = $this->Api_model->get_token_bnsp();
 		$get_detail_jadwal_asesmen_per_permohonan = $this->Admin_model->get_detail_jadwal_asesmen_per_permohonan($id_izin);
 		$get_data_pencatatan = $this->Admin_model->get_data_pencatatan($id_izin);
-		$url_bnsp = $token_bnsp->host . "jadwal/peserta/sertifikat";
+
+		$host_bnsp = isset($token_bnsp->host) ? rtrim($token_bnsp->host, '/') : 'https://konstruksi.bnsp.go.id/api/v1';
+		$x_auth_bnsp = isset($token_bnsp->x_authorization) ? $token_bnsp->x_authorization : '';
+
+		$url_bnsp = $host_bnsp . "/jadwal/peserta/sertifikat";
+
+		$id_jadwal_bnsp = isset($get_detail_jadwal_asesmen_per_permohonan->id_jadwal_asesmen)
+			? $get_detail_jadwal_asesmen_per_permohonan->id_jadwal_asesmen
+			: null;
 
 		$jsonData_bnsp = array(
-			"jadwal_id" => isset($get_detail_jadwal_asesmen_per_permohonan->id_jadwal_asesmen) ? $get_detail_jadwal_asesmen_per_permohonan->id_jadwal_asesmen : null,
+			"jadwal_id" => $id_jadwal_bnsp,
 			"nik_peserta" => isset($get_data_pencatatan->nik) ? (string) $get_data_pencatatan->nik : "",
 			"nomor_sertifikat" => isset($get_data_pencatatan->nomor_sertifikat_lengkap) ? (string) $get_data_pencatatan->nomor_sertifikat_lengkap : "",
 			"nomor_reg" => isset($get_data_pencatatan->nomor_registrasi_lsp) ? (string) $get_data_pencatatan->nomor_registrasi_lsp : "",
@@ -2927,40 +2944,75 @@ class Admin extends MY_Controller
 			"tgl_srtf" => isset($get_data_pencatatan->tanggal_ditetapkan) ? $get_data_pencatatan->tanggal_ditetapkan : "",
 			"tgl_srtf_end" => isset($get_data_pencatatan->tanggal_masa_berlaku) ? $get_data_pencatatan->tanggal_masa_berlaku : "",
 		);
+		$headers_bnsp = array(
+			'Content-Type: application/json',
+			'x-authorization: ' . $x_auth_bnsp
+		);
 
 		// =========================================================================
-		// Testing Tampilan & Struktur Payload Tanpa Eksekusi API
+		// DEBUG VISUALIZER / ENDPOINT & PAYLOAD INSPECTOR
 		// =========================================================================
-		if ($_SERVER['SERVER_NAME'] == 'localhost' || $_SERVER['REMOTE_ADDR'] == '127.0.0.1' || $_SERVER['REMOTE_ADDR'] == '::1') {
-			echo "<div style='font-family: monospace; background: #1e1e1e; color: #00ff00; padding: 20px; border-radius: 8px;'>";
-			echo "<h2 style='color: #ff9900; margin-top:0;'>[MODE SIMULASI LOCALHOST]</h2>";
-			echo "<p style='color: #fff;'>Proses berhasil di-intersept. <b>TIDAK ADA DATA</b> yang dikirim ke cURL SIKI/BNSP dan DB lokal belum di-update.</p>";
-			echo "<hr style='border-color: #444;'>";
-			echo "<b>ID Izin:</b> " . $id_izin . "<br><br>";
+		if ($debug_mode || $_SERVER['SERVER_NAME'] == 'localhost' || $_SERVER['REMOTE_ADDR'] == '127.0.0.1' || $_SERVER['REMOTE_ADDR'] == '::1') {
+			echo "<!DOCTYPE html><html><head><title>DEBUG - IZIN FINAL SIKI & BNSP</title>";
+			echo "<style>
+            body{font-family:'Segoe UI', Tahoma, monospace;background:#1e1e1e;color:#d4d4d4;padding:25px;margin:0;}
+            .card{background:#252526;border:1px solid #3c3c3c;margin-bottom:20px;padding:18px;border-radius:8px;}
+            h3{color:#569cd6;margin-top:0;border-bottom:1px solid #3c3c3c;padding-bottom:8px;}
+            pre{color:#ce9178;white-space:pre-wrap;word-break:break-all;background:#1e1e1e;padding:12px;border-radius:5px;border:1px solid #333;}
+            .badge-debug{background:#0e639c;color:#fff;padding:4px 8px;border-radius:4px;font-size:12px;font-weight:bold;}
+            .method{background:#4ec9b0;color:#000;padding:2px 6px;border-radius:3px;font-weight:bold;font-size:11px;}
+            .url{color:#dcdcaa;font-weight:bold;}
+            .param-table{width:100%;border-collapse:collapse;margin:10px 0;}
+            .param-table th, .param-table td{border:1px solid #3c3c3c;padding:6px 10px;text-align:left;}
+            .param-table th{background:#333;color:#4ec9b0;}
+            .btn-back{background:#28a745;color:white;padding:10px 18px;text-decoration:none;border-radius:5px;display:inline-block;font-weight:bold;}
+        </style>";
+			echo "</head><body>";
+			echo "<h2>[MODE SIMULASI] Endpoint & Payload Inspector</h2>";
+			echo "<p>Status Engine: <span class='badge-debug'>DRY-RUN / NO API EXECUTION</span> | Target ID Izin: <strong>{$id_izin}</strong></p>";
 
-			echo "<b style='color: #00bfff;'>1. TARGET ENDPOINT & PAYLOAD SIKI:</b><br>";
-			echo "URL: " . $url_siki . "<br>";
-			echo "<pre style='color: #fff; background: #2d2d2d; padding: 10px;'>" . json_encode($jsonData_siki, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "</pre>";
-
-			echo "<b style='color: #00bfff;'>2. TARGET ENDPOINT & PAYLOAD BNSP:</b><br>";
-			echo "URL: " . $url_bnsp . "<br>";
-			echo "<pre style='color: #fff; background: #2d2d2d; padding: 10px;'>" . json_encode($jsonData_bnsp, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "</pre>";
-
-			echo "<hr style='border-color: #444;'>";
-			echo "<a href='" . base_url('admin/list_selesai_penetapan') . "' style='background: #28a745; color: white; padding: 8px 15px; text-decoration: none; border-radius: 4px;'>&laquo; Kembali ke List</a>";
+			// INSPECTOR SIKI
+			echo "<div class='card'>";
+			echo "<h3>1. Target Endpoint & Payload SIKI (Izin Final SKK)</h3>";
+			echo "<p><span class='method'>POST</span> <span class='url'>{$url_siki}</span></p>";
+			echo "<strong>Headers:</strong>";
+			echo "<pre>" . print_r($headers_siki, true) . "</pre>";
+			echo "<strong>Body JSON Payload:</strong>";
+			echo "<pre>" . json_encode($jsonData_siki, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "</pre>";
 			echo "</div>";
+
+			// INSPECTOR BNSP
+			echo "<div class='card'>";
+			echo "<h3>2. Target Endpoint & Payload BNSP (Sertifikat Peserta)</h3>";
+			echo "<p><span class='method'>POST</span> <span class='url'>{$url_bnsp}</span></p>";
+			echo "<strong>Headers:</strong>";
+			echo "<pre>" . print_r($headers_bnsp, true) . "</pre>";
+			echo "<strong>Check Field Penting:</strong>";
+			echo "<table class='param-table'>
+                <tr><th>Field Key</th><th>Value</th><th>Status Validation</th></tr>
+                <tr><td>jadwal_id</td><td>" . htmlspecialchars($id_jadwal_bnsp ?? 'NULL') . "</td><td>" . (!empty($id_jadwal_bnsp) ? "<span style='color:#4ec9b0;'>OK (Valid)</span>" : "<span style='color:#f44747;'>WARNING: Kosong!</span>") . "</td></tr>
+                <tr><td>nik_peserta</td><td>" . htmlspecialchars($jsonData_bnsp['nik_peserta']) . "</td><td>" . (!empty($jsonData_bnsp['nik_peserta']) ? "<span style='color:#4ec9b0;'>OK</span>" : "<span style='color:#f44747;'>Kosong</span>") . "</td></tr>
+                <tr><td>nomor_sertifikat</td><td>" . htmlspecialchars($jsonData_bnsp['nomor_sertifikat']) . "</td><td>" . (!empty($jsonData_bnsp['nomor_sertifikat']) ? "<span style='color:#4ec9b0;'>OK</span>" : "<span style='color:#f44747;'>Kosong</span>") . "</td></tr>
+              </table>";
+			echo "<strong>Body JSON Payload:</strong>";
+			echo "<pre>" . json_encode($jsonData_bnsp, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "</pre>";
+			echo "</div>";
+
+			echo "<br><a href='" . base_url('Admin/list_selesai_penetapan') . "' class='btn-back'>&laquo; Kembali ke List Selesai Penetapan</a>";
+			echo "</body></html>";
 
 			exit();
 		}
+
+		// =========================================================================
+		// EXECUTION MODE (PRODUCTION RUN)
 		// =========================================================================
 
-		///////////////////////{ Exec cURL SIKI } //////////////////////////
+		// 1. Exec cURL SIKI
 		$ch_siki = curl_init($url_siki);
-		$jsonDataEncodedSiki = json_encode($jsonData_siki);
-
 		curl_setopt($ch_siki, CURLOPT_POST, 1);
-		curl_setopt($ch_siki, CURLOPT_POSTFIELDS, $jsonDataEncodedSiki);
-		curl_setopt($ch_siki, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'token: ' . $token->token));
+		curl_setopt($ch_siki, CURLOPT_POSTFIELDS, json_encode($jsonData_siki));
+		curl_setopt($ch_siki, CURLOPT_HTTPHEADER, $headers_siki);
 		curl_setopt($ch_siki, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($ch_siki, CURLOPT_TIMEOUT, 30);
 
@@ -2974,17 +3026,11 @@ class Admin extends MY_Controller
 			$this->session->set_flashdata('message_siki', 'Warning: ' . $msg_siki);
 		}
 
-		///////////// Exec cURL BNSP ///////////////////
+		// 2. Exec cURL BNSP
 		$ch_bnsp = curl_init($url_bnsp);
-		$jsonDataEncodedBnsp = json_encode($jsonData_bnsp);
-
 		curl_setopt($ch_bnsp, CURLOPT_POST, 1);
-		curl_setopt($ch_bnsp, CURLOPT_POSTFIELDS, $jsonDataEncodedBnsp);
-		curl_setopt($ch_bnsp, CURLOPT_HTTPHEADER, array(
-			'Content-Type: application/json',
-			'x-authorization:' . $token_bnsp->x_authorization,
-			'token:' . $token_bnsp->x_authorization
-		));
+		curl_setopt($ch_bnsp, CURLOPT_POSTFIELDS, json_encode($jsonData_bnsp));
+		curl_setopt($ch_bnsp, CURLOPT_HTTPHEADER, $headers_bnsp);
 		curl_setopt($ch_bnsp, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($ch_bnsp, CURLOPT_TIMEOUT, 30);
 
@@ -2993,7 +3039,7 @@ class Admin extends MY_Controller
 
 		$responseBodyBnsp = json_decode($execBnsp, true);
 
-		// Insert Log History Permohonan Status 50
+		// 3. Insert Log History Permohonan Status 50
 		$data_tinjau['id_izin'] = $id_izin;
 		$data_tinjau['kode_status'] = "50";
 		$data_tinjau['log'] = date("Y-m-d H:i:s");
