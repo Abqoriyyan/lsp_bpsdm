@@ -2587,7 +2587,7 @@ class Admin extends MY_Controller
 
 		if ($curl_err) {
 			$this->session->set_flashdata('error', 'Gagal terhubung ke API BNSP: ' . $curl_err);
-			redirect('admin/list_penetapan', 'refresh');
+			redirect('Admin/list_penetapan', 'refresh');
 			return;
 		}
 
@@ -2595,7 +2595,7 @@ class Admin extends MY_Controller
 
 		if (empty($nomor_blanko_bnsp)) {
 			$this->session->set_flashdata('warning', 'Blangko BNSP belum diterbitkan atau status masih diproses BNSP.');
-			redirect('admin/list_penetapan', 'refresh');
+			redirect('Admin/list_penetapan', 'refresh');
 			return;
 		}
 
@@ -2827,7 +2827,7 @@ class Admin extends MY_Controller
 		$res_penugasan = $this->hit_api_siki('v3/asesor-lsp-penugasan/' . $id_izin, $jsonData_penugasan_asesor);
 		if (!$res_penugasan['status']) {
 			$this->session->set_flashdata('error', 'Gagal Penugasan Asesor ke SIKI: ' . $res_penugasan['message']);
-			redirect('admin/list_selesai_penetapan', 'refresh');
+			redirect('Admin/list_selesai_penetapan', 'refresh');
 			return;
 		}
 
@@ -2835,7 +2835,7 @@ class Admin extends MY_Controller
 		$res_rekom = $this->hit_api_siki('v2/asesor-lsp-penugasan/' . $id_izin, $jsonData_rekom_asesor);
 		if (!$res_rekom['status']) {
 			$this->session->set_flashdata('error', 'Gagal Rekomendasi Asesor ke SIKI: ' . $res_rekom['message']);
-			redirect('admin/list_selesai_penetapan', 'refresh');
+			redirect('Admin/list_selesai_penetapan', 'refresh');
 			return;
 		}
 
