@@ -12,7 +12,7 @@
     </div>
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Sidang Pleno Komite Teknis</h1>
-                <a href="<?= site_url('Admin/post_siki_komtek/' . $id_izin); ?>" class="btn btn-primary"
+                <a href="<?= site_url('Admin/post_siki_komtek/' . $id_izin); ?>" class="btn btn-primary" method="POST"
             onclick="return confirm('Apakah Anda yakin ingin mengirim data Komtek ini ke API SIKI PU?');">
             <i class="fa fa-paper-plane"></i> Post Penugasan ke SIKI
         </a>
