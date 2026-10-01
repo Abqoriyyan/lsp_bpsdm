@@ -223,7 +223,7 @@
 		function openSsoPopup() {
 			var callbackUrl = "<?= base_url('sso/login'); ?>";
 
-			// TESTING LOKAL (Uncomment jika sedang dev lokal):
+			// TESTING LOKAL
 			// callbackUrl = "https://plot-surprise-stinger.ngrok-free.dev/sso/login";
 
 			var encodedCallback = encodeURIComponent(callbackUrl);
