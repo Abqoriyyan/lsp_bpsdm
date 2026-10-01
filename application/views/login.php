@@ -234,24 +234,12 @@
 			var left = (screen.width / 2) - (width / 2);
 			var top = (screen.height / 2) - (height / 2);
 
-			var popupWindow = window.open(
+			window.open(
 				ssoUrl,
 				"SSO_Dwaradaya_Login",
 				"width=" + width + ",height=" + height + ",top=" + top + ",left=" + left + ",resizable=yes,scrollbars=yes,status=yes"
 			);
-
-			var checkPopupTimer = setInterval(function () {
-				if (!popupWindow || popupWindow.closed) {
-					clearInterval(checkPopupTimer);
-				}
-			}, 1000);
 		}
-
-		window.addEventListener("message", function (event) {
-			if (event.data === "sso_login_success") {
-				window.location.href = "<?= base_url('User'); ?>";
-			}
-		}, false);
 	</script>
 
 </body>
