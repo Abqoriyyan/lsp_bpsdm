@@ -223,27 +223,35 @@
 		function openSsoPopup() {
 			var callbackUrl = "<?= base_url('sso/login'); ?>";
 
-			// TESTING LOKAL:
+			// TESTING LOKAL (Uncomment jika sedang dev lokal):
 			// callbackUrl = "https://plot-surprise-stinger.ngrok-free.dev/sso/login";
 
 			var encodedCallback = encodeURIComponent(callbackUrl);
 			var ssoUrl = "https://superapps.bpsdm.pu.go.id/login?callbackUrl=" + encodedCallback;
+
 			var width = 600;
 			var height = 700;
 			var left = (screen.width / 2) - (width / 2);
 			var top = (screen.height / 2) - (height / 2);
+
 			var popupWindow = window.open(
 				ssoUrl,
 				"SSO_Dwaradaya_Login",
 				"width=" + width + ",height=" + height + ",top=" + top + ",left=" + left + ",resizable=yes,scrollbars=yes,status=yes"
 			);
+
 			var checkPopupTimer = setInterval(function () {
 				if (!popupWindow || popupWindow.closed) {
 					clearInterval(checkPopupTimer);
-					window.location.href = "<?= base_url('User'); ?>";
 				}
 			}, 1000);
 		}
+
+		window.addEventListener("message", function (event) {
+			if (event.data === "sso_login_success") {
+				window.location.href = "<?= base_url('User'); ?>";
+			}
+		}, false);
 	</script>
 
 </body>

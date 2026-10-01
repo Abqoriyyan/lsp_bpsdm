@@ -2472,7 +2472,6 @@ class Admin extends MY_Controller
 		//Execute the request
 		$result = curl_exec($ch);
 
-
 		// Update Status Konfirm Jadwal di DB Lokal
 		$data = array(
 			'status_jadwal' => '27',
@@ -2588,7 +2587,7 @@ class Admin extends MY_Controller
 		$id_izin_clean = $this->security->xss_clean($id_izin_raw);
 		$id_izin_clean = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
 
-		// Ambil Data Master (Gunakan penamaan model yang konsisten)
+		// Ambil Data Master
 		$get_data_pencatatan = $this->Admin_model->get_data_pencatatan($id_izin_clean);
 		$get_detail_jadwal_asesmen_per_permohonan = $this->Admin_model->get_detail_jadwal_asesmen_per_permohonan($id_izin_clean);
 		$get_data_rekomendasi_asesor_lpjk = $this->Admin_model->get_data_rekomendasi_asesor_lpjk($id_izin_clean);
