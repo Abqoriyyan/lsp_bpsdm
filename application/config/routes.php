@@ -53,6 +53,8 @@ $route['default_controller'] = 'login';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
+$route['sso/login'] = 'sso/login';
+$route['api/sso-check'] = 'sso/check';
 
 // Route For Link Sertifikat
 $route['cetak_form_asesmen/apl01/(:any)'] = 'asesor/cetak_form_apl01/$1';

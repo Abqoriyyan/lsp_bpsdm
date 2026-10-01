@@ -24,7 +24,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 */
 // $config['base_url'] = 'https://' . $_SERVER['HTTP_HOST'] . '/lsp26/';
-$config['base_url'] = 'http://localhost/lsp26/';
+// $config['base_url'] = 'http://localhost/lsp26/';
+
+$protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ||
+    (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+    ? 'https://' : 'http://';
+
+$host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
+
+$script_name = str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']);
+
+// Set Base URL Dinamis
+$config['base_url'] = $protocol . $host . $script_name;
 
 /*
 |--------------------------------------------------------------------------
@@ -137,6 +148,7 @@ $config['subclass_prefix'] = 'MY_';
 | Note: This will NOT disable or override the CodeIgniter-specific
 |	autoloading (application/config/autoload.php)
 */
+$config['composer_autoload'] = TRUE;
 $config['composer_autoload'] = "./vendor/autoload.php";
 
 /*
@@ -224,7 +236,7 @@ $config['allow_get_array'] = TRUE;
 | your log files will fill up very fast.
 |
 */
-$config['log_threshold'] = 4;
+$config['log_threshold'] = 1;
 
 /*
 |--------------------------------------------------------------------------
@@ -455,7 +467,13 @@ $config['csrf_token_name'] = 'csrf_test_name';
 $config['csrf_cookie_name'] = 'csrf_cookie_name';
 $config['csrf_expire'] = 7200;
 $config['csrf_regenerate'] = FALSE;
-$config['csrf_exclude_uris'] = array();
+$config['csrf_exclude_uris'] = array(
+    'api/sso/check',
+    'api/sso/check.*',
+    'sso/check',
+    'sso/check.*',
+    'sso.*'
+);
 
 /*
 |--------------------------------------------------------------------------

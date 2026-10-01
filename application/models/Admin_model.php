@@ -152,12 +152,21 @@ class Admin_model extends CI_Model
     }
 
     ## Cek User Pemohon untuk membuat User
-    public function cek_user_pemohon($nik)
+    public function cek_user_pemohon($nik, $email = null)
     {
         $this->db->select('*');
         $this->db->from('user_login');
-        $multiClause = array('nik' => $nik, 'user_level' => 'User');
-        $this->db->where($multiClause);
+
+        if (!empty($email)) {
+            $this->db->group_start();
+            $this->db->where('nik', $nik);
+            $this->db->or_where('email', $email);
+            $this->db->group_end();
+        } else {
+            $this->db->where('nik', $nik);
+        }
+
+        $this->db->where('user_level', 'User');
         $query = $this->db->get();
         return $query->row();
     }
@@ -338,10 +347,18 @@ class Admin_model extends CI_Model
 
     public function get_data_penunjukan_asesor($id_izin)
     {
-        $this->db->select('a.*, b.*, c.*');
+        $this->db->select('
+            a.*,
+            b.kode_jadwal, b.nama_jadwal, b.tanggal_mulai, b.tanggal_selesai,
+            c.nama_tuk, c.alamat as alamat_tuk,
+            e.jabatan_kerja as deskripsi_jabatan_kerja
+        ');
         $this->db->from('data_penunjukan_asesor a');
-        $this->db->join('data_jadwal_asesmen b', 'b.kode_jadwal = a.kode_jadwal_asesmen');
-        $this->db->join('master_tuk c', 'c.id = b.id_tuk');
+        $this->db->join('data_jadwal_asesmen b', 'b.kode_jadwal = a.kode_jadwal_asesmen', 'left');
+        $this->db->join('master_tuk c', 'c.id = b.id_tuk', 'left');
+        $this->db->join('data_klasifikasi_kualifikasi_permohonan d', 'd.id_izin = a.id_izin', 'left');
+        $this->db->join('master_jabatan_kerja e', 'e.id_jabatan_kerja = d.jabatan_kerja', 'left');
+
         $this->db->where('a.id_izin', $id_izin);
 
         $query = $this->db->get();
@@ -410,9 +427,10 @@ class Admin_model extends CI_Model
 
     public function get_data_perbaikan($id_izin)
     {
-        $this->db->select('a.*,b.deskripsi');
+        $this->db->select('a.id_izin, a.item_tinjau_permohonan, a.catatan, b.deskripsi as nama_item');
         $this->db->from('tinjau_permohonan a');
         $this->db->join('master_item_tinjau_permohonan b', 'b.kode_item = a.item_tinjau_permohonan');
+
         $multiClause = array('a.id_izin' => $id_izin, 'a.status' => '0');
         $this->db->where($multiClause);
 

@@ -1,5 +1,13 @@
-RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_FILENAME} !-s
-RewriteRule (.*) index.php/$1 [L]
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /lsp26/
+
+    # Meneruskan Authorization Header dari Postman ke PHP (Sintaks Aman)
+    RewriteCond %{HTTP:Authorization} ^(.*)
+    RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+
+    # Rule Standar CodeIgniter 3
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php/$1 [L]
+</IfModule>

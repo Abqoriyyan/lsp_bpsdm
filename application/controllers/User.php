@@ -19,6 +19,8 @@ class User extends MY_Controller
     }
     public function index()
     {
+        // var_dump($this->session->all_userdata());
+        // die();
         ##/Cek Session Login##
         if (!$this->ion_auth->ceklogin()) {
             redirect('login', 'refresh');
