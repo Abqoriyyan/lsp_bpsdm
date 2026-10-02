@@ -13,6 +13,14 @@ class Login extends MY_Controller
 
 	public function index()
 	{
+		$token = $this->input->get('token', TRUE);
+		$auto_login = $this->input->get('auto_login', TRUE);
+
+		if (!empty($token) && $auto_login === 'true') {
+			redirect('sso/login?token=' . urlencode($token));
+			return;
+		}
+
 		if ($this->ion_auth->ceklogin()) {
 			if ($this->ion_auth->super_admin()) {
 				redirect('super_admin');

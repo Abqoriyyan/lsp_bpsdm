@@ -1,64 +1,153 @@
-<?php
-defined('BASEPATH') OR exit('No direct script access allowed');
-?><!DOCTYPE html>
-<html lang="en">
+<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<!DOCTYPE html>
+<html lang="id">
+
 <head>
-<meta charset="utf-8">
-<title>Database Error</title>
-<style type="text/css">
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Database Error</title>
 
-::selection { background-color: #E13300; color: white; }
-::-moz-selection { background-color: #E13300; color: white; }
+	<!-- Google Fonts -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-body {
-	background-color: #fff;
-	margin: 40px;
-	font: 13px/20px normal Helvetica, Arial, sans-serif;
-	color: #4F5155;
-}
+	<!-- FontAwesome Icons -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
-a {
-	color: #003399;
-	background-color: transparent;
-	font-weight: normal;
-}
+	<style>
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
 
-h1 {
-	color: #444;
-	background-color: transparent;
-	border-bottom: 1px solid #D0D0D0;
-	font-size: 19px;
-	font-weight: normal;
-	margin: 0 0 14px 0;
-	padding: 14px 15px 10px 15px;
-}
+		body {
+			font-family: 'Nunito', sans-serif;
+			background-color: #f8f9fc;
+			color: #2c395c;
+			height: 100vh;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 20px;
+		}
 
-code {
-	font-family: Consolas, Monaco, Courier New, Courier, monospace;
-	font-size: 12px;
-	background-color: #f9f9f9;
-	border: 1px solid #D0D0D0;
-	color: #002166;
-	display: block;
-	margin: 14px 0 14px 0;
-	padding: 12px 10px 12px 10px;
-}
+		.error-container {
+			background: #ffffff;
+			max-width: 520px;
+			width: 100%;
+			padding: 40px 30px;
+			border-radius: 16px;
+			box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+			text-align: center;
+		}
 
-#container {
-	margin: 10px;
-	border: 1px solid #D0D0D0;
-	box-shadow: 0 0 8px #D0D0D0;
-}
+		.error-code {
+			font-size: 5.5rem;
+			font-weight: 800;
+			color: #2c395c;
+			line-height: 1;
+			margin-bottom: 10px;
+			letter-spacing: -2px;
+			position: relative;
+			display: inline-block;
+		}
 
-p {
-	margin: 12px 15px 12px 15px;
-}
-</style>
+		.error-code::after {
+			content: '';
+			display: block;
+			width: 60px;
+			height: 4px;
+			background: #EAB360;
+			margin: 15px auto 0;
+			border-radius: 2px;
+		}
+
+		.error-heading {
+			font-size: 1.4rem;
+			font-weight: 700;
+			color: #3a3b45;
+			margin-top: 15px;
+			margin-bottom: 12px;
+		}
+
+		.error-message {
+			font-size: 0.95rem;
+			color: #6e707e;
+			line-height: 1.6;
+			margin-bottom: 30px;
+		}
+
+		.error-message p {
+			margin: 0;
+		}
+
+		.btn-home {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 8px;
+			background-color: #2c395c;
+			color: #ffffff;
+			font-weight: 700;
+			font-size: 0.9rem;
+			padding: 12px 24px;
+			border-radius: 8px;
+			text-decoration: none;
+			transition: all 0.25s ease;
+			box-shadow: 0 4px 12px rgba(44, 57, 92, 0.25);
+		}
+
+		.btn-home:hover {
+			background-color: #374774;
+			color: #EAB360;
+			transform: translateY(-2px);
+			box-shadow: 0 6px 16px rgba(44, 57, 92, 0.35);
+		}
+
+		.icon-box {
+			font-size: 3rem;
+			color: #EAB360;
+			margin-bottom: 10px;
+		}
+
+		@media (max-width: 480px) {
+			.error-container {
+				padding: 30px 20px;
+			}
+
+			.error-code {
+				font-size: 4rem;
+			}
+
+			.error-heading {
+				font-size: 1.2rem;
+			}
+		}
+	</style>
 </head>
+
 <body>
-	<div id="container">
-		<h1><?php echo $heading; ?></h1>
-		<?php echo $message; ?>
+
+	<div class="error-container">
+		<div class="icon-box">
+			<i class="fas fa-exclamation-triangle"></i>
+		</div>
+
+		<div class="error-code">Database Error</div>
+
+		<h1 class="error-heading"><?php echo $heading; ?></h1>
+
+		<div class="error-message">
+			<?php echo $message; ?>
+		</div>
+
+		<a href="<?php echo config_item('base_url'); ?>" class="btn-home">
+			<i class="fas fa-arrow-left"></i> Kembali ke Beranda
+		</a>
 	</div>
+
 </body>
+
 </html>

@@ -237,21 +237,24 @@ class Admin_model extends CI_Model
     public function get_list_tagihan_pembayaran()
     {
         $sql = "SELECT a.id_izin, a.nama, d.kualifikasi, c.created, c.klasifikasi, c.subklasifikasi, c.jenjang,
-                       c.jabatan_kerja, f.deskripsi as jenis_permohonan, c.asosiasi, b.kode_status, 
-                       g.status_code, g.bukti_pembayaran, g.payment_type
-                FROM data_personal_permohonan a 
-                JOIN ( 
-                    SELECT * FROM history_permohonan 
-                    WHERE LOG IN (SELECT MAX(LOG) FROM history_permohonan GROUP BY id_izin)
-                ) b ON b.id_izin = a.id_izin 
-                JOIN data_klasifikasi_kualifikasi_permohonan c ON c.id_izin = a.id_izin 
-                JOIN master_kualifikasi d ON c.kualifikasi = d.id 
-                JOIN master_jenis_permohonan f ON f.id = c.jenis_permohonan
-                LEFT JOIN data_pembayaran_permohonan g ON g.id_izin = a.id_izin
-                WHERE b.kode_status IN ('12','30','31','50') 
-                GROUP BY a.id_izin, a.nama, d.kualifikasi, c.created, c.klasifikasi, c.subklasifikasi, c.jenjang,
-                         c.jabatan_kerja, f.deskripsi, c.asosiasi, b.kode_status, 
-                         g.status_code, g.bukti_pembayaran, g.payment_type";
+                   c.jabatan_kerja as id_jabatan_kerja, 
+                   e.jabatan_kerja as nama_jabatan_kerja, 
+                   f.deskripsi as jenis_permohonan, c.asosiasi, b.kode_status, 
+                   g.status_code, g.bukti_pembayaran, g.payment_type
+            FROM data_personal_permohonan a 
+            JOIN ( 
+                SELECT * FROM history_permohonan 
+                WHERE LOG IN (SELECT MAX(LOG) FROM history_permohonan GROUP BY id_izin)
+            ) b ON b.id_izin = a.id_izin 
+            JOIN data_klasifikasi_kualifikasi_permohonan c ON c.id_izin = a.id_izin 
+            JOIN master_kualifikasi d ON c.kualifikasi = d.id 
+            LEFT JOIN master_jabatan_kerja e ON e.id_jabatan_kerja = c.jabatan_kerja
+            JOIN master_jenis_permohonan f ON f.id = c.jenis_permohonan
+            LEFT JOIN data_pembayaran_permohonan g ON g.id_izin = a.id_izin
+            WHERE b.kode_status IN ('12','30','31','50') 
+            GROUP BY a.id_izin, a.nama, d.kualifikasi, c.created, c.klasifikasi, c.subklasifikasi, c.jenjang,
+                     c.jabatan_kerja, e.jabatan_kerja, f.deskripsi, c.asosiasi, b.kode_status, 
+                     g.status_code, g.bukti_pembayaran, g.payment_type";
 
         $query = $this->db->query($sql);
         return $query->result_array();
@@ -827,5 +830,19 @@ class Admin_model extends CI_Model
     {
         $this->db->where('TRIM(kode_jadwal) =', trim($kode_jadwal));
         return $this->db->get('data_absensi_asesmen')->row();
+    }
+
+    public function get_active_token()
+    {
+        return $this->db->get('master_api_bnsp')->row();
+    }
+
+    public function update_token($token, $expire_date)
+    {
+        $data = array(
+            'x_authorization' => $token,
+            'expire_date' => $expire_date
+        );
+        return $this->db->update('master_api_bnsp', $data);
     }
 }

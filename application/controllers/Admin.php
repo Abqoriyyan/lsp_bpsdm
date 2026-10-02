@@ -1440,6 +1440,7 @@ class Admin extends MY_Controller
 		} else if ($this->session->userdata('level') !== 'Admin') {
 			redirect('login/keluar', 'refresh');
 		}
+
 		##/Cek Session Login##
 		$get_list_tagihan_pembayaran = $this->Admin_model->get_list_tagihan_pembayaran();
 
@@ -3850,6 +3851,88 @@ class Admin extends MY_Controller
 				return "XI";
 			case 12:
 				return "XII";
+		}
+	}
+
+	public function bnsp_token()
+	{
+		##/Cek Session Login##
+		if (!$this->ion_auth->ceklogin()) {
+			redirect('login', 'refresh');
+		} else if ($this->session->userdata('level') !== 'Admin') {
+			redirect('login/keluar', 'refresh');
+		}
+		##/Cek Session Login##
+
+		$this->data = array(
+			'username' => $this->session->userdata('username'),
+			'level' => $this->session->userdata('level'),
+		);
+
+		$data['token_data'] = $this->Admin_model->get_active_token();
+		$this->template->load('menu', 'Master/bnsp_token', $data);
+	}
+
+	public function generate()
+	{
+		if (!$this->input->is_ajax_request()) {
+			show_404();
+			return;
+		}
+
+		$bnsp_user = getenv('BNSP_API_USER');
+		$bnsp_key = getenv('BNSP_API_KEY');
+
+		$token_config = $this->Admin_model->get_active_token();
+		$host_url = !empty($token_config->host) ? rtrim($token_config->host, '/') . '/' : 'https://konstruksi.bnsp.go.id/api/v1/';
+		$endpoint = $host_url . 'auth';
+
+		// Panggil API BNSP menggunakan cURL
+		$ch = curl_init($endpoint);
+		curl_setopt_array($ch, array(
+			CURLOPT_POST => TRUE,
+			CURLOPT_POSTFIELDS => '',
+			CURLOPT_HTTPHEADER => array(
+				'Content-Type: application/json',
+				'x-bnsp-user: ' . $bnsp_user,
+				'x-bnsp-key: ' . $bnsp_key
+			),
+			CURLOPT_RETURNTRANSFER => TRUE,
+			CURLOPT_SSL_VERIFYPEER => FALSE,
+			CURLOPT_TIMEOUT => 30
+		));
+
+		$response = curl_exec($ch);
+		$curl_error = curl_error($ch);
+		curl_close($ch);
+
+		if ($curl_error) {
+			echo json_encode(['status' => false, 'message' => 'cURL Error: ' . $curl_error]);
+			return;
+		}
+
+		$result = json_decode($response, true);
+
+		if (isset($result['data']['token']) && isset($result['data']['expire_date'])) {
+			$new_token = $result['data']['token'];
+			$expire_date = $result['data']['expire_date'];
+
+			// Simpan ke Database
+			$update = $this->Admin_model->update_token($new_token, $expire_date);
+
+			if ($update) {
+				echo json_encode([
+					'status' => true,
+					'message' => 'Token BNSP berhasil diperbarui!',
+					'token' => $new_token,
+					'expire_date' => date('d M Y H:i:s', strtotime($expire_date))
+				]);
+			} else {
+				echo json_encode(['status' => false, 'message' => 'Gagal memperbarui data token di database.']);
+			}
+		} else {
+			$msg = isset($result['message']) ? $result['message'] : 'Respon API BNSP tidak valid.';
+			echo json_encode(['status' => false, 'message' => $msg]);
 		}
 	}
 }

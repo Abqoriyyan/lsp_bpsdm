@@ -24,18 +24,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 */
 // $config['base_url'] = 'https://' . $_SERVER['HTTP_HOST'] . '/lsp26/';
-// $config['base_url'] = 'http://localhost/lsp26/';
+$config['base_url'] = 'http://localhost/lsp26/';
 
-$protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ||
-    (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
-    ? 'https://' : 'http://';
+// $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ||
+//     (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+//     ? 'https://' : 'http://';
 
-$host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
+// $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
 
-$script_name = str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']);
+// $script_name = str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']);
 
-// Set Base URL Dinamis
-$config['base_url'] = $protocol . $host . $script_name;
+// // Set Base URL Dinamis
+// $config['base_url'] = $protocol . $host . $script_name;
 
 /*
 |--------------------------------------------------------------------------

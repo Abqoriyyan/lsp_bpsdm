@@ -40,7 +40,7 @@
     <div class="card shadow mb-4">
         <div class="card-header py-3 card-header-custom">
             <h6 class="m-0 font-weight-bold text-white">
-                <i class="fas fa-file"></i> List Tagihan Pembayaran
+                <i class="fas fa-file"></i> List Surat Perjanjian Sertifikasi
             </h6>
         </div>
         <div class="card-body">
@@ -52,10 +52,8 @@
                             <th>No</th>
                             <th>Nama</th>
                             <th>Id Izin</th>
-                            <th>Kualifikasi</th>
-                            <th>Jabatan Kerja</th>
-                            <th>Jenis Permohonan</th>
-                            <th>Link Pembayaran</th>
+                            <th>Skema Sertifikasi</th>
+                            <th>Link Surat Perjanjian</th>
                             <th>Aksi</th>
                             <th>Status</th>
                         </tr>
@@ -65,10 +63,8 @@
                             <th>No</th>
                             <th>Nama</th>
                             <th>Id Izin</th>
-                            <th>Kualifikasi</th>
-                            <th>Jabatan Kerja</th>
-                            <th>Jenis Permohonan</th>
-                            <th>Link Pembayaran</th>
+                            <th>Skema Sertifikasi</th>
+                            <th>Link Surat Perjanjian</th>
                             <th>Aksi</th>
                             <th>Status</th>
                     </tfoot>
@@ -81,13 +77,11 @@
                                 <td class="text-center"><?= $no++ ?></td>
                                 <td><?= $list_tagihan_pembayaran['nama'] ?></td>
                                 <td><?= $list_tagihan_pembayaran['id_izin'] ?></td>
-                                <td class="text-center"><?= $list_tagihan_pembayaran['kualifikasi'] ?></td>
-                                <td><?= $list_tagihan_pembayaran['jabatan_kerja'] ?></td>
-                                <td class="text-center"><?= $list_tagihan_pembayaran['jenis_permohonan'] ?></td>
+                                <td><?= $list_tagihan_pembayaran['nama_jabatan_kerja'] ?></td>
                                 <td class="text-center"><a
                                         href="<?= base_url('pembayaran/checkout/') . base64_encode($list_tagihan_pembayaran['id_izin']); ?>"
                                         target="_blank" class="btn btn-info text-center text-light"
-                                        style="font-size:10px;">Pembayaran</a></td>
+                                        style="font-size:10px;">Surat Perjanjian Sertifikasi</a></td>
                                 <td>
                                     <?php
                                     if ($list_tagihan_pembayaran['kode_status'] == 12) {
@@ -107,7 +101,7 @@
                                         }
                                     } elseif ($list_tagihan_pembayaran['status_code'] == '200') {
                                         if (!empty($list_tagihan_pembayaran['bukti_pembayaran'])) {
-                                            echo "<a href='" . base_url('uploads/file_permohonan/bukti_pembayaran_biaya_sertifikasi/') . $list_tagihan_pembayaran['bukti_pembayaran'] . "' target='_blank' class='btn btn-primary' style='font-size:10px;'>Cek Bukti Pembayaran</a>";
+                                            echo "<a href='#' class='btn btn-primary' style='font-size:10px;'>Selesai Konfirmasi Bebas Biaya</a>";
                                         } else {
                                             echo "Payment Gateway";
                                         }

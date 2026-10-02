@@ -221,10 +221,7 @@
 
 		// FUNGSI POP-UP LOGIN DWARADAYA
 		function openSsoPopup() {
-			var callbackUrl = "<?= base_url('sso/login'); ?>";
-
-			// TESTING LOKAL
-			// callbackUrl = "https://plot-surprise-stinger.ngrok-free.dev/sso/login";
+			var callbackUrl = "<?= base_url('login'); ?>";
 
 			var encodedCallback = encodeURIComponent(callbackUrl);
 			var ssoUrl = "https://superapps.bpsdm.pu.go.id/login?callbackUrl=" + encodedCallback;
