@@ -2663,7 +2663,7 @@ class Admin extends MY_Controller
 							"penyelenggaraan_uji" => '1',
 							"url_surat_rekomendasi_akhir" => $prod_base_url . "asesor/cetak_berita_acara_rekomendasi_asesor/" . base64_encode($id_izin_clean),
 							"url_apl01" => $prod_base_url . "asesor/cetak_form_apl01/" . base64_encode($id_izin_clean),
-							"url_apl02" => $prod_base_url . "asesor/cetak_form_apl01/" . base64_encode($id_izin_clean),
+							"url_apl02" => $prod_base_url . "asesor/cetak_form_apl02/" . base64_encode($id_izin_clean),
 							"url_dokumentasi_asesmen" => $prod_base_url . "uploads/file_asesmen/bukti_dokumentasi_asesmen/" . (isset($get_bukti_dokumentasi_asesmen->file) ? $get_bukti_dokumentasi_asesmen->file : ''),
 							"url_form_uji_tulis" => ($uji_tulis == "1") ? $prod_base_url . "berkas/asesmen/" . base64_encode($id_izin_clean) : "",
 							"tgl_pelaksaaan_form_uji_tulis" => ($uji_tulis == "1") ? $tgl_uji_ref : "",

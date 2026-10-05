@@ -685,22 +685,42 @@ class Asesor extends MY_Controller
                 "uji_lisan" => $uji_lisan,
                 "wawancara" => $wawancara,
                 "penyelenggara" => 1,
-                "apl_01" => base_url("asesor/form_apl01/") . base64_encode($id_izin),
-                "apl_02" => base_url("asesor/form_apl02/") . base64_encode($id_izin),
+                "apl_01" => base_url("asesor/cetak_form_apl01/") . base64_encode($id_izin),
+                "apl_02" => base_url("asesor/cetak_form_apl02/") . base64_encode($id_izin),
                 "url_dokumentasi_asesmen" => base_url("uploads/file_asesmen/bukti_dokumentasi_asesmen/") . $file_dokumentasi
             );
 
             $jsonDataEncoded = json_encode($jsonData);
             $token_auth = isset($token_bnsp->x_authorization) ? $token_bnsp->x_authorization : '';
 
+            $headers = array(
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $token_auth,
+                'x-authorization: ' . $token_auth
+            );
+
+            // =========================================================================
+            // MODE DEBUG
+            // =========================================================================
+            $debug_mode = FALSE;
+
+            if ($debug_mode) {
+                $this->output
+                    ->set_content_type('application/json')
+                    ->set_output(json_encode(array(
+                        'DEBUG_STATUS' => 'ENABLED (cURL Tidak Eksekusi)',
+                        'TARGET_URL' => $url,
+                        'HEADERS' => $headers,
+                        'PAYLOAD_ARRAY' => $jsonData,
+                        'PAYLOAD_JSON' => $jsonDataEncoded
+                    ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+                return;
+            }
+
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_POST, 1);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonDataEncoded);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                'Content-Type: application/json',
-                'x-authorization:' . $token_auth,
-                'token:' . $token_auth
-            ));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
             curl_setopt($ch, CURLOPT_TIMEOUT, 30);
