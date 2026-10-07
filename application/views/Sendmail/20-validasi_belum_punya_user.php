@@ -66,8 +66,36 @@
                                 </tr>
                             </table>
 
-                            <!-- Informasi SSO Box -->
                             <div
+                                style="background-color: #eff6ff; border-left: 4px solid #2563eb; padding: 15px; border-radius: 4px; margin-bottom: 25px;">
+                                <strong
+                                    style="color: #1e40af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Petunjuk
+                                    Login LSP BPSDM Kementerian PU:</strong>
+                                <p style="margin: 8px 0 0 0; color: #1e3a8a; font-size: 13px; line-height: 1.5;">
+                                    Terlampir dibawah Merupakan User Login untuk melengkapi keperluan Permohonan SKK
+                                    yaitu APL-01 dan APL-02, user ini juga nantinya digunakan untuk Permohonan SKK yang
+                                    lain yang anda Mohonkan.
+                                </p>
+                                <p style="margin: 8px 0 0 0; color: #1e3a8a; font-size: 13px; line-height: 1.5;">
+                                    Username : <?= $username; ?><br />
+                                    Password : <?= $password; ?><br />
+                                </p>
+                            </div>
+
+                            <!-- CTA Button -->
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 30px 0;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="<?= isset($url) ? $url : base_url(); ?>" target="_blank"
+                                            style="background-color: #2563eb; color: #ffffff; text-decoration: none; padding: 12px 30px; border-radius: 6px; font-weight: 600; font-size: 15px; display: inline-block; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3);">
+                                            LOGIN
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Informasi SSO Box -->
+                            <!-- <div
                                 style="background-color: #eff6ff; border-left: 4px solid #2563eb; padding: 15px; border-radius: 4px; margin-bottom: 25px;">
                                 <strong
                                     style="color: #1e40af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Petunjuk
@@ -77,10 +105,10 @@
                                         PU</strong>. Silakan login menggunakan akun SSO Anda untuk masuk dan melengkapi
                                     berkas permohonan (APL-01 & APL-02).
                                 </p>
-                            </div>
+                            </div> -->
 
                             <!-- CTA Button -->
-                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 30px 0;">
+                            <!-- <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 30px 0;">
                                 <tr>
                                     <td align="center">
                                         <a href="<?= isset($url_sso) ? $url_sso : base_url(); ?>" target="_blank"
@@ -89,13 +117,13 @@
                                         </a>
                                     </td>
                                 </tr>
-                            </table>
+                            </table> -->
 
-                            <p style="margin-bottom: 0;">Jika tombol di atas tidak dapat diklik, silakan salin dan
+                            <!-- <p style="margin-bottom: 0;">Jika tombol di atas tidak dapat diklik, silakan salin dan
                                 tempel tautan berikut pada browser Anda:<br>
                                 <a href="<?= isset($url_sso) ? $url_sso : base_url('sso/login'); ?>"
                                     style="color: #2563eb; word-break: break-all; font-size: 12px;"><?= isset($url_sso) ? $url_sso : base_url('sso/login'); ?></a>
-                            </p>
+                            </p> -->
 
                         </td>
                     </tr>

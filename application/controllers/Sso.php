@@ -9,7 +9,7 @@ class Sso extends CI_Controller
         parent::__construct();
 
         $this->load->helper(['url', 'jwt']);
-        $this->load->model('User_sso_model');
+        $this->load->model('Sso_model');
 
         if (file_exists(APPPATH . 'config/sso.php')) {
             $this->config->load('sso');
@@ -48,7 +48,7 @@ class Sso extends CI_Controller
             return;
         }
 
-        $user = $this->User_sso_model->get_or_bind_user($nip, $email);
+        $user = $this->Sso_model->get_or_bind_user($nip, $email);
 
         if (!$user) {
             $this->_handle_popup_error('Data permohonan sertifikasi Anda belum terdaftar di aplikasi LSP.');
@@ -115,7 +115,7 @@ class Sso extends CI_Controller
         }
 
         $identifier = !empty($payload->user) ? $payload->user : (!empty($payload->email) ? $payload->email : null);
-        $user = $this->User_sso_model->find_by_identifier($identifier);
+        $user = $this->Sso_model->find_by_identifier($identifier);
 
         if (!$user || (isset($user['status']) && $user['status'] != '1')) {
             return $this->_send_sso_error("User tidak ditemukan atau tidak aktif", 400);

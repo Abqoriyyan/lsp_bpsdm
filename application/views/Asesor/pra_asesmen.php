@@ -54,7 +54,7 @@
                                 class="btn btn-success" target="_blank">Form APL 01</a>
                         </div>
                         <div class="col-sm-6 text-center">
-                            <a href="<?= base_url('asesor/cetak_form_apl02/') . base64_encode($id_izin); ?>"
+                            <a href="<?= base_url('asesor/form_apl02/') . base64_encode($id_izin); ?>"
                                 class="btn btn-success" target="_blank">Form APL 02</a>
                         </div>
                     </div>

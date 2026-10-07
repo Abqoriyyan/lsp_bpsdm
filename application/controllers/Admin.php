@@ -245,7 +245,7 @@ class Admin extends MY_Controller
 		$id_izin = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
 		$log = date("Y-m-d H:i:s");
 
-		$token = $this->Api_model->get_token();
+		$token = $this->api_model->get_token();
 		## Set Configuration Header.
 		$headers = array(
 			'Content-Type: application/json',
@@ -268,52 +268,6 @@ class Admin extends MY_Controller
 		$responseInfo = curl_getinfo($ch);
 		curl_close($ch);
 
-		// TESTING MOCK =========================================================
-		$is_testing_mode = TRUE;
-
-		if ($is_testing_mode) {
-			$responseInfo["http_code"] = 200;
-
-			$responseBody = json_encode([
-				'personal' => [
-					[
-						'id_izin' => 'I-2023052216225017752',
-						'id' => '12345',
-						'nik' => '3320061601990003',
-						'nama' => 'Nama Percobaan SSO',
-						'email' => 'abqoriyyan@pu.go.id',
-						'tempat_lahir' => 'Jakarta',
-						'tanggal_lahir' => '1990-01-01',
-						'telepon' => '081234567890',
-						'npwp' => '123456789',
-						'jenis_kelamin' => 'L',
-						'alamat' => 'Jl. Testing No. 1',
-						'negara' => 'Indonesia',
-						'propinsi' => '31',
-						'kabupaten' => '3171',
-						'kodepos' => '12340',
-						'ktp' => '',
-						'surat_pernyataan_kebenaran_data' => '',
-						'file_npwp' => '',
-						'pas_foto' => ''
-					]
-				],
-				'pendidikan' => [],
-				'proyek' => [],
-				'pelatihan' => [],
-				'klasifikasi_kualifikasi' => [
-					[
-						'id' => '1',
-						'jabatan_kerja' => 'Ahli Teknik Bangunan Gedung',
-						'jenjang' => 7,
-						'lsp' => 'LSP-XYZ'
-					]
-				]
-			]);
-			$array = json_decode($responseBody, True);
-		}
-		// TESTING MOCK =========================================================
-
 		$array = json_decode($responseBody, True);
 
 		if ($responseInfo["http_code"] != 200 && $responseInfo["http_code"] != 201) {
@@ -328,7 +282,8 @@ class Admin extends MY_Controller
 			$data_tinjau['kode_status'] = "20";
 			$data_tinjau['log'] = date("Y-m-d H:i:s");
 			$data_tinjau['username'] = $this->session->userdata('username');
-			$this->Admin_model->insert_log_history_permohonan($data_tinjau);
+			$this->admin_model->insert_log_history_permohonan($data_tinjau);
+
 
 			/////////////////////// Hit Status ke API SIKI & PORTAL ///////////////
 			//API Url
@@ -356,75 +311,111 @@ class Admin extends MY_Controller
 			//Execute the request to array
 			$arr = json_decode(curl_exec($ch), true);
 
+			// $log_hit_status_siki_portal['id_izin'] = $id_izin;
+			// $log_hit_status_siki_portal['status'] = $arr['status'];
+			// $log_hit_status_siki_portal['message'] = $arr['message'];
+			// $log_hit_status_siki_portal['log'] = $log;
+
+			// $this->db->insert('log_hit_status_permohonan_siki_portal', $log_hit_status_siki_portal);
+			/////////////////////// / Hit Status ke API SIKI & PORTAL ///////////////
+
+
+			// Generate User Pemohon
+			$comb = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+			$shfl = str_shuffle($comb);
+			$pwd = SUBSTR($shfl, 0, 8);
+
+			$usr = rand();
 			$nik_pemohon = isset($array['personal'][0]['nik']) ? $array['personal'][0]['nik'] : null;
 			$email_pemohon = isset($array['personal'][0]['email']) ? $array['personal'][0]['email'] : null;
 
 			$cek_user = $this->Admin_model->cek_user_pemohon($nik_pemohon, $email_pemohon);
 
-			if ($cek_user && !empty($cek_user->nik)) {
+
+			#Get Data Master
+			$get_master_jabatan_kerja = $this->master_model->get_master_jabatan_kerja();
+			$get_data_lsp = $this->api_model->get_token();
+			$jabatan_kerja = isset($array['klasifikasi_kualifikasi'][0]['jabatan_kerja']) ? $array['klasifikasi_kualifikasi'][0]['jabatan_kerja'] : '-';
+
+
+			if (!empty($cek_user->nik)) {
+				#email permohonan sedang di proses user sudah ada
 				$from = $this->config->item('smtp_user');
-				$to = $email_pemohon;
-				$subject = 'Permohonan Sertifikasi - Proses Verifikasi';
+				// $to = $this->input->post('to');
+				$to = $array['personal'][0]['email'];
+				$subject = 'Pemberitahuan Permohonan SKK';
 
 				$data = array(
 					'nama' => $array['personal'][0]['nama'],
 					'id_izin' => $id_izin,
-					'jabker' => $array['klasifikasi_kualifikasi'][0]['jabatan_kerja'],
-					'get_data_lsp' => $token,
-					'url_sso' => base_url()
+					'jabker' => $jabatan_kerja,
+					'get_data_lsp' => $get_data_lsp,
+					'url' => base_url(),
 				);
-
 				$message = $this->load->view('Sendmail/20-validasi_sudah_punya_user', $data, true);
 
 				$this->email->set_newline("\r\n");
 				$this->email->from($from);
 				$this->email->to($to);
-				if (!empty($token->cc_email)) {
-					$this->email->cc($token->cc_email);
-				}
+				$this->email->cc($get_data_lsp->cc_email);
 				$this->email->subject($subject);
 				$this->email->message($message);
-				$this->email->send();
 
+				if ($this->email->send()) {
+					echo '';
+				} else {
+					show_error($this->email->print_debugger());
+				}
 			} else {
+				// Kirim User via Email
+
+				//Insert User ke Tabel user_login
 				$user_login['nik'] = $nik_pemohon;
-				$user_login['username'] = $email_pemohon;
-				$user_login['password'] = NULL;
-				$user_login['nip'] = NULL;
-				$user_login['email'] = $email_pemohon;
+				$user_login['username'] = "SKK-" . $usr;
+				$user_login['password'] = password_hash($pwd, PASSWORD_BCRYPT);
+				$user_login['email'] = $array['personal'][0]['email'];
 				$user_login['user_level'] = 'User';
 				$user_login['status'] = '1';
-
 				$this->db->insert('user_login', $user_login);
 
+				#email kirim user hasil generate
 				$from = $this->config->item('smtp_user');
-				$to = $email_pemohon;
-				$subject = 'Permohonan Sertifikasi - Login SSO';
+				$to = $array['personal'][0]['email'];
+				$subject = 'Pemberitahuan Permohonan SKK';
 
 				$data = array(
 					'nama' => $array['personal'][0]['nama'],
 					'id_izin' => $id_izin,
-					'jabker' => $array['klasifikasi_kualifikasi'][0]['jabatan_kerja'],
-					'get_data_lsp' => $token,
-					'url_sso' => base_url()
+					'jabker' => $jabatan_kerja,
+					'username' => "SKK-" . $usr,
+					'password' => $pwd,
+					'get_data_lsp' => $get_data_lsp,
+					'url' => base_url(),
 				);
-
 				$message = $this->load->view('Sendmail/20-validasi_belum_punya_user', $data, true);
 
 				$this->email->set_newline("\r\n");
 				$this->email->from($from);
 				$this->email->to($to);
-				if (!empty($token->cc_email)) {
-					$this->email->cc($token->cc_email);
-				}
+				$this->email->cc($get_data_lsp->cc_email);
 				$this->email->subject($subject);
 				$this->email->message($message);
-				$this->email->send();
+
+				if ($this->email->send()) {
+					echo '';
+				} else {
+					show_error($this->email->print_debugger());
+				}
 			}
+
 
 			//Keperluan Form APl 01
 			$apl01['id_izin'] = $id_izin;
 			$this->db->insert('data_apl01_permohonan', $apl01);
+
+
+			//  print_r(json_decode($responseBody));
+			$array = json_decode($responseBody, True);
 			$log = date("Y-m-d H:i:s");
 
 			// Entry Data Personal Permohonan
@@ -562,7 +553,7 @@ class Admin extends MY_Controller
 				$this->db->insert('data_klasifikasi_kualifikasi_permohonan', $data_klasifikasi_kualifikasi);
 			}
 
-			redirect('admin/tinjau_permohonan/' . base64_encode($id_izin));
+			header("location:" . base_url('admin/tinjau_permohonan/') . base64_encode($id_izin));
 		}
 	}
 
