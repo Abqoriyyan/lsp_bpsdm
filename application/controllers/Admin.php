@@ -3866,6 +3866,12 @@ class Admin extends MY_Controller
 
 	public function generate()
 	{
+		if (!$this->ion_auth->ceklogin()) {
+			redirect('login', 'refresh');
+		} else if ($this->session->userdata('level') !== 'Admin') {
+			redirect('login/keluar', 'refresh');
+		}
+
 		if (!$this->input->is_ajax_request()) {
 			show_404();
 			return;

@@ -65,8 +65,11 @@
                 $('#alert-message').html('');
 
                 $.ajax({
-                    url: "<?= site_url('admin/bnsp_token/generate') ?>",
+                    url: "<?= site_url('admin/generate') ?>",
                     type: "POST",
+                    data: {
+                        '<?= $this->security->get_csrf_token_name(); ?>': '<?= $this->security->get_csrf_hash(); ?>'
+                    },
                     dataType: "JSON",
                     success: function (response) {
                         if (response.status) {
