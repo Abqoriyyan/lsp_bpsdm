@@ -91,10 +91,9 @@
                             <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 30px 0;">
                                 <tr>
                                     <td align="center">
-                                        <a href="<?= isset($url_sso) ? $url_sso : base_url('sso/login'); ?>"
-                                            target="_blank"
-                                            style="background-color: #059669; color: #ffffff; text-decoration: none; padding: 12px 30px; border-radius: 6px; font-weight: 600; font-size: 15px; display: inline-block; box-shadow: 0 2px 4px rgba(5, 150, 105, 0.3);">
-                                            MASUK KE DASHBOARD LSP
+                                        <a href="<?= isset($url) ? $url : base_url(); ?>" target="_blank"
+                                            style="background-color: #2563eb; color: #ffffff; text-decoration: none; padding: 12px 30px; border-radius: 6px; font-weight: 600; font-size: 15px; display: inline-block; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3);">
+                                            LOGIN
                                         </a>
                                     </td>
                                 </tr>

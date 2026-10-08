@@ -202,9 +202,7 @@
 			<button href="https://superapps.bpsdm.pu.go.id/login?callbackUrl=%2F" type="button"
 				class="btn btn-block modern-btn-sso" font-weight: 600; border-radius: 8px; padding: 10px; display: flex;
 				align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);>
-				<a href="https://superapps.bpsdm.pu.go.id/login?callbackUrl=%2F">
-					<i class="fa fa-key"></i> Masuk via SSO Dwaradaya
-				</a>
+				<i class="fa fa-key"></i> Masuk via SSO Dwaradaya
 			</button>
 		</div>
 
@@ -226,7 +224,7 @@
 			var callbackUrl = "https://bpsdm.pu.go.id/lsp/login";
 
 			var encodedCallback = encodeURIComponent(callbackUrl);
-			var ssoUrl = "https://superapps.bpsdm.pu.go.id/login?callbackUrl=" + encodedCallback;
+			var ssoUrl = "https://superapps.bpsdm.pu.go.id/login?callbackUrl=";
 
 			var width = 600;
 			var height = 700;

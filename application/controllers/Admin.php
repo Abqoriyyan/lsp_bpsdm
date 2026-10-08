@@ -245,7 +245,7 @@ class Admin extends MY_Controller
 		$id_izin = preg_replace('/[^a-zA-Z0-9-]/', '', $id_izin_clean);
 		$log = date("Y-m-d H:i:s");
 
-		$token = $this->api_model->get_token();
+		$token = $this->Api_model->get_token();
 		## Set Configuration Header.
 		$headers = array(
 			'Content-Type: application/json',
@@ -282,7 +282,7 @@ class Admin extends MY_Controller
 			$data_tinjau['kode_status'] = "20";
 			$data_tinjau['log'] = date("Y-m-d H:i:s");
 			$data_tinjau['username'] = $this->session->userdata('username');
-			$this->admin_model->insert_log_history_permohonan($data_tinjau);
+			$this->Admin_model->insert_log_history_permohonan($data_tinjau);
 
 
 			/////////////////////// Hit Status ke API SIKI & PORTAL ///////////////
@@ -333,8 +333,8 @@ class Admin extends MY_Controller
 
 
 			#Get Data Master
-			$get_master_jabatan_kerja = $this->master_model->get_master_jabatan_kerja();
-			$get_data_lsp = $this->api_model->get_token();
+			$get_master_jabatan_kerja = $this->Master_model->get_master_jabatan_kerja();
+			$get_data_lsp = $this->Api_model->get_token();
 			$jabatan_kerja = isset($array['klasifikasi_kualifikasi'][0]['jabatan_kerja']) ? $array['klasifikasi_kualifikasi'][0]['jabatan_kerja'] : '-';
 
 
